@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>html IDE</title>
+  <meta name="theme-color" content="#1e1e1e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" type="image/png" href="icons/html_editor_icon.png">
+  <script>
+    var require = {
+      paths: {
+        'vs': 'monaco-editor/min/vs',
+        'vs/language/html': 'monaco-editor/min/vs/language/html/html',
+        'vs/language/css': 'monaco-editor/min/vs/language/css/css',
+        'vs/language/typescript': 'monaco-editor/min/vs/language/typescript/tsMode'
+      }
+    };
+  </script>
+</head>
+
+<body>
+  <div class="menu-bar" role="menubar" aria-label="Main menu">
+    <!-- File Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      File
+      <div class="dropdown" role="menu">
+        <div class="dropdown-item" role="menuitem" data-action="new">New</div>
+        <div class="dropdown-item" role="menuitem" data-action="open">Open</div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Open Recent
+            <div class="dropdown" id="recent-files-menu" role="menu"></div>
+          </div>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-action="save">Save</div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Save As
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="save-as-html">.html</div>
+              <div class="dropdown-item" role="menuitem" data-action="save-as-txt">.txt</div>
+              <div class="dropdown-item" role="menuitem" data-action="save-as-css">.css</div>
+              <div class="dropdown-item" role="menuitem" data-action="save-as-js">.js</div>
+              <div class="dropdown-item" role="menuitem" data-action="save-as-zip">.zip</div>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-action="rename">Rename</div>
+        <div class="dropdown-item" role="menuitem" data-action="clear">Clear</div>
+        <div class="dropdown-item" role="menuitem" data-action="toggle-explorer">Toggle Explorer</div>
+      </div>
+    </div>
+
+    <!-- Edit Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      Edit
+      <div class="dropdown" role="menu">
+        <div class="dropdown-item" role="menuitem" data-action="undo">Undo</div>
+        <div class="dropdown-item" role="menuitem" data-action="redo">Redo</div>
+        <div class="dropdown-item" role="menuitem" data-action="cut">Cut</div>
+        <div class="dropdown-item" role="menuitem" data-action="copy">Copy</div>
+        <div class="dropdown-item" role="menuitem" data-action="paste">Paste</div>
+        <div class="dropdown-item" role="menuitem" data-action="select-all">Select All</div>
+        <div class="dropdown-item" role="menuitem" data-action="find">Find/Replace</div>
+      </div>
+    </div>
+
+    <!-- View Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      View
+      <div class="dropdown" role="menu">
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Layout
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="layout-horizontal">Horizontal Split</div>
+              <div class="dropdown-item" role="menuitem" data-action="layout-vertical">Vertical Split</div>
+              <div class="dropdown-item" role="menuitem" data-action="layout-editor-only">Editor Only</div>
+              <div class="dropdown-item" role="menuitem" data-action="layout-output-only">Output Only</div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Zoom
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="zoom-in">Zoom In</div>
+              <div class="dropdown-item" role="menuitem" data-action="zoom-out">Zoom Out</div>
+              <div class="dropdown-item" role="menuitem" data-action="reset-zoom">Reset Zoom</div>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-action="number-lines">Toggle Line Numbers</div>
+      </div>
+    </div>
+
+    <!-- Settings Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      Settings
+      <div class="dropdown" role="menu">
+      <div class="dropdown-item" role="menuitem" data-action="settings">All Settings</div>
+      <div class="dropdown-item" role="menuitem" data-action="extentions">Extentions</div>
+      <div class="dropdown-item" role="menuitem" data-action="kb-shortcut-setings">KB Shortcuts</div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Theme
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="theme-dark">Dark</div>
+              <div class="dropdown-item" role="menuitem" data-action="theme-light">Light</div>
+              <div class="sub-menus">
+                <div class="dropdown-item" role="menuitem">
+                  Contrast Options
+                  <div class="dropdown" role="menu">
+                    <div class="dropdown-item" role="menuitem" data-action="theme-contrast-dark">Dark</div>
+                    <div class="dropdown-item" role="menuitem" data-action="theme-contrast-light">Light</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Font
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="font-family-monospace">Monospace</div>
+              <div class="dropdown-item" role="menuitem" data-action="font-family-arial">Arial</div>
+              <div class="dropdown-item" role="menuitem" data-action="font-family-courier">Courier</div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Font Size
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="font-size-small">Small (12px)</div>
+              <div class="dropdown-item" role="menuitem" data-action="font-size-medium">Medium (16px)</div>
+              <div class="dropdown-item" role="menuitem" data-action="font-size-large">Large (20px)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      Help
+      <div class="dropdown" role="menu">
+        <div class="dropdown-item" role="menuitem" data-action="documentation">Documentation</div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Language Docs
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="docmt-html">HTML</div>
+              <div class="dropdown-item" role="menuitem" data-action="docmt-css">CSS</div>
+              <div class="dropdown-item" role="menuitem" data-action="docmt-js">JavaScript</div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Examples
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="example-basic">Basic HTML</div>
+              <div class="dropdown-item" role="menuitem" data-action="example-form">Form Example</div>
+              <div class="dropdown-item" role="menuitem" data-action="example-grid">CSS Grid</div>
+              <div class="dropdown-item" role="menuitem" data-action="example-table">Table Example</div>
+              <div class="dropdown-item" role="menuitem" data-action="example-responsive">Responsive Design</div>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-action="about">About</div>
+      </div>
+    </div>
+
+    <!-- Run Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      Run
+      <div class="dropdown" role="menu">
+        <div class="dropdown-item" role="menuitem" data-action="run-in-tab">Current Tab</div>
+        <div class="dropdown-item" role="menuitem" data-action="run-new-tab">New Tab</div>
+        <div class="dropdown-item" role="menuitem" data-action="refresh-output">Refresh</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="split-container" id="mainContainer">
+    <div id="file-explorer" class="file-explorer">
+      <div class="file-explorer-header">
+        <div class="file-explorer-title">Files</div>
+        <div class="file-explorer-close" data-action="toggle-explorer">×</div>
+      </div>
+      <div class="file-explorer-toolbar">
+        <button class="file-explorer-button" data-action="add-file">Add File</button>
+        <button class="file-explorer-button" data-action="add-folder">Add Folder</button>
+      </div>
+      <div class="file-explorer-list" id="file-list"></div>
+    </div>
+    <div class="editor-wrapper">
+      <div id="editor"></div>
+    </div>
+    <div class="resizer" id="resizer"></div>
+    <div class="preview-pane" id="preview"></div>
+  </div>
+
+  <div class="status-bar">
+    <div id="statusMessage">Ready</div>
+    <div id="lineInfo">Ln 1, Col 1</div>
+  </div>
+
+<div class="tab-bar">
+  <div class="tabs-container" id="tabsContainer"></div>
+  <button class="new-tab-button" data-action="new-tab">+</button>
+</div>
+
+  <input type="file" class="hidden-file-input" id="fileInput" />
+
+  <!-- Scripts -->
+  <script src="js/JSZIP.js"></script>
+  <script src="js/monacoEditor.js"></script>
+  <script src="js/scripts.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+
+</html>
