@@ -47,9 +47,22 @@
             </div>
           </div>
         </div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Reformat
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="">.html</div>
+              <div class="dropdown-item" role="menuitem" data-action="">.txt</div>
+              <div class="dropdown-item" role="menuitem" data-action="">.css</div>
+              <div class="dropdown-item" role="menuitem" data-action="">.js</div>
+              <div class="dropdown-item" role="menuitem" data-action="">.zip</div>
+            </div>
+          </div>
+        </div>
         <div class="dropdown-item" role="menuitem" data-action="rename">Rename</div>
         <div class="dropdown-item" role="menuitem" data-action="clear">Clear</div>
         <div class="dropdown-item" role="menuitem" data-action="toggle-explorer">Toggle Explorer</div>
+        <div class="dropdown-item" role="menuitem" data-action="close-tab">Close Current Tab</div>
       </div>
     </div>
 
@@ -193,8 +206,8 @@
         <div class="file-explorer-close" data-action="toggle-explorer">×</div>
       </div>
       <div class="file-explorer-toolbar">
-        <button class="file-explorer-button" data-action="add-file">Add File</button>
-        <button class="file-explorer-button" data-action="add-folder">Add Folder</button>
+        <button class="file-explorer-button" data-action="new-file">Add File</button>
+        <button class="file-explorer-button" data-action="new-folder">Add Folder</button>
       </div>
       <div class="file-explorer-list" id="file-list"></div>
     </div>
@@ -212,7 +225,7 @@
 
 <div class="tab-bar">
   <div class="tabs-container" id="tabsContainer"></div>
-  <button class="new-tab-button" data-action="new-tab">+</button>
+  <div class="new-tab-button" data-action="new">+</div>
 </div>
 
   <input type="file" class="hidden-file-input" id="fileInput" />
