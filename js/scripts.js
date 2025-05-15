@@ -2,86 +2,106 @@
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const DEFAULT_FONT_SIZE = 16;
 const DEBOUNCE_DELAY = 500;
-const INIT_CONTEX = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>New Document</title>\n  <link rel="icon" type="image/png" href="example_image.png">\n  <style>\n\n    /* Style Sheets gose here */\n\n  </style>\n</head>\n<body>\n  <!-- body -->\n\n  <script>\n    // JS gose here\n  </script>\n</body>\n</html>`;
+const INIT_CONTEX = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>New Document</title>
+    <link rel="icon" type="image/png" href="example_image.png">
+    <style>
+
+      /* Style Sheets gose here */
+
+    </style>
+  </head>
+  <body>
+
+      <!-- body -->
+
+    <script>
+        // JS gose here
+    </script>
+  </body>
+</html>`;
 const FILE_TYPES = {
-html: { mime: 'text/html', ext: '.html' },
-css: { mime: 'text/css', ext: '.css' },
-js: { mime: 'text/javascript', ext: '.js' },
-json: { mime: 'application/json', ext: '.json' },
-txt: { mime: 'text/plain', ext: '.txt' }
+  html: { mime: 'text/html', ext: '.html' },
+  css: { mime: 'text/css', ext: '.css' },
+  js: { mime: 'text/javascript', ext: '.js' },
+  json: { mime: 'application/json', ext: '.json' },
+  txt: { mime: 'text/plain', ext: '.txt' }
 };
 
 // State management
 const state = {
-unsavedChanges: false,
-recentFiles: JSON.parse(localStorage.getItem('recentFiles')) || [],
-tabs: JSON.parse(localStorage.getItem('editorTabs')) || [{
-id: 'tab1',
-name: 'untitled.html',
-type: 'html',
-content: INIT_CONTEX,
-handle: null,
-active: true
-}],
-currentTabId: 'tab1',
-fileExplorerOpen: localStorage.getItem('fileExplorerOpen') === 'true',
-files: JSON.parse(localStorage.getItem('projectFiles')) || [
-{ name: 'index.html', type: 'file' },
-{ name: 'styles.css', type: 'file' },
-{ name: 'scripts.js', type: 'file' },
-{ name: 'assets', type: 'folder', children: [] }
-]
+  unsavedChanges: false,
+  recentFiles: JSON.parse(localStorage.getItem('recentFiles')) || [],
+  tabs: JSON.parse(localStorage.getItem('editorTabs')) || [{
+    id: 'tab1',
+    name: 'untitled.html',
+    type: 'html',
+    content: INIT_CONTEX,
+    handle: null,
+    active: true
+  }],
+  currentTabId: 'tab1',
+  fileExplorerOpen: localStorage.getItem('fileExplorerOpen') === 'true',
+  files: JSON.parse(localStorage.getItem('projectFiles')) || [
+    { name: 'index.html', type: 'file' },
+    { name: 'styles.css', type: 'file' },
+    { name: 'scripts.js', type: 'file' },
+    { name: 'assets', type: 'folder', children: [] }
+  ]
 };
 
 // Configure Monaco Editor loader with language support paths
 require.config({
-paths: {
-'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs',
-'vs/language/html': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/html',
-'vs/language/css': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/css',
-'vs/language/typescript': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/typescript',
-'vs/language/json': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/json'
-}
+  paths: {
+    'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs',
+    'vs/language/html': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/html',
+    'vs/language/css': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/css',
+    'vs/language/typescript': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/typescript',
+    'vs/language/json': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/json'
+  }
 });
 
 // Initialize Monaco Editor with language support
-require(['vs/editor/editor.main'], function() {
-// Register languages with Monaco
-monaco.languages.register({ id: 'html' });
-monaco.languages.register({ id: 'css' });
-monaco.languages.register({ id: 'javascript' });
-monaco.languages.register({ id: 'json' });
-monaco.languages.register({ id: 'plaintext' });
+require(['vs/editor/editor.main'], function () {
+  // Register languages with Monaco
+  monaco.languages.register({ id: 'html' });
+  monaco.languages.register({ id: 'css' });
+  monaco.languages.register({ id: 'javascript' });
+  monaco.languages.register({ id: 'json' });
+  monaco.languages.register({ id: 'plaintext' });
 
-// Create editor instance
-const editor = monaco.editor.create(document.getElementById('editor'), {
-value: getCurrentTab().content,
-language: 'html',
-theme: localStorage.getItem('editorTheme') === 'light' ? 'vs' : 'vs-dark',
-fontSize: parseInt(localStorage.getItem('editorFontSize')) || DEFAULT_FONT_SIZE,
-fontFamily: localStorage.getItem('editorFontFamily') || 'monospace',
-lineNumbers: localStorage.getItem('editorLineNumbers') !== 'off' ? 'on' : 'off',
-minimap: { enabled: true },
-automaticLayout: true,
-tabSize: 2,
-autoClosingBrackets: 'always',
-autoIndent: 'full',
-formatOnPaste: true,
-formatOnType: true
-});
+  // Create editor instance
+  const editor = monaco.editor.create(document.getElementById('editor'), {
+    value: getCurrentTab().content,
+    language: 'html',
+    theme: localStorage.getItem('editorTheme') === 'light' ? 'vs' : 'vs-dark',
+    fontSize: parseInt(localStorage.getItem('editorFontSize')) || DEFAULT_FONT_SIZE,
+    fontFamily: localStorage.getItem('editorFontFamily') || 'monospace',
+    lineNumbers: localStorage.getItem('editorLineNumbers') !== 'off' ? 'on' : 'off',
+    minimap: { enabled: true },
+    automaticLayout: true,
+    tabSize: 2,
+    autoClosingBrackets: 'always',
+    autoIndent: 'full',
+    formatOnPaste: true,
+    formatOnType: true
+  });
 
-// Editor functionality
-const preview = document.getElementById('preview');
-const statusMessage = document.getElementById('statusMessage');
-const lineInfo = document.getElementById('lineInfo');
-const fileExplorer = document.getElementById('file-explorer');
-const fileList = document.getElementById('file-list');
-const tabsContainer = document.getElementById('tabsContainer');
-let updateTimeout;
+  // Editor functionality
+  const preview = document.getElementById('preview');
+  const statusMessage = document.getElementById('statusMessage');
+  const lineInfo = document.getElementById('lineInfo');
+  const fileExplorer = document.getElementById('file-explorer');
+  const fileList = document.getElementById('file-list');
+  const tabsContainer = document.getElementById('tabsContainer');
+  let updateTimeout;
 
-// Examples
-const examples = {
-'basic': `
+  // Examples
+  const examples = {
+    'basic': `
 <!DOCTYPE html>\n<html>\n
 
 <head>\n <title>Basic Page</title>\n</head>\n
@@ -89,7 +109,7 @@ const examples = {
 <body>\n <h1>Hello World</h1>\n <p>This is a basic HTML page.</p>\n</body>\n
 
 </html>`,
-'form': `
+    'form': `
 <!DOCTYPE html>\n<html>\n
 
 <head>\n <title>Form Example</title>\n <style>
@@ -129,7 +149,7 @@ const examples = {
 \n
 
 </html>`,
-'grid': `
+    'grid': `
 <!DOCTYPE html>\n<html>\n
 
 <head>\n <title>CSS Grid</title>\n <style>
@@ -156,7 +176,7 @@ const examples = {
       class="grid-item">6</div>\n </div>\n</body>\n
 
 </html>`,
-'table': `
+    'table': `
 <!DOCTYPE html>\n<html>\n
 
 <head>\n <title>Table Example</title>\n <style>
@@ -189,7 +209,7 @@ const examples = {
         Imposter</td>\n </tr>\n </table>\n</body>\n
 
 </html>`,
-'responsive': `
+    'responsive': `
 <!DOCTYPE html>\n<html>\n
 
 <head>\n <title>Responsive Example</title>\n
@@ -242,93 +262,93 @@ const examples = {
         </h2>\n <p>Resize the browser to see the responsive effect.</p>\n </div>\n </div>\n </div>\n</body>\n
 
 </html>`,
-'json-example': `{\n "name": "My Project",\n "version": "1.0.0",\n "description": "A sample JSON file",\n
+    'json-example': `{\n "name": "My Project",\n "version": "1.0.0",\n "description": "A sample JSON file",\n
 "dependencies": {\n "monaco-editor": "^0.40.0",\n "jszip": "^3.10.1"\n },\n "scripts": {\n "start": "node server.js",\n
 "build": "webpack"\n }\n}`
-};
+  };
 
-// Tab management functions
-function generateTabId() {
-return 'tab' + Date.now() + Math.floor(Math.random() * 1000);
-}
+  // Tab management functions
+  function generateTabId() {
+    return 'tab' + Date.now() + Math.floor(Math.random() * 1000);
+  }
 
-function getCurrentTab() {
-return state.tabs.find(tab => tab.id === state.currentTabId);
-}
+  function getCurrentTab() {
+    return state.tabs.find(tab => tab.id === state.currentTabId);
+  }
 
-function getTabById(tabId) {
-return state.tabs.find(tab => tab.id === tabId);
-}
+  function getTabById(tabId) {
+    return state.tabs.find(tab => tab.id === tabId);
+  }
 
-function renderTabs() {
-tabsContainer.innerHTML = '';
+  function renderTabs() {
+    tabsContainer.innerHTML = '';
 
-state.tabs.forEach(tab => {
-const tabElement = document.createElement('div');
-tabElement.className = `tab ${tab.active ? 'active' : ''}`;
-tabElement.dataset.tabId = tab.id;
+    state.tabs.forEach(tab => {
+      const tabElement = document.createElement('div');
+      tabElement.className = `tab ${tab.active ? 'active' : ''}`;
+      tabElement.dataset.tabId = tab.id;
 
-tabElement.innerHTML = `
+      tabElement.innerHTML = `
 ${tab.name}
 <div class="tab-close" data-action="close-tab" data-tab-id="${tab.id}">×</div>
 `;
 
-tabElement.addEventListener('click', (e) => {
-if (!e.target.classList.contains('tab-close')) {
-switchToTab(tab.id);
-}
-});
+      tabElement.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('close-tab')) {
+          switchToTab(tab.id);
+        }
+      });
 
-tabsContainer.appendChild(tabElement);
-});
-}
+      tabsContainer.appendChild(tabElement);
+    });
+  }
 
-function switchToTab(tabId) {
-const currentTab = getCurrentTab();
-if (currentTab) {
-// Save current content before switching
-currentTab.content = editor.getValue();
-currentTab.active = false;
-}
+  function switchToTab(tabId) {
+    const currentTab = getCurrentTab();
+    if (currentTab) {
+      // Save current content before switching
+      currentTab.content = editor.getValue();
+      currentTab.active = false;
+    }
 
-const newTab = getTabById(tabId);
-if (newTab) {
-state.currentTabId = tabId;
-newTab.active = true;
-editor.setValue(newTab.content);
+    const newTab = getTabById(tabId);
+    if (newTab) {
+      state.currentTabId = tabId;
+      newTab.active = true;
+      editor.setValue(newTab.content);
 
-// Update language mode
-const fileType = newTab.name.split('.').pop().toLowerCase();
-const languageMap = {
-html: 'html',
-css: 'css',
-js: 'javascript',
-json: 'json',
-txt: 'plaintext'
-};
+      // Update language mode
+      const fileType = newTab.name.split('.').pop().toLowerCase();
+      const languageMap = {
+        html: 'html',
+        css: 'css',
+        js: 'javascript',
+        json: 'json',
+        txt: 'plaintext'
+      };
 
-monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType] || 'plaintext');
+      monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType] || 'plaintext');
 
-renderTabs();
-updatePreview();
-updateStatus(`Switched to ${newTab.name}`);
-saveTabsToStorage();
-}
-}
+      renderTabs();
+      updatePreview();
+      updateStatus(`Switched to ${newTab.name}`);
+      saveTabsToStorage();
+    }
+  }
 
-function addNewTab() {  
+  function addNewTab() {
 
-  //  !!
+    //  !!
 
-  // ether im bat at odeing or im bad at iplamenting code in html or both
+    // ether im bat at odeing or im bad at iplamenting code in html or both
 
- 
-const tabId = generateTabId();
-const newTab = {
-id: tabId,
-name: `untitled-${state.tabs.length + 1}.html`,
-type: 'html',
-content: `
+
+    const tabId = generateTabId();
+    const newTab = {
+      id: tabId,
+      name: `untitled-${state.tabs.length + 1}.html`,
+      type: 'html',
+      content: `
 <!DOCTYPE html>\n<html>\n
 
 <head>\n <title>New Document</title>\n</head>\n
@@ -336,54 +356,81 @@ content: `
 <body>\n\n</body>\n
 
 </html>`,
-handle: null,
-active: true
-};
+      handle: null,
+      active: true
+    };
 
-// Deactivate current tab
-const currentTab = getCurrentTab();
-if (currentTab) {
-currentTab.content = editor.getValue();
-currentTab.active = false;
-}
+    // Deactivate current tab
+    const currentTab = getCurrentTab();
+    if (currentTab) {
+      currentTab.content = editor.getValue();
+      currentTab.active = false;
+    }
 
-state.tabs.push(newTab);
-state.currentTabId = tabId;
+    state.tabs.push(newTab);
+    state.currentTabId = tabId;
 
-renderTabs();
-editor.setValue(newTab.content);
-updateStatus(`Created new tab: ${newTab.name}`);
-saveTabsToStorage();
-}
+    renderTabs();
+    editor.setValue(newTab.content);
+    updateStatus(`Created new tab: ${newTab.name}`);
+    saveTabsToStorage();
+  }
 
-  function closeTab(tabId) {
-    if (state.tabs.length <= 0) {
-      updateStatus("Cannot close a non-existent tab", true);
+  function closeTab(tabId = null) {
+    // If no tabId provided, try to close current tab
+    if (!tabId) {
+      const currentTab = getCurrentTab();
+      if (!currentTab) {
+        updateStatus("Error: No active tab to close", true);
+        return;
+      }
+      tabId = currentTab.id;
+    }
+
+    // Validate tab exists
+    const tabIndex = state.tabs.findIndex(tab => tab.id === tabId);
+    if (tabIndex === -1) {
+      updateStatus(`Error: Tab ${tabId} not found`, true);
+
+      // Auto-recovery: switch to first available tab or create new one
+      if (state.tabs.length > 0) {
+        switchToTab(state.tabs[0].id);
+      } else {
+        addNewTab();
+      }
       return;
     }
 
-    const tabIndex = state.tabs.findIndex(tab => tab.id === tabId);
-    if (tabIndex === -1) return;
-
+    // Check for unsaved changes
     const tabToClose = state.tabs[tabIndex];
-    const wasActive = tabToClose.active;
+    const isActiveTab = tabToClose.active;
+    const hasUnsavedChanges = isActiveTab &&
+      editor.getValue() !== tabToClose.content;
 
-    state.tabs.splice(tabIndex, 1);
-
-    if (wasActive && state.tabs.length > 0) {
-      // Switch to the next available tab
-      const newActiveIndex = Math.min(tabIndex, state.tabs.length - 1);
-      state.currentTabId = state.tabs[newActiveIndex].id;
-      state.tabs[newActiveIndex].active = true;
-      editor.setValue(state.tabs[newActiveIndex].content);
-    } else if (state.tabs.length === 0) {
-      // If no tabs left, create a new empty one
-      addNewTab();
+    if (hasUnsavedChanges && !confirm('You have unsaved changes. Close tab anyway?')) {
+      return;
     }
 
+    // Close the tab
+    state.tabs.splice(tabIndex, 1);
+
+    // Handle tab switching after closure
+    if (isActiveTab) {
+      if (state.tabs.length > 0) {
+        // Switch to nearest tab (next or previous)
+        const newIndex = Math.min(tabIndex, state.tabs.length - 1);
+        switchToTab(state.tabs[newIndex].id);
+      } else {
+        // Create new default tab if none remain
+        addNewTab();
+      }
+    }
+
+    // Update UI and state
     renderTabs();
-    updateStatus(`Closed tab: ${tabToClose.name}`);
     saveTabsToStorage();
+    state.unsavedChanges = false;
+    updateStatus(`Closed tab: ${tabToClose.name}`);
   }
 
   function saveTabsToStorage() {
@@ -396,18 +443,18 @@ saveTabsToStorage();
 
   // File Explorer Functions
   function toggleFileExplorer() {
-  state.fileExplorerOpen = !state.fileExplorerOpen;
-  localStorage.setItem('fileExplorerOpen', state.fileExplorerOpen);
+    state.fileExplorerOpen = !state.fileExplorerOpen;
+    localStorage.setItem('fileExplorerOpen', state.fileExplorerOpen);
 
-  if (state.fileExplorerOpen) {
-  fileExplorer.classList.add('open');
-  document.body.classList.add('file-explorer-open');
-  } else {
-  fileExplorer.classList.remove('open');
-  document.body.classList.remove('file-explorer-open');
-  }
+    if (state.fileExplorerOpen) {
+      fileExplorer.classList.add('open');
+      document.body.classList.add('file-explorer-open');
+    } else {
+      fileExplorer.classList.remove('open');
+      document.body.classList.remove('file-explorer-open');
+    }
 
-  updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
+    updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
   }
 
   function renderFileList() {
@@ -459,97 +506,154 @@ saveTabsToStorage();
   }
 
   function addFile() {
-  const fileName = prompt('Enter file name (include extension):', 'newfile.html');
-  if (fileName) {
-  state.files.push({
-  name: fileName,
-  type: 'file'
-  });
-  saveProjectFiles();
-  renderFileList();
-  updateStatus(`Added file: ${fileName}`);
-  }
+    const fileName = prompt('Enter file name (include extension):', 'newfile.html');
+    if (fileName) {
+      state.files.push({
+        name: fileName,
+        type: 'file'
+      });
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Added file: ${fileName}`);
+    }
   }
 
   function addFolder() {
-  const folderName = prompt('Enter folder name:', 'newfolder');
-  if (folderName) {
-  state.files.push({
-  name: folderName,
-  type: 'folder',
-  children: []
-  });
-  saveProjectFiles();
-  renderFileList();
-  updateStatus(`Added folder: ${folderName}`);
-  }
+    const folderName = prompt('Enter folder name:', 'newfolder');
+    if (folderName) {
+      state.files.push({
+        name: folderName,
+        type: 'folder',
+        children: []
+      });
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Added folder: ${folderName}`);
+    }
   }
 
   function deleteFile(path) {
-  if (confirm(`Are you sure you want to delete ${path}?`)) {
-  const pathParts = path.split('/');
-  let currentLevel = state.files;
+    if (confirm(`Are you sure you want to delete ${path}?`)) {
+      const pathParts = path.split('/');
+      let currentLevel = state.files;
 
-  for (let i = 0; i < pathParts.length - 1; i++) { const part=pathParts[i]; const folder=currentLevel.find(item=>
-    item.name === part && item.type === 'folder');
-    if (!folder) break;
-    currentLevel = folder.children;
-    }
+      for (let i = 0; i < pathParts.length - 1; i++) {
+        const part = pathParts[i]; const folder = currentLevel.find(item =>
+          item.name === part && item.type === 'folder');
+        if (!folder) break;
+        currentLevel = folder.children;
+      }
 
-    const itemName = pathParts[pathParts.length - 1];
-    const index = currentLevel.findIndex(item => item.name === itemName);
+      const itemName = pathParts[pathParts.length - 1];
+      const index = currentLevel.findIndex(item => item.name === itemName);
 
-    if (index !== -1) {
-    currentLevel.splice(index, 1);
-    saveProjectFiles();
-    renderFileList();
-    updateStatus(`Deleted: ${path}`);
+      if (index !== -1) {
+        currentLevel.splice(index, 1);
+        saveProjectFiles();
+        renderFileList();
+        updateStatus(`Deleted: ${path}`);
+      }
     }
-    }
-    }
+  }
 
-    function saveProjectFiles() {
+  function saveProjectFiles() {
     localStorage.setItem('projectFiles', JSON.stringify(state.files));
-    }
+  }
 
-    // Update preview with sandboxed iframe and error handling
-    function updatePreview() {
+  // Update preview with sandboxed iframe and error handling
+  function updatePreview() {
     try {
-    preview.innerHTML = '';
-    const iframe = document.createElement('iframe');
-    iframe.sandbox = 'allow-same-origin';
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    preview.appendChild(iframe);
+      preview.innerHTML = '';
+      const currentTab = getCurrentTab();
+      const isJsFile = currentTab.name.endsWith('.js');
 
-    const content = `
-    <!DOCTYPE html>
-    <html>
+      if (isJsFile) {
+        // Create a container for JS output
+        const jsOutputContainer = document.createElement('div');
+        jsOutputContainer.id = 'js-output';
+        jsOutputContainer.style.padding = '1rem';
+        jsOutputContainer.style.fontFamily = 'monospace';
+        jsOutputContainer.style.whiteSpace = 'pre';
+        jsOutputContainer.style.overflow = 'auto';
+        jsOutputContainer.style.height = '100%';
 
-    <head>
-      <script>
-        window.onerror = function(e) {
-                parent.postMessage({ 
-                  type: 'preview-error', 
-                  error: e.toString() 
-                }, '*');
-              };
-            <\/script>
-            <style>
-              body { margin: 0; padding: 1rem; }
-              .error { color: red; }
-            </style>
-          </head>
-          <body>${editor.getValue()}</body>
-        </html>
-      `;
-      
-      iframe.contentDocument.open();
-      iframe.contentDocument.write(content);
-      iframe.contentDocument.close();
-      
-      updateStatus("Preview updated");
+        // Create a console div
+        const consoleDiv = document.createElement('div');
+        consoleDiv.id = 'js-console';
+        consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
+        consoleDiv.style.padding = '0.5rem';
+        consoleDiv.style.marginTop = '1rem';
+        consoleDiv.style.borderRadius = '4px';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+
+        preview.appendChild(jsOutputContainer);
+
+
+        // Override console.log to capture output
+        const originalConsoleLog = console.log;
+        const logs = [];
+
+        console.log = function (...args) {
+          logs.push(args.join(' '));
+          consoleDiv.textContent = logs.join('\n');
+          consoleDiv.scrollTop = consoleDiv.scrollHeight;
+          originalConsoleLog.apply(console, args);
+        };
+
+        try {
+          // Execute the JS code
+          const result = new Function(editor.getValue())();
+
+          if (result !== undefined) {
+            jsOutputContainer.textContent = String(result);
+          } else {
+            jsOutputContainer.textContent = 'Code executed (no return value)';
+          }
+        } catch (error) {
+          jsOutputContainer.textContent = `Error: ${error.message}`;
+          jsOutputContainer.style.color = 'var(--error-red)';
+        }
+
+        // Restore original console.log
+        console.log = originalConsoleLog;
+
+        updateStatus("JavaScript executed");
+      } else {
+        // Original HTML preview code
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+
+        const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script>
+          window.onerror = function(e) {
+            parent.postMessage({ 
+              type: 'preview-error', 
+              error: e.toString() 
+            }, '*');
+          };
+        <\/script>
+        <style>
+          body { margin: 0; padding: 1rem; }
+          .error { color: red; }
+        </style>
+      </head>
+      <body>${editor.getValue()}</body>
+      </html>`;
+
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(content);
+        iframe.contentDocument.close();
+
+        updateStatus("Preview updated");
+      }
     } catch (error) {
       showError(`Preview error: ${error.message}`);
     }
@@ -562,17 +666,17 @@ saveTabsToStorage();
       if (!currentTab.handle) {
         return await saveFileAs(currentTab.type || 'html');
       }
-      
+
       const writable = await currentTab.handle.createWritable();
       await writable.write(editor.getValue());
       await writable.close();
-      
+
       currentTab.content = editor.getValue();
       state.unsavedChanges = false;
       updateStatus(`Saved ${currentTab.name}`);
       addToRecentFiles(currentTab);
       saveTabsToStorage();
-      
+
       return true;
     } catch (error) {
       showError(`Save failed: ${error.message}`);
@@ -607,7 +711,7 @@ saveTabsToStorage();
       await detectLanguage();
       renderTabs();
       saveTabsToStorage();
-      
+
       return true;
     } catch (error) {
       if (error.name !== 'AbortError') {
@@ -617,19 +721,19 @@ saveTabsToStorage();
     }
   }
 
-  async function saveText() { 
+  async function saveText() {
     await saveFileAs('txt');
   }
 
-  async function saveCSS() { 
+  async function saveCSS() {
     await saveFileAs('css');
   }
 
-  async function saveJS() { 
+  async function saveJS() {
     await saveFileAs('js');
   }
 
-  async function saveJSON() { 
+  async function saveJSON() {
     await saveFileAs('json');
   }
 
@@ -712,15 +816,15 @@ saveTabsToStorage();
           accept: { [type.mime]: [type.ext] }
         }))
       });
-      
+
       const file = await handle.getFile();
       if (file.size > MAX_FILE_SIZE) {
-        throw new Error(`File too large (max ${MAX_FILE_SIZE/1024/1024}MB)`);
+        throw new Error(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
       }
-      
+
       const content = await file.text();
       const fileType = handle.name.split('.').pop().toLowerCase();
-      
+
       // Create a new tab for the opened file
       const tabId = generateTabId();
       const newTab = {
@@ -731,23 +835,23 @@ saveTabsToStorage();
         handle: handle,
         active: true
       };
-      
+
       // Deactivate current tab
       const currentTab = getCurrentTab();
       if (currentTab) {
         currentTab.active = false;
       }
-      
+
       state.tabs.push(newTab);
       state.currentTabId = tabId;
-      
+
       editor.setValue(content);
       renderTabs();
       updateStatus(`Opened ${handle.name}`);
       addToRecentFiles(newTab);
       await detectLanguage();
       saveTabsToStorage();
-      
+
     } catch (error) {
       if (error.name !== 'AbortError') {
         showError(`Open failed: ${error.message}`);
@@ -762,7 +866,7 @@ saveTabsToStorage();
         const file = await fileHandle.getFile();
         const content = await file.text();
         const fileType = file.name.split('.').pop().toLowerCase();
-        
+
         // Create a new tab for the opened file
         const tabId = generateTabId();
         const newTab = {
@@ -773,16 +877,16 @@ saveTabsToStorage();
           handle: fileHandle,
           active: true
         };
-        
+
         // Deactivate current tab
         const currentTab = getCurrentTab();
         if (currentTab) {
           currentTab.active = false;
         }
-        
+
         state.tabs.push(newTab);
         state.currentTabId = tabId;
-        
+
         editor.setValue(content);
         renderTabs();
         updateStatus(`Opened ${file.name}`);
@@ -851,7 +955,7 @@ saveTabsToStorage();
   function nameFile() {
 
     const currentTab = getCurrentTab();
-    const name = prompt('Enter new file name (without extension):', 
+    const name = prompt('Enter new file name (without extension):',
       currentTab.name.replace(/\..*$/, ''));
     if (name) {
       currentTab.name = `${name}${FILE_TYPES[currentTab.type].ext}`;
@@ -885,7 +989,7 @@ saveTabsToStorage();
     if (languageMap[fileType]) {
       try {
         // Load the specific language features if needed
-        switch(fileType) {
+        switch (fileType) {
           case 'html':
             await new Promise((resolve) => {
               require(['vs/language/html/html'], resolve);
@@ -907,7 +1011,7 @@ saveTabsToStorage();
             });
             break;
         }
-        
+
         monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType]);
         updateStatus(`Language mode set to ${languageMap[fileType]}`);
       } catch (error) {
@@ -931,7 +1035,7 @@ saveTabsToStorage();
       { name: file.name, lastOpened: Date.now() },
       ...state.recentFiles.filter(f => f.name !== file.name)
     ].slice(0, 10);
-    
+
     localStorage.setItem('recentFiles', JSON.stringify(state.recentFiles));
     updateRecentFilesMenu();
   }
@@ -939,8 +1043,8 @@ saveTabsToStorage();
   function updateRecentFilesMenu() {
     const recentFilesMenu = document.getElementById('recent-files-menu');
     if (!recentFilesMenu) return;
-    
-    recentFilesMenu.innerHTML = state.recentFiles.length 
+
+    recentFilesMenu.innerHTML = state.recentFiles.length
       ? state.recentFiles.map(file => `
           <div class="dropdown-item" role="menuitem" 
                 data-action="open-recent" data-file="${file.name}">
@@ -958,7 +1062,7 @@ saveTabsToStorage();
         return e.returnValue = 'You have unsaved changes';
       }
     });
-    
+
     editor.onDidChangeModelContent(() => {
       const currentTab = getCurrentTab();
       if (currentTab) {
@@ -972,8 +1076,8 @@ saveTabsToStorage();
   // Status management
   function updateStatus(message, isError = false) {
     statusMessage.textContent = message;
-    statusMessage.style.color = isError 
-      ? 'var(--error-red)' 
+    statusMessage.style.color = isError
+      ? 'var(--error-red)'
       : 'var(--text-dark)';
   }
 
@@ -1041,7 +1145,7 @@ saveTabsToStorage();
     const container = document.getElementById('mainContainer');
     const editorWrapper = document.querySelector('.editor-wrapper');
     const previewPane = document.querySelector('.preview-pane');
-    
+
     if (layout === 'horizontal' || layout === 'vertical') {
       container.style.flexDirection = layout === 'horizontal' ? 'row' : 'column';
       editorWrapper.style.display = 'flex';
@@ -1061,7 +1165,7 @@ saveTabsToStorage();
   // Menu actions
   async function handleMenuAction(action, data) {
     try {
-      switch(action) {
+      switch (action) {
         case 'new': newFile(); break;
         case 'new-tab': addNewTab(); break;
         case 'close-tab': closeTab(data.tabId); break;
@@ -1093,38 +1197,38 @@ saveTabsToStorage();
         case 'add-file': addFile(); break;
         case 'add-folder': addFolder(); break;
         case 'delete-file': deleteFile(data.path); break;
-        case 'number-lines': 
+        case 'number-lines':
           const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
           editor.updateOptions({ lineNumbers: lineNumbers === 'off' ? 'on' : 'off' });
           localStorage.setItem('editorLineNumbers', lineNumbers === 'off' ? 'on' : 'off');
           updateStatus(`Line numbers ${lineNumbers === 'off' ? 'enabled' : 'disabled'}`);
           break;
-        case 'font-family-monospace': 
+        case 'font-family-monospace':
           editor.updateOptions({ fontFamily: 'monospace' });
           localStorage.setItem('editorFontFamily', 'monospace');
           updateStatus("Font set to monospace");
           break;
-        case 'font-family-arial': 
+        case 'font-family-arial':
           editor.updateOptions({ fontFamily: 'Arial, sans-serif' });
           localStorage.setItem('editorFontFamily', 'Arial, sans-serif');
           updateStatus("Font set to Arial");
           break;
-        case 'font-family-courier': 
+        case 'font-family-courier':
           editor.updateOptions({ fontFamily: 'Courier New, monospace' });
           localStorage.setItem('editorFontFamily', 'Courier New, monospace');
           updateStatus("Font set to Courier New");
           break;
-        case 'font-size-small': 
+        case 'font-size-small':
           editor.updateOptions({ fontSize: 12 });
           localStorage.setItem('editorFontSize', 12);
           updateStatus("Font size set to small (12px)");
           break;
-        case 'font-size-medium': 
+        case 'font-size-medium':
           editor.updateOptions({ fontSize: 16 });
           localStorage.setItem('editorFontSize', 16);
           updateStatus("Font size set to medium (16px)");
           break;
-        case 'font-size-large': 
+        case 'font-size-large':
           editor.updateOptions({ fontSize: 20 });
           localStorage.setItem('editorFontSize', 20);
           updateStatus("Font size set to large (20px)");
@@ -1227,7 +1331,7 @@ saveTabsToStorage();
   document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', (e) => {
       if (item.hasAttribute('disabled')) return;
-      
+
       const action = e.target.dataset.action;
       const file = e.target.dataset.file;
       const path = e.target.dataset.path;
@@ -1268,14 +1372,14 @@ saveTabsToStorage();
   }
 
   // File input handler
-  document.getElementById('fileInput').addEventListener('change', async function(e) {
+  document.getElementById('fileInput').addEventListener('change', async function (e) {
     const file = e.target.files[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
-        showError(`File too large (max ${MAX_FILE_SIZE/1024/1024}MB)`);
+        showError(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
         return;
       }
-      
+
       // Create a new tab for the opened file
       const tabId = generateTabId();
       const newTab = {
@@ -1286,16 +1390,16 @@ saveTabsToStorage();
         handle: null,
         active: true
       };
-      
+
       // Deactivate current tab
       const currentTab = getCurrentTab();
       if (currentTab) {
         currentTab.active = false;
       }
-      
+
       state.tabs.push(newTab);
       state.currentTabId = tabId;
-      
+
       editor.setValue(newTab.content);
       renderTabs();
       updateStatus(`Opened ${file.name}`);
@@ -1311,16 +1415,16 @@ saveTabsToStorage();
     updateRecentFilesMenu();
     renderTabs();
     renderFileList();
-    
+
     if (state.fileExplorerOpen) {
       toggleFileExplorer();
     }
-    
+
     let debounceTimer;
     editor.onDidChangeModelContent(() => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(updatePreview, DEBOUNCE_DELAY);
-      
+
       const currentTab = getCurrentTab();
       if (currentTab) {
         currentTab.content = editor.getValue();
