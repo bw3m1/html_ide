@@ -2,7 +2,7 @@
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const DEFAULT_FONT_SIZE = 16;
 const DEBOUNCE_DELAY = 500;
-const INIT_CONTEX = `<!DOCTYPE html>
+const INIT_CONTENTS = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -39,7 +39,7 @@ const state = {
     id: 'tab1',
     name: 'untitled.html',
     type: 'html',
-    content: INIT_CONTEX,
+    content: INIT_CONTENTS,
     handle: null,
     active: true
   }],
@@ -74,21 +74,25 @@ require(['vs/editor/editor.main'], function () {
   monaco.languages.register({ id: 'plaintext' });
 
   // Create editor instance
-  const editor = monaco.editor.create(document.getElementById('editor'), {
-    value: getCurrentTab().content,
-    language: 'html',
-    theme: localStorage.getItem('editorTheme') === 'light' ? 'vs' : 'vs-dark',
-    fontSize: parseInt(localStorage.getItem('editorFontSize')) || DEFAULT_FONT_SIZE,
-    fontFamily: localStorage.getItem('editorFontFamily') || 'monospace',
-    lineNumbers: localStorage.getItem('editorLineNumbers') !== 'off' ? 'on' : 'off',
-    minimap: { enabled: true },
-    automaticLayout: true,
-    tabSize: 2,
-    autoClosingBrackets: 'always',
-    autoIndent: 'full',
-    formatOnPaste: true,
-    formatOnType: true
-  });
+
+  if (!window.monacoEditorInstance) {
+    window.monacoEditorInstance = monaco.editor.create(document.getElementById('editor'), {
+      value: getCurrentTab().content,
+      language: 'html',
+      theme: localStorage.getItem('editorTheme') === 'light' ? 'vs' : 'vs-dark',
+      fontSize: parseInt(localStorage.getItem('editorFontSize')) || DEFAULT_FONT_SIZE,
+      fontFamily: localStorage.getItem('editorFontFamily') || 'monospace',
+      lineNumbers: localStorage.getItem('editorLineNumbers') !== 'off' ? 'on' : 'off',
+      minimap: { enabled: true },
+      automaticLayout: true,
+      tabSize: 2,
+      autoClosingBrackets: 'always',
+      autoIndent: 'full',
+      formatOnPaste: true,
+      formatOnType: true
+    });
+  }
+  const editor = window.monacoEditorInstance;
 
   // Editor functionality
   const preview = document.getElementById('preview');
@@ -930,7 +934,7 @@ ${tab.name}
       id: tabId,
       name: 'untitled.html',
       type: 'html',
-      content: INIT_CONTEX,
+      content: INIT_CONTENTS,
       handle: null,
       active: true
     };
@@ -975,6 +979,10 @@ ${tab.name}
   }
 
   // Language detection and support loading
+
+  // Deepseek you shold make a function setLang and then use that for detectLang so that i can reuse it
+  // for reformating the documint
+
   async function detectLanguage() {
     const currentTab = getCurrentTab();
     const fileType = currentTab.name.split('.').pop().toLowerCase();
@@ -983,7 +991,17 @@ ${tab.name}
       css: 'css',
       js: 'javascript',
       json: 'json',
-      txt: 'plaintext'
+      txt: 'plaintext',
+      md: 'markdown',
+      c: 'c',
+      cpp: 'cpp',
+      cs: 'csharp',
+      py: 'python',
+      java: 'java',
+      rs: 'rust',
+      go: 'go',
+      ts: 'typescript'
+
     };
 
     if (languageMap[fileType]) {
@@ -1182,9 +1200,26 @@ ${tab.name}
         case 'clear': clearFile(); break;
         case 'undo': editor.trigger('', 'undo'); break;
         case 'redo': editor.trigger('', 'redo'); break;
-        case 'cut': document.execCommand('cut'); break;
-        case 'copy': document.execCommand('copy'); break;
-        case 'paste': document.execCommand('paste'); break;
+        case 'cut':
+          const selection = editor.getSelection();
+          const text = editor.getModel().getValueInRange(selection);
+          navigator.clipboard.writeText(text).then(() => {
+            editor.executeEdits("cut", [{ range: selection, text: "" }]);
+          }).catch(err => showError("Clipboard access denied"));
+          break;
+        case 'copy':
+          navigator.clipboard.writeText(
+            editor.getModel().getValueInRange(editor.getSelection())
+          ).catch(err => showError("Clipboard access denied"));
+          break;
+        case 'paste':
+          navigator.clipboard.readText().then(text => {
+            editor.executeEdits("paste", [{
+              range: editor.getSelection(),
+              text: text
+            }]);
+          }).catch(err => showError("Clipboard access denied"));
+          break;
         case 'select-all': editor.setSelection(editor.getModel().getFullModelRange()); break;
         case 'find': editor.getAction('actions.find').run(); break;
         case 'layout-horizontal': setLayout('horizontal'); break;
@@ -1198,7 +1233,8 @@ ${tab.name}
         case 'add-folder': addFolder(); break;
         case 'delete-file': deleteFile(data.path); break;
         case 'number-lines':
-          const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
+        // theres this stupid bug where it will set it to off and then not toggle it back on
+        const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
           editor.updateOptions({ lineNumbers: lineNumbers === 'off' ? 'on' : 'off' });
           localStorage.setItem('editorLineNumbers', lineNumbers === 'off' ? 'on' : 'off');
           updateStatus(`Line numbers ${lineNumbers === 'off' ? 'enabled' : 'disabled'}`);
