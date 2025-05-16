@@ -1291,8 +1291,8 @@ ${tab.name}
           updateStatus("Opening IDE documentation");
           break;
         case 'extentions':
-          const docUrl = new URL('IDE_docmtn.html', window.location.href).href;
-          window.open(docUrl, '_blank');
+          const xtnUrl = new URL('IDE_docmtn.html', window.location.href).href;
+          window.open(xtnUrl, '_blank');
           updateStatus("Opening IDE documentation");
           break;
         case 'shortcuts-win':
