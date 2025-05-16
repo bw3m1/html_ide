@@ -1290,6 +1290,11 @@ ${tab.name}
           window.open(docUrl, '_blank');
           updateStatus("Opening IDE documentation");
           break;
+        case 'extentions':
+          const docUrl = new URL('IDE_docmtn.html', window.location.href).href;
+          window.open(docUrl, '_blank');
+          updateStatus("Opening IDE documentation");
+          break;
         case 'shortcuts-win':
           window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf', '_blank');
           updateStatus("Opening Windows shortcuts");
