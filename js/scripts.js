@@ -9,17 +9,19 @@ const INIT_CONTENTS = `<!DOCTYPE html>
     <title>New Document</title>
     <link rel="icon" type="image/png" href="example_image.png">
     <style>
-
+      
       /* Style Sheets gose here */
-
+      
     </style>
   </head>
   <body>
-
+      
       <!-- body -->
-
+      
     <script>
-        // JS gose here
+      
+      // JS gose here
+      
     </script>
   </body>
 </html>`;
