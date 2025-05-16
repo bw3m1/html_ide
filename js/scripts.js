@@ -10,17 +10,17 @@ const INIT_CONTENTS = `<!DOCTYPE html>
     <link rel="icon" type="image/png" href="example_image.png">
     <style>
       
-      /* Style Sheets gose here */
+      /* Style Sheets goes here */
       
     </style>
   </head>
   <body>
       
-      <!-- body -->
+    <!-- body -->
       
     <script>
       
-      // JS gose here
+      // JS goes here
       
     </script>
   </body>
