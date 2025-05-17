@@ -1003,7 +1003,6 @@ ${tab.name}
       rs: 'rust',
       go: 'go',
       ts: 'typescript'
-
     };
 
     if (languageMap[fileType]) {
@@ -1028,6 +1027,16 @@ ${tab.name}
           case 'json':
             await new Promise((resolve) => {
               require(['vs/language/json/jsonMode'], resolve);
+            });
+            break;
+          case 'plaintext':
+            await new Promise((resolve) => {
+              require(['vs/language/plaintext/plaintextMode'], resolve);
+            });
+            break;
+          case 'markdown':
+            await new Promise((resolve) => {
+              require(['vs/language/markdown/markdownMode'], resolve);
             });
             break;
         }
@@ -1182,6 +1191,10 @@ ${tab.name}
     }
   }
 
+  function setFileType(fileType) {
+    
+  }
+
   // Menu actions
   async function handleMenuAction(action, data) {
     try {
@@ -1322,6 +1335,18 @@ ${tab.name}
           window.open('https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON', '_blank');
           updateStatus("Opening JSON documentation");
           break;
+        case 'file-2-html': setFileType('html'); detectLanguage(); break;
+        case 'file-2-css': setFileType('css'); detectLanguage(); break;
+        case 'file-2-js': setFileType('js'); detectLanguage(); break;
+        case 'file-2-txt': setFileType('txt'); detectLanguage(); break;
+        case 'file-2-md': setFileType('md'); detectLanguage(); break;
+        case 'file-2-c': setFileType('c'); detectLanguage(); break;
+        case 'file-2-cpp': setFileType('cpp'); detectLanguage(); break;
+        case 'file-2-cs': setFileType('cs'); detectLanguage(); break;
+        case 'file-2-py': setFileType('py'); detectLanguage(); break;
+        case 'file-2-java': setFileType('java'); detectLanguage(); break;
+        case 'file-2-rust': setFileType('rust'); detectLanguage(); break;
+        case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
           alert('html IDE\n\nVersion:                  0.4.2.1\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveuped by Bryson J G.');
           updateStatus("About dialog shown");
