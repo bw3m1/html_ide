@@ -1292,7 +1292,7 @@ ${tab.name}
           break;
         case 'extensions':
           window.open('extensions.html', '_blank');
-          updateStatus("Opened Extensions Manager");
+          updateStatus("Opened Extensions Loader");
           break;
         case 'shortcuts-win':
           window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf', '_blank');
