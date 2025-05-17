@@ -1290,11 +1290,36 @@ ${tab.name}
           window.open(docUrl, '_blank');
           updateStatus("Opening IDE documentation");
           break;
-        case 'extentions':
-          const xtnUrl = new URL('IDE_docmtn.html', window.location.href).href;
-          // using IDE_docmtn for testing
-          window.open(xtnUrl, '_blank');
-          updateStatus("Opening extentions");
+        case 'extensions':
+          // Create a simple extensions UI
+          const extensionsHTML = `
+            <div class="extensions-modal">
+              <h3>Extensions</h3>
+              <div class="extensions-list">
+                <div class="extension-item">
+                  <h4>HTML Validator</h4>
+                  <button data-action="install-extension" data-extension="html-validator">Install</button>
+                </div>
+                <div class="extension-item">
+                  <h4>CSS Preprocessor</h4>
+                  <button data-action="install-extension" data-extension="css-pre">Install</button>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Create and show modal
+          const modal = document.createElement('div');
+          modal.className = 'modal-overlay';
+          modal.innerHTML = extensionsHTML;
+          document.body.appendChild(modal);
+          
+          // Close modal on click outside
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              document.body.removeChild(modal);
+            }
+          });
           break;
         case 'shortcuts-win':
           window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf', '_blank');
