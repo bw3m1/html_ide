@@ -745,36 +745,24 @@ ${tab.name}
 
   async function saveZip() {
     try {
-      // Create a new JSZip instance
       const zip = new JSZip();
-
-      // Ask for project name
       const projectName = prompt("Enter project name for ZIP file:", "my_project") || "my_project";
-
-      // 1. Add all open tabs to ZIP
       const tabsToInclude = state.tabs.filter(tab =>
         confirm(`Include "${tab.name}" in the ZIP file?`)
       );
-
       if (tabsToInclude.length === 0 &&
         !confirm("No tabs selected. Continue with empty project?")) {
         updateStatus("ZIP export canceled", true);
         return;
       }
-
       tabsToInclude.forEach(tab => {
         zip.file(tab.name, tab.content);
       });
-
-      // 2. Add files from file explorer
       if (confirm("Include files from file explorer in ZIP?")) {
-        // Helper function to recursively add files
         function addFilesToZip(items, zipFolder, path = '') {
           items.forEach(item => {
             const itemPath = path ? `${path}/${item.name}` : item.name;
             if (item.type === 'file') {
-              // In a real app, you would read the actual file content here
-              // For this demo, we'll just add the file name
               zipFolder.file(itemPath, `Content for ${item.name}`);
             } else if (item.type === 'folder' && item.children) {
               const newFolder = zipFolder.folder(item.name);
@@ -782,18 +770,13 @@ ${tab.name}
             }
           });
         }
-
         addFilesToZip(state.files, zip);
       }
-
-      // 3. Generate the ZIP file
       const content = await zip.generateAsync({
         type: "blob",
         compression: "DEFLATE",
         compressionOptions: { level: 6 }
       });
-
-      // 4. Create download link
       const url = URL.createObjectURL(content);
       const a = document.createElement('a');
       a.style.display = 'none';
@@ -801,13 +784,10 @@ ${tab.name}
       a.download = `${projectName}.zip`;
       document.body.appendChild(a);
       a.click();
-
-      // 5. Clean up
       setTimeout(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }, 100);
-
       updateStatus(`Exported ${tabsToInclude.length} files as ${projectName}.zip`);
     } catch (error) {
       showError(`Error creating ZIP: ${error.message}`);
@@ -959,7 +939,6 @@ ${tab.name}
   }
 
   function nameFile() {
-
     const currentTab = getCurrentTab();
     const name = prompt('Enter new file name (without extension):',
       currentTab.name.replace(/\..*$/, ''));
@@ -979,11 +958,6 @@ ${tab.name}
     state.unsavedChanges = true;
     updateStatus("Editor cleared");
   }
-
-  // Language detection and support loading
-
-  // Deepseek you shold make a function setLang and then use that for detectLang so that i can reuse it
-  // for reformating the documint
 
   async function detectLanguage() {
     const currentTab = getCurrentTab();
@@ -1191,9 +1165,18 @@ ${tab.name}
     }
   }
 
-  function setFileType(fileType) {
-    
+function setFileType(fileType) {
+  const currentTab = getCurrentTab();
+  const fileName = currentTab.name;
+  const dotIndex = fileName.lastIndexOf('.');
+  const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
+  if (name) {
+    currentTab.name = `${name}${fileType}`;
+    renderTabs();
+    updateStatus(`Renamed to ${currentTab.name}`);
+    saveTabsToStorage();
   }
+}
 
   // Menu actions
   async function handleMenuAction(action, data) {
