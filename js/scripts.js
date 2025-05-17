@@ -1165,18 +1165,18 @@ ${tab.name}
     }
   }
 
-function setFileType(fileType) {
-  const currentTab = getCurrentTab();
-  const fileName = currentTab.name;
-  const dotIndex = fileName.lastIndexOf('.');
-  const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
-  if (name) {
-    currentTab.name = `${name}${fileType}`;
-    renderTabs();
-    updateStatus(`Renamed to ${currentTab.name}`);
-    saveTabsToStorage();
+  function setFileType(fileType) {
+    const currentTab = getCurrentTab();
+    const fileName = currentTab.name;
+    const dotIndex = fileName.lastIndexOf('.');
+    const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
+    if (name) {
+      currentTab.name = `${name}${fileType}`;
+      renderTabs();
+      updateStatus(`Reformated to ${fileType}`);
+      saveTabsToStorage();
+    }
   }
-}
 
   // Menu actions
   async function handleMenuAction(action, data) {
