@@ -1165,7 +1165,7 @@ ${tab.name}
     }
   }
 
-  function setFileType(fileType) { // untidled.html is converted into untidledjsjs istead of untidled.js
+  function setFileType(fileType) {
     const currentTab = getCurrentTab();
     const fileName = currentTab.name;
     const dotIndex = fileName.lastIndexOf('.');
