@@ -1293,7 +1293,7 @@ ${tab.name}
         case 'extentions':
           const xtnUrl = new URL('IDE_docmtn.html', window.location.href).href;
           window.open(xtnUrl, '_blank');
-          updateStatus("Opening IDE documentation");
+          updateStatus("Opening extentions");
           break;
         case 'shortcuts-win':
           window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf', '_blank');
