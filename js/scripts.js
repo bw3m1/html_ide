@@ -1173,7 +1173,7 @@ ${tab.name}
     if (name) {
       currentTab.name = `${name}${'.' + fileType}`;
       renderTabs();
-      updateStatus(`Reformated to ${'.' + fileType}`);
+      updateStatus(`Reformated to ${fileType}`);
       saveTabsToStorage();
     }
   }
