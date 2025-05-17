@@ -1331,7 +1331,7 @@ ${tab.name}
         case 'file-2-rust': setFileType('rust'); detectLanguage(); break;
         case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
-          alert('html IDE\n\nVersion:                  0.4.2.1\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveuped by Bryson J G.');
+          alert('html IDE\n\nVersion:                  0.4.2.9\nDate of Publish:   2025 / 05 / 17\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveuped by Bryson J G.');
           updateStatus("About dialog shown");
           break;
       }
