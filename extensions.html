@@ -6,7 +6,32 @@
     <link rel="icon" type="image/png" href="example_image.png">
     <style>
 
-      /* Style Sheets goes here */
+      :root {
+        --primary: #007acc;
+        --secondary: #3e3e42;
+        --background: #ffffff;
+        --text: #333333;
+        --border: #e1e1e1;
+        --toc-width: 250px;
+      }
+
+      body.dark {
+        --primary: #3794ff;
+        --secondary: #858585;
+        --background: #1e1e1e;
+        --text: #d4d4d4;
+        --border: #444;
+      }
+
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+        transition: background-color 0.3s, color 0.3s;
+      }
 
     </style>
   </head>
