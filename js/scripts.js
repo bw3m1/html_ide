@@ -1291,35 +1291,8 @@ ${tab.name}
           updateStatus("Opening IDE documentation");
           break;
         case 'extensions':
-          // Create a simple extensions UI
-          const extensionsHTML = `
-            <div class="extensions-modal">
-              <h3>Extensions</h3>
-              <div class="extensions-list">
-                <div class="extension-item">
-                  <h4>HTML Validator</h4>
-                  <button data-action="install-extension" data-extension="html-validator">Install</button>
-                </div>
-                <div class="extension-item">
-                  <h4>CSS Preprocessor</h4>
-                  <button data-action="install-extension" data-extension="css-pre">Install</button>
-                </div>
-              </div>
-            </div>
-          `;
-          
-          // Create and show modal
-          const modal = document.createElement('div');
-          modal.className = 'modal-overlay';
-          modal.innerHTML = extensionsHTML;
-          document.body.appendChild(modal);
-          
-          // Close modal on click outside
-          modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-              document.body.removeChild(modal);
-            }
-          });
+          window.open('extensions.html', '_blank');
+          updateStatus("Opened Extensions Manager");
           break;
         case 'shortcuts-win':
           window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf', '_blank');
