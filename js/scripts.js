@@ -1291,15 +1291,15 @@ ${tab.name}
           updateStatus("Opened Extensions Loader");
           break;
         case 'shortcuts-win':
-          window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf', '_blank');
+          window.open('shortcuts/windows.html', '_blank');
           updateStatus("Opening Windows shortcuts");
           break;
         case 'shortcuts-mac':
-          window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf', '_blank');
+          window.open('shortcuts/macos.html', '_blank');
           updateStatus("Opening Mac shortcuts");
           break;
         case 'shortcuts-lux':
-          window.open('https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf', '_blank');
+          window.open('shortcuts/linux.html', '_blank');
           updateStatus("Opening Linux shortcuts");
           break;
         case 'docmt-css':
