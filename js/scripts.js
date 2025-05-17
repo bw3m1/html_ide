@@ -1171,7 +1171,7 @@ ${tab.name}
     const dotIndex = fileName.lastIndexOf('.');
     const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
     if (name) {
-      currentTab.name = `${name}${fileType}`;
+      currentTab.name = `${name}${'.' + fileType}`;
       renderTabs();
       updateStatus(`Reformated to ${fileType}`);
       saveTabsToStorage();
