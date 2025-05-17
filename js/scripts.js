@@ -1292,6 +1292,7 @@ ${tab.name}
           break;
         case 'extentions':
           const xtnUrl = new URL('IDE_docmtn.html', window.location.href).href;
+          // using IDE_docmtn for testing
           window.open(xtnUrl, '_blank');
           updateStatus("Opening extentions");
           break;
