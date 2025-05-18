@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>html IDE</title>
+  <title>HTML IDE</title>
   <meta name="theme-color" content="#1e1e1e">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/styles.css">
@@ -19,7 +19,6 @@
     };
   </script>
 </head>
-
 <body>
   <div class="menu-bar" role="menubar" aria-label="Main menu">
     <!-- File Menu -->
@@ -61,7 +60,6 @@
         <div class="dropdown-item" role="menuitem" data-action="rename">Rename</div>
         <div class="dropdown-item" role="menuitem" data-action="clear">Clear</div>
         <div class="dropdown-item" role="menuitem" data-action="toggle-explorer">Toggle Explorer</div>
-        <div class="dropdown-item" role="menuitem" data-action="close-tab">Close Current Tab</div>
       </div>
     </div>
 
@@ -108,17 +106,35 @@
       </div>
     </div>
 
+    <!-- Tab Menu -->
+    <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
+      Tab
+      <div class="dropdown" role="menu">
+        <div class="dropdown-item" role="menuitem" data-action="new">New</div>
+        <div class="dropdown-item" role="menuitem" data-action="close-tab">Close Current</div>
+        <div class="sub-menus">
+          <div class="dropdown-item" role="menuitem">
+            Close
+            <div class="dropdown" role="menu">
+              <div class="dropdown-item" role="menuitem" data-action="close-all-other">Close All Other Tabs</div>
+              <div class="dropdown-item" role="menuitem" data-action="close-all-right">Close All Right</div>
+              <div class="dropdown-item" role="menuitem" data-action="close-all-left">Close All Left</div>
+              <div class="dropdown-item" role="menuitem" data-action="close-right">Close Right</div>
+              <div class="dropdown-item" role="menuitem" data-action="close-left">Close Left</div>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown-item" role="menuitem" data-action="search-workspace">Search Workspace</div>
+        <div class="dropdown-item" role="menuitem" data-action="reload-current">Reload</div>
+        <div class="dropdown-item" role="menuitem" data-action="duplicate-tab">Duplicate Current Tab</div>
+      </div>
+    </div>
+
     <!-- Settings Menu -->
     <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">
       Settings
       <div class="dropdown" role="menu">
-<!-- 
-        <div class="dropdown-item" role="menuitem" data-action="settings">All Settings</div>
--->
         <div class="dropdown-item" role="menuitem" data-action="extensions">Extensions</div>
-<!-- 
-        <div class="dropdown-item" role="menuitem" data-action="kb-shortcut-setings">KB Shortcuts</div>
--->
         <div class="sub-menus">
           <div class="dropdown-item" role="menuitem">
             Theme
@@ -165,14 +181,14 @@
       Help
       <div class="dropdown" role="menu">
         <div class="dropdown-item" role="menuitem" data-action="documentation">Documentation</div>
-      <div class="dropdown-item" role="menuitem" data-action="extensions">Extensions</div>
+        <div class="dropdown-item" role="menuitem" data-action="extensions">Extensions</div>
         <div class="sub-menus">
           <div class="dropdown-item" role="menuitem">
             Shortcuts
             <div class="dropdown" role="menu">
               <div class="dropdown-item" role="menuitem" data-action="shortcuts-win">Windows</div>
               <div class="dropdown-item" role="menuitem" data-action="shortcuts-mac">Mac</div>
-              <div class="dropdown-item" role="menuitem" data-action="shortcuts-lux">Linux</div>
+              <div class="dropdown-item" role="menuitem" data-action="shortcuts-linux">Linux</div>
             </div>
           </div>
         </div>
@@ -180,9 +196,9 @@
           <div class="dropdown-item" role="menuitem">
             Language Docs
             <div class="dropdown" role="menu">
-              <div class="dropdown-item" role="menuitem" data-action="docmt-html">HTML</div>
-              <div class="dropdown-item" role="menuitem" data-action="docmt-css">CSS</div>
-              <div class="dropdown-item" role="menuitem" data-action="docmt-js">JavaScript</div>
+              <div class="dropdown-item" role="menuitem" data-action="docs-html">HTML</div>
+              <div class="dropdown-item" role="menuitem" data-action="docs-css">CSS</div>
+              <div class="dropdown-item" role="menuitem" data-action="docs-js">JavaScript</div>
             </div>
           </div>
         </div>
@@ -237,10 +253,10 @@
     <div id="lineInfo">Ln 1, Col 1</div>
   </div>
 
-<div class="tab-bar">
-  <div class="tabs-container" id="tabsContainer"></div>
-  <div class="new-tab-button" data-action="new">+</div>
-</div>
+  <div class="tab-bar">
+    <div class="tabs-container" id="tabsContainer"></div>
+    <div class="new-tab-button" data-action="new">+</div>
+  </div>
 
   <input type="file" class="hidden-file-input" id="fileInput" />
 
@@ -259,5 +275,4 @@
     }
   </script>
 </body>
-
 </html>
