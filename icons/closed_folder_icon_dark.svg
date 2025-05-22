@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M41,12.5H7.5v75h85v-65H51L41,12.5z M87.5,82.5h-75v-65H39l10,10h38.5V82.5z"/></svg>
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" width="100" height="125">
+	<title>closed_folder_icon_dark</title>
+	<defs>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp1">
+			<path d="m41 12.5h-33.5v75h85v-65h-41.5zm46.5 70h-75v-65h26.5l10 10h38.5z"/>
+		</clipPath>
+	</defs>
+	<style>
+		.s0 { fill: #000000 } 
+	</style>
+	<g clip-path="url(#cp1)">
+		<path class="s0" d="m41 12.5h-33.5v75h85v-65h-41.5zm46.5 70h-75v-65h26.5l10 10h38.5z"/>
+		<rect width="100" height="125" id="Layer 1" style="fill: #ffffff"/>
+	</g>
+</svg>
