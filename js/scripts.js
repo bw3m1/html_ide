@@ -469,12 +469,38 @@ ${tab.name}
       function getFileIcon(filename) {
           const extension = filename.split('.').pop().toLowerCase();
           switch(extension) {
+            case 'txt': return 'text_icon.png';
+              case 'png': return 'png_img_icon.png';
+              case 'jpg': return 'jpeg_img_icon.png';
+              case 'jpeg': return 'jpeg_img_icon.png';
+              case 'gif': return 'gif_video_icon.png';
+              case 'svg': return 'svg_img_icon.svg';
+              case 'mp4': return 'gif_video_icon.png';
+              case 'mp3': return 'mp3_audio_icon.png';
+              case 'pdf':
+              case 'zip':
               case 'brl': return 'BRL_icon.png';
-              case 'c':
+              case 'py':
+              case 'java':
+              case 'rb':
+              case 'go':
+              case 'php': return 'PHP_icon.png';
+              case 'swift':
+              case 'rs':
+              case 'ts': return 'TypeScript_icon.png';
+              case 'xml':
+              case 'json':
+              case 'yaml':
+              case 'yml':
+              case 'sql': 
+              case 'bash':
+              case 'sh': return 'shell_icon.png';
+              case 'cjs': return 'JavaScripts_icon.png';
+              case 'c': return 'Clang_icon.png';
               case 'h': return 'Clang_icon.png';
-              case 'cpp':
-              case 'hpp':
-              case 'cxx':
+              case 'cpp': return 'Cpp_icon.png';
+              case 'hpp': return 'Cpp_icon.png';
+              case 'cxx': return 'Clang_icon.png';
               case 'hxx': return 'Cpp_icon.png';
               case 'cs': return 'Csharp_icon.png';
               case 'css': return 'CSS_icon.png';
@@ -488,7 +514,7 @@ ${tab.name}
               case 'zip':
               case 'rar':
               case '7z': return 'closed_zip_folder_icon.svg';
-              default: return 'file_icon.svg'; // You might need to add a default file icon
+              default:  return 'text_icon.png';
           }
       }
 
