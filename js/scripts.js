@@ -469,7 +469,7 @@ ${tab.name}
       function getFileIcon(filename) {
           const extension = filename.split('.').pop().toLowerCase();
           switch(extension) {
-              case 'brl': return 'BRL.png';
+              case 'brl': return 'BRL_icon.png';
               case 'c':
               case 'h': return 'Clang_icon.png';
               case 'cpp':
@@ -479,7 +479,7 @@ ${tab.name}
               case 'cs': return 'Csharp_icon.png';
               case 'css': return 'CSS_icon.png';
               case 'html': return 'html_icon.png';
-              case 'js':
+              case 'js': return 'JavaScripts_icon.png';
               case 'jsx': return 'react_icon.png';
               case 'mjs': return 'JavaScripts_icon.png';
               case 'md': return 'README_icon.png';
@@ -564,7 +564,7 @@ function addFile(parentPath = '') {
                 if (!folder) {
                     throw new Error(`Folder not found: ${part}`);
                 }
-                targetLocation = folder.children;
+                targetLocation = folder.children;S
             }
         }
 
