@@ -346,8 +346,7 @@ ${tab.name}
 
     //  !!
 
-    // ether im bat at odeing or im bad at iplamenting code in html or both
-
+    // ether im bat at codeing or im bad at iplamenting code in html or both
 
     const tabId = generateTabId();
     const newTab = {
@@ -526,8 +525,13 @@ ${tab.name}
               fileItem.dataset.path = path;
               fileItem.dataset.type = item.type;
 
-              const iconSrc = item.type === 'folder' 
-                  ? item.expanded ? 'icons/open_folder_icon.svg' : 'icons/closed_folder_icon.svg'
+                // Determine theme (light or dark)
+                const isLightTheme = document.body.classList.contains('light-theme');
+                const openFolderIcon = isLightTheme ? 'icons/open_folder_icon_lite.svg' : 'icons/open_folder_icon_dark.svg';
+                const closedFolderIcon = isLightTheme ? 'icons/closed_folder_icon_lite.svg' : 'icons/closed_folder_icon_dark.svg';
+
+                const iconSrc = item.type === 'folder' 
+                  ? item.expanded ? openFolderIcon : closedFolderIcon
                   : `icons/${getFileIcon(item.name)}`;
 
               fileItem.innerHTML = `
