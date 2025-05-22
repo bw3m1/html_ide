@@ -464,103 +464,228 @@ ${tab.name}
   }
 
   function renderFileList() {
-    fileList.innerHTML = '';
+      fileList.innerHTML = '';
 
-    function renderItems(items, parentPath = '') {
-      items.forEach(item => {
-        const path = parentPath ? `${parentPath}/${item.name}` : item.name;
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.dataset.path = path;
-        fileItem.dataset.type = item.type;
-
-        fileItem.innerHTML = `
-        <div class="file-item-name">
-          ${item.type === 'folder' ? '📁 ' : '📄 '}${item.name}
-        </div>
-        <div class="file-item-actions">
-          ${item.type === 'file' ?
-            `<span class="file-item-open" data-action="open-file" data-path="${path}">Open</span>` : ''}
-          <span class="file-item-delete" data-action="delete-file" data-path="${path}">×</span>
-        </div>
-      `;
-
-        fileItem.addEventListener('click', (e) => {
-          if (e.target.classList.contains('file-item-delete') ||
-            e.target.classList.contains('file-item-open')) {
-            return;
+      function getFileIcon(filename) {
+          const extension = filename.split('.').pop().toLowerCase();
+          switch(extension) {
+              case 'brl': return 'BRL.png';
+              case 'c':
+              case 'h': return 'Clang_icon.png';
+              case 'cpp':
+              case 'hpp':
+              case 'cxx':
+              case 'hxx': return 'Cpp_icon.png';
+              case 'cs': return 'Csharp_icon.png';
+              case 'css': return 'CSS_icon.png';
+              case 'html': return 'html_icon.png';
+              case 'js':
+              case 'jsx': return 'react_icon.png';
+              case 'mjs': return 'JavaScripts_icon.png';
+              case 'md': return 'README_icon.png';
+              case 'txt': return 'README_icon.png';
+              case 'license': return 'LICENSE_icon.png';
+              case 'zip':
+              case 'rar':
+              case '7z': return 'closed_zip_folder_icon.svg';
+              default: return 'file_icon.svg'; // You might need to add a default file icon
           }
-
-          if (item.type === 'folder') {
-            // Toggle folder expansion
-            fileItem.classList.toggle('expanded');
-          }
-        });
-
-        fileList.appendChild(fileItem);
-
-        if (item.type === 'folder' && item.children) {
-          const childContainer = document.createElement('div');
-          childContainer.className = 'folder-children';
-          fileItem.appendChild(childContainer);
-          renderItems(item.children, path, childContainer);
-        }
-      });
-    }
-
-    renderItems(state.files);
-  }
-
-  function addFile() {
-    const fileName = prompt('Enter file name (include extension):', 'newfile.html');
-    if (fileName) {
-      state.files.push({
-        name: fileName,
-        type: 'file'
-      });
-      saveProjectFiles();
-      renderFileList();
-      updateStatus(`Added file: ${fileName}`);
-    }
-  }
-
-  function addFolder() {
-    const folderName = prompt('Enter folder name:', 'newfolder');
-    if (folderName) {
-      state.files.push({
-        name: folderName,
-        type: 'folder',
-        children: []
-      });
-      saveProjectFiles();
-      renderFileList();
-      updateStatus(`Added folder: ${folderName}`);
-    }
-  }
-
-  function deleteFile(path) {
-    if (confirm(`Are you sure you want to delete ${path}?`)) {
-      const pathParts = path.split('/');
-      let currentLevel = state.files;
-
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        const part = pathParts[i]; const folder = currentLevel.find(item =>
-          item.name === part && item.type === 'folder');
-        if (!folder) break;
-        currentLevel = folder.children;
       }
 
-      const itemName = pathParts[pathParts.length - 1];
-      const index = currentLevel.findIndex(item => item.name === itemName);
+      function renderItems(items, parentPath = '', container = fileList) {
+          items.forEach(item => {
+              const path = parentPath ? `${parentPath}/${item.name}` : item.name;
+              const fileItem = document.createElement('div');
+              fileItem.className = 'file-item';
+              fileItem.dataset.path = path;
+              fileItem.dataset.type = item.type;
 
-      if (index !== -1) {
+              const iconSrc = item.type === 'folder' 
+                  ? item.expanded ? 'icons/open_folder_icon.svg' : 'icons/closed_folder_icon.svg'
+                  : `icons/${getFileIcon(item.name)}`;
+
+              fileItem.innerHTML = `
+                  <div class="file-item-name" style="display: flex; align-items: center;">
+                      <img src="${iconSrc}" alt="${item.type}" class="file-icon" style="width: 16px; height: 16px; margin-right: 4px;" />
+                      <span>${item.name}</span>
+                  </div>
+                  <div class="file-item-actions">
+                      ${item.type === 'file' ?
+                          `<span class="file-item-open" data-action="open-file" data-path="${path}">Open</span>` : ''}
+                      <span class="file-item-delete" data-action="delete-file" data-path="${path}">×</span>
+                  </div>
+              `;
+
+              fileItem.addEventListener('click', (e) => {
+                  if (e.target.classList.contains('file-item-delete') ||
+                      e.target.classList.contains('file-item-open')) {
+                      return;
+                  }
+
+                  if (item.type === 'folder') {
+                      item.expanded = !item.expanded;
+                      renderFileList(); // Re-render to show/hide children
+                  }
+              });
+
+              container.appendChild(fileItem);
+
+              if (item.type === 'folder' && item.children && item.expanded) {
+                  const childContainer = document.createElement('div');
+                  childContainer.className = 'folder-children';
+                  childContainer.style.marginLeft = '16px'; // Indent children
+                  fileItem.appendChild(childContainer);
+                  renderItems(item.children, path, childContainer);
+              }
+          });
+      }
+
+      renderItems(state.files);
+  }
+
+function addFile(parentPath = '') {
+    const fileName = prompt('Enter file name (include extension):', 'newfile.html');
+    if (!fileName) return;
+
+    // Validate filename
+    if (!fileName.includes('.')) {
+        alert('Please include a file extension (e.g., ".html", ".js")');
+        return;
+    }
+
+    try {
+        let targetLocation = state.files;
+        
+        if (parentPath) {
+            const pathParts = parentPath.split('/');
+            for (const part of pathParts) {
+                const folder = targetLocation.find(item => 
+                    item.name === part && item.type === 'folder');
+                if (!folder) {
+                    throw new Error(`Folder not found: ${part}`);
+                }
+                targetLocation = folder.children;
+            }
+        }
+
+        // Check for duplicates
+        if (targetLocation.some(item => item.name === fileName)) {
+            alert(`A file or folder with name "${fileName}" already exists in this location`);
+            return;
+        }
+
+        targetLocation.push({
+            name: fileName,
+            type: 'file',
+            content: '' // Add empty content by default
+        });
+
+        saveProjectFiles();
+        renderFileList();
+        updateStatus(`Added file: ${parentPath ? parentPath + '/' : ''}${fileName}`);
+    } catch (error) {
+        alert(`Error adding file: ${error.message}`);
+        console.error(error);
+    }
+}
+
+function addFolder(parentPath = '') {
+    const folderName = prompt('Enter folder name:', 'newfolder');
+    if (!folderName) return;
+
+    // Validate folder name
+    if (folderName.includes('/') || folderName.includes('\\')) {
+        alert('Folder name cannot contain slashes');
+        return;
+    }
+
+    try {
+        let targetLocation = state.files;
+        
+        if (parentPath) {
+            const pathParts = parentPath.split('/');
+            for (const part of pathParts) {
+                const folder = targetLocation.find(item => 
+                    item.name === part && item.type === 'folder');
+                if (!folder) {
+                    throw new Error(`Folder not found: ${part}`);
+                }
+                targetLocation = folder.children;
+            }
+        }
+
+        // Check for duplicates
+        if (targetLocation.some(item => item.name === folderName)) {
+            alert(`A file or folder with name "${folderName}" already exists in this location`);
+            return;
+        }
+
+        targetLocation.push({
+            name: folderName,
+            type: 'folder',
+            children: [],
+            expanded: false // Folders start collapsed by default
+        });
+
+        saveProjectFiles();
+        renderFileList();
+        updateStatus(`Added folder: ${parentPath ? parentPath + '/' : ''}${folderName}`);
+    } catch (error) {
+        alert(`Error adding folder: ${error.message}`);
+        console.error(error);
+    }
+}
+
+function deleteFile(path) {
+    if (!path || !confirm(`Are you sure you want to delete "${path}"?`)) {
+        return;
+    }
+
+    try {
+        const pathParts = path.split('/');
+        let currentLevel = state.files;
+        let parentLevel = null;
+        let index = -1;
+        let itemName = pathParts[pathParts.length - 1];
+
+        // Navigate to the parent of the item to delete
+        for (let i = 0; i < pathParts.length - 1; i++) {
+            const part = pathParts[i];
+            const folder = currentLevel.find(item => 
+                item.name === part && item.type === 'folder');
+            
+            if (!folder) {
+                throw new Error(`Path not found: ${pathParts.slice(0, i + 1).join('/')}`);
+            }
+            
+            parentLevel = currentLevel;
+            currentLevel = folder.children;
+        }
+
+        // Find the item in the final level
+        index = currentLevel.findIndex(item => item.name === itemName);
+        
+        if (index === -1) {
+            throw new Error(`Item not found: ${itemName}`);
+        }
+
+        // Special handling if it's a non-empty folder
+        const item = currentLevel[index];
+        if (item.type === 'folder' && item.children && item.children.length > 0) {
+            if (!confirm(`Folder "${itemName}" is not empty. Delete all contents as well?`)) {
+                return;
+            }
+        }
+
         currentLevel.splice(index, 1);
         saveProjectFiles();
         renderFileList();
         updateStatus(`Deleted: ${path}`);
-      }
+    } catch (error) {
+        alert(`Error deleting: ${error.message}`);
+        console.error(error);
     }
-  }
+}
 
   function saveProjectFiles() {
     localStorage.setItem('projectFiles', JSON.stringify(state.files));
