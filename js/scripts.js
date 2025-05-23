@@ -571,6 +571,26 @@ ${tab.name}
       }
 
       renderItems(state.files);
+
+      // Add event delegation for file explorer actions
+      fileList.addEventListener('click', function(e) {
+        const openBtn = e.target.closest('.file-item-open');
+        if (openBtn) {
+          const path = openBtn.dataset.path;
+          if (path) {
+            handleMenuAction('open-file', { path });
+            e.stopPropagation();
+          }
+        }
+        const deleteBtn = e.target.closest('.file-item-delete');
+        if (deleteBtn) {
+          const path = deleteBtn.dataset.path;
+          if (path) {
+            handleMenuAction('delete-file', { path });
+            e.stopPropagation();
+          }
+        }
+      });
   }
 
 function addFile(parentPath = '') {
@@ -604,10 +624,23 @@ function addFile(parentPath = '') {
             return;
         }
 
+        // Set default content based on file extension
+        let defaultContent = '';
+        const ext = fileName.split('.').pop().toLowerCase();
+        if (ext === 'html') {
+            defaultContent = INIT_CONTENTS;
+        } else if (ext === 'css') {
+            defaultContent = '/* New CSS file */\n';
+        } else if (ext === 'js') {
+            defaultContent = '// New JavaScript file\n';
+        } else if (ext === 'json') {
+            defaultContent = '{\n  \n}';
+        }
+
         const newFile = {
             name: fileName,
             type: 'file',
-            content: '' // Add empty content by default
+            content: defaultContent // Add default content by extension
         };
 
         targetLocation.push(newFile);

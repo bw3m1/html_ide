@@ -304,6 +304,20 @@ body, html {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+.file-item-open {
+  padding: 2px 5px;
+  border-radius: 3px;
+  display: none;
+}
+
+.file-item:hover .file-item-open {
+  display: block;
+}
+
+.file-item-open:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 /* Adjust layout when file explorer is open */
 .file-explorer-open .editor-wrapper,
 .file-explorer-open .preview-pane {
