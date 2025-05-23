@@ -594,7 +594,7 @@ function addFile(parentPath = '') {
                 if (!folder) {
                     throw new Error(`Folder not found: ${part}`);
                 }
-                targetLocation = folder.children;
+                targetLocation = folder.children;S
             }
         }
 
@@ -667,6 +667,228 @@ function addFolder(parentPath = '') {
         console.error(error);
     }
 }
+
+function deleteFile(path) {
+<<<<<<< HEAD
+    if (!confirm(`Are you sure you want to delete "${path}"?`)) {
+      return;
+    }
+  
+    try {
+      const pathParts = path.split('/');
+      const fileName = pathParts.pop();
+      let targetLocation = state.files;
+  
+      // Navigate to the parent folder
+      for (const part of pathParts) {
+        const folder = targetLocation.find(item => item.name === part && item.type === 'folder');
+        if (!folder) {
+          throw new Error(`Folder not found: ${part}`);
+        }
+        targetLocation = folder.children;
+      }
+  
+      // Find and remove the file or folder
+      const fileIndex = targetLocation.findIndex(item => item.name === fileName);
+      if (fileIndex === -1) {
+        throw new Error(`File not found: ${fileName}`);
+      }
+  
+      targetLocation.splice(fileIndex, 1);
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Deleted ${path}`);
+    } catch (error) {
+      alert(`Error deleting file: ${error.message}`);
+      console.error(error);
+    }
+  }
+=======
+    if (!path || !confirm(`Are you sure you want to delete "${path}"?`)) {
+        return;
+    }
+
+    try {
+        const pathParts = path.split('/');
+        let currentLevel = state.files;
+        let parentLevel = null;
+        let index = -1;
+        let itemName = pathParts[pathParts.length - 1];
+
+        // Navigate to the parent of the item to delete
+        for (let i = 0; i < pathParts.length - 1; i++) {
+            const part = pathParts[i];
+            const folder = currentLevel.find(item => 
+                item.name === part && item.type === 'folder');
+            
+            if (!folder) {
+                throw new Error(`Path not found: ${pathParts.slice(0, i + 1).join('/')}`);
+            }
+            
+            parentLevel = currentLevel;
+            currentLevel = folder.children;
+        }
+
+        // Find the item in the final level
+        index = currentLevel.findIndex(item => item.name === itemName);
+        
+        if (index === -1) {
+            throw new Error(`Item not found: ${itemName}`);
+        }
+
+        // Special handling if it's a non-empty folder
+        const item = currentLevel[index];
+        if (item.type === 'folder' && item.children && item.children.length > 0) {
+            if (!confirm(`Folder "${itemName}" is not empty. Delete all contents as well?`)) {
+                return;
+            }
+        }
+
+        currentLevel.splice(index, 1);
+        saveProjectFiles();
+        renderFileList();
+        updateStatus(`Deleted: ${path}`);
+    } catch (error) {
+        alert(`Error deleting: ${error.message}`);
+        console.error(error);
+    }
+}
+>>>>>>> parent of 8f90ea7 (fixed something [ i think ])
+
+  function saveProjectFiles() {
+    localStorage.setItem('projectFiles', JSON.stringify(state.files));
+  }
+
+  // Update preview with sandboxed iframe and error handling
+  function updatePreview() {
+<<<<<<< HEAD
+    const currentTab = getCurrentTab();
+    if (!currentTab) return;
+
+    const previewFrame = document.getElementById('preview-frame');
+    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+
+    // Clear previous content
+    previewDoc.open();
+    previewDoc.write('<html><head><title>Preview</title></head><body>');
+    previewDoc.write('<h2>Preview</h2>');
+    previewDoc.write('<p>Loading...</p>');
+    previewDoc.write('</body></html>');
+    previewDoc.close();
+
+    // Create a blob URL for the current tab content
+    const blob = new Blob([currentTab.content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    // Set the iframe source to the blob URL
+    previewFrame.src = url;
+
+    // Revoke the object URL after the iframe has loaded
+    previewFrame.onload = () => {
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+    };
+
+    updateStatus(`Preview updated`);
+=======
+    try {
+      preview.innerHTML = '';
+      const currentTab = getCurrentTab();
+      const isJsFile = currentTab.name.endsWith('.js');
+
+      if (isJsFile) {
+        // Create a container for JS output
+        const jsOutputContainer = document.createElement('div');
+        jsOutputContainer.id = 'js-output';
+        jsOutputContainer.style.padding = '1rem';
+        jsOutputContainer.style.fontFamily = 'monospace';
+        jsOutputContainer.style.whiteSpace = 'pre';
+        jsOutputContainer.style.overflow = 'auto';
+        jsOutputContainer.style.height = '100%';
+
+        // Create a console div
+        const consoleDiv = document.createElement('div');
+        consoleDiv.id = 'js-console';
+        consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
+        consoleDiv.style.padding = '0.5rem';
+        consoleDiv.style.marginTop = '1rem';
+        consoleDiv.style.borderRadius = '4px';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+
+        preview.appendChild(jsOutputContainer);
+
+
+        // Override console.log to capture output
+        const originalConsoleLog = console.log;
+        const logs = [];
+
+        console.log = function (...args) {
+          logs.push(args.join(' '));
+          consoleDiv.textContent = logs.join('\n');
+          consoleDiv.scrollTop = consoleDiv.scrollHeight;
+          originalConsoleLog.apply(console, args);
+        };
+
+        try {
+          // Execute the JS code
+          const result = new Function(editor.getValue())();
+
+          if (result !== undefined) {
+            jsOutputContainer.textContent = String(result);
+          } else {
+            jsOutputContainer.textContent = 'Code executed (no return value)';
+          }
+        } catch (error) {
+          jsOutputContainer.textContent = `Error: ${error.message}`;
+          jsOutputContainer.style.color = 'var(--error-red)';
+        }
+
+        // Restore original console.log
+        console.log = originalConsoleLog;
+
+        updateStatus("JavaScript executed");
+      } else {
+        // Original HTML preview code
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+
+        const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script>
+          window.onerror = function(e) {
+            parent.postMessage({ 
+              type: 'preview-error', 
+              error: e.toString() 
+            }, '*');
+          };
+        <\/script>
+        <style>
+          body { margin: 0; padding: 1rem; }
+          .error { color: red; }
+        </style>
+      </head>
+      <body>${editor.getValue()}</body>
+      </html>`;
+
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(content);
+        iframe.contentDocument.close();
+
+        updateStatus("Preview updated");
+      }
+    } catch (error) {
+      showError(`Preview error: ${error.message}`);
+    }
+>>>>>>> parent of 8f90ea7 (fixed something [ i think ])
+  }
 
   // File operations with enhanced language support
   async function saveFile() {
@@ -1233,6 +1455,7 @@ function addFolder(parentPath = '') {
         case 'add-file': addFile(); break;
         case 'add-folder': addFolder(); break;
         case 'delete-file': deleteFile(data.path); break;
+        case 'open-file': openFileFromExplorer(data.path); break;
         case 'number-lines':
         // theres this stupid bug where it will set it to off and then not toggle it back on
         const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
@@ -1341,6 +1564,70 @@ function addFolder(parentPath = '') {
     } catch (error) {
       showError(`Action failed: ${error.message}`);
     }
+  }
+
+  async function openFileFromExplorer(filePath) {
+    try {
+      const fileEntry = findFileEntry(filePath, state.files);
+
+      if (!fileEntry || fileEntry.type !== 'file') {
+        throw new Error(`File not found: ${filePath}`);
+      }
+
+      // Create a new tab for the opened file
+      const tabId = generateTabId();
+      const newTab = {
+        id: tabId,
+        name: fileEntry.name,
+        type: fileEntry.name.split('.').pop().toLowerCase(),
+        content: fileEntry.content || '',
+        handle: null,
+        active: true
+      };
+
+      // Deactivate current tab
+      const currentTab = getCurrentTab();
+      if (currentTab) {
+        currentTab.active = false;
+      }
+
+      state.tabs.push(newTab);
+      state.currentTabId = tabId;
+
+      editor.setValue(newTab.content);
+      renderTabs();
+      updateStatus(`Opened ${fileEntry.name}`);
+      addToRecentFiles(newTab);
+      await detectLanguage();
+      saveTabsToStorage();
+
+    } catch (error) {
+      showError(`Open failed: ${error.message}`);
+    }
+  }
+
+  function findFileEntry(path, files) {
+    const pathParts = path.split('/');
+    let currentLevel = files;
+    let fileEntry = null;
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      fileEntry = currentLevel.find(item => item.name === part);
+
+      if (!fileEntry) {
+        return null;
+      }
+
+      if (fileEntry.type === 'folder' && fileEntry.children) {
+        currentLevel = fileEntry.children;
+      } else if (i < pathParts.length - 1) {
+        // If it's a file but not the last part of the path, the path is invalid
+        return null;
+      }
+    }
+
+    return fileEntry;
   }
 
   // Set up menu event listeners
