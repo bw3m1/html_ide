@@ -604,11 +604,13 @@ function addFile(parentPath = '') {
             return;
         }
 
-        targetLocation.push({
+        const newFile = {
             name: fileName,
             type: 'file',
             content: '' // Add empty content by default
-        });
+        };
+
+        targetLocation.push(newFile);
 
         saveProjectFiles();
         renderFileList();
