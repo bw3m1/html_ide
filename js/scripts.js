@@ -594,7 +594,7 @@ function addFile(parentPath = '') {
                 if (!folder) {
                     throw new Error(`Folder not found: ${part}`);
                 }
-                targetLocation = folder.children;
+                targetLocation = folder.children;S
             }
         }
 
@@ -669,6 +669,7 @@ function addFolder(parentPath = '') {
 }
 
 function deleteFile(path) {
+<<<<<<< HEAD
     if (!confirm(`Are you sure you want to delete "${path}"?`)) {
       return;
     }
@@ -702,6 +703,57 @@ function deleteFile(path) {
       console.error(error);
     }
   }
+=======
+    if (!path || !confirm(`Are you sure you want to delete "${path}"?`)) {
+        return;
+    }
+
+    try {
+        const pathParts = path.split('/');
+        let currentLevel = state.files;
+        let parentLevel = null;
+        let index = -1;
+        let itemName = pathParts[pathParts.length - 1];
+
+        // Navigate to the parent of the item to delete
+        for (let i = 0; i < pathParts.length - 1; i++) {
+            const part = pathParts[i];
+            const folder = currentLevel.find(item => 
+                item.name === part && item.type === 'folder');
+            
+            if (!folder) {
+                throw new Error(`Path not found: ${pathParts.slice(0, i + 1).join('/')}`);
+            }
+            
+            parentLevel = currentLevel;
+            currentLevel = folder.children;
+        }
+
+        // Find the item in the final level
+        index = currentLevel.findIndex(item => item.name === itemName);
+        
+        if (index === -1) {
+            throw new Error(`Item not found: ${itemName}`);
+        }
+
+        // Special handling if it's a non-empty folder
+        const item = currentLevel[index];
+        if (item.type === 'folder' && item.children && item.children.length > 0) {
+            if (!confirm(`Folder "${itemName}" is not empty. Delete all contents as well?`)) {
+                return;
+            }
+        }
+
+        currentLevel.splice(index, 1);
+        saveProjectFiles();
+        renderFileList();
+        updateStatus(`Deleted: ${path}`);
+    } catch (error) {
+        alert(`Error deleting: ${error.message}`);
+        console.error(error);
+    }
+}
+>>>>>>> parent of 8f90ea7 (fixed something [ i think ])
 
   function saveProjectFiles() {
     localStorage.setItem('projectFiles', JSON.stringify(state.files));
@@ -709,6 +761,7 @@ function deleteFile(path) {
 
   // Update preview with sandboxed iframe and error handling
   function updatePreview() {
+<<<<<<< HEAD
     const currentTab = getCurrentTab();
     if (!currentTab) return;
 
@@ -738,6 +791,103 @@ function deleteFile(path) {
     };
 
     updateStatus(`Preview updated`);
+=======
+    try {
+      preview.innerHTML = '';
+      const currentTab = getCurrentTab();
+      const isJsFile = currentTab.name.endsWith('.js');
+
+      if (isJsFile) {
+        // Create a container for JS output
+        const jsOutputContainer = document.createElement('div');
+        jsOutputContainer.id = 'js-output';
+        jsOutputContainer.style.padding = '1rem';
+        jsOutputContainer.style.fontFamily = 'monospace';
+        jsOutputContainer.style.whiteSpace = 'pre';
+        jsOutputContainer.style.overflow = 'auto';
+        jsOutputContainer.style.height = '100%';
+
+        // Create a console div
+        const consoleDiv = document.createElement('div');
+        consoleDiv.id = 'js-console';
+        consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
+        consoleDiv.style.padding = '0.5rem';
+        consoleDiv.style.marginTop = '1rem';
+        consoleDiv.style.borderRadius = '4px';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+
+        preview.appendChild(jsOutputContainer);
+
+
+        // Override console.log to capture output
+        const originalConsoleLog = console.log;
+        const logs = [];
+
+        console.log = function (...args) {
+          logs.push(args.join(' '));
+          consoleDiv.textContent = logs.join('\n');
+          consoleDiv.scrollTop = consoleDiv.scrollHeight;
+          originalConsoleLog.apply(console, args);
+        };
+
+        try {
+          // Execute the JS code
+          const result = new Function(editor.getValue())();
+
+          if (result !== undefined) {
+            jsOutputContainer.textContent = String(result);
+          } else {
+            jsOutputContainer.textContent = 'Code executed (no return value)';
+          }
+        } catch (error) {
+          jsOutputContainer.textContent = `Error: ${error.message}`;
+          jsOutputContainer.style.color = 'var(--error-red)';
+        }
+
+        // Restore original console.log
+        console.log = originalConsoleLog;
+
+        updateStatus("JavaScript executed");
+      } else {
+        // Original HTML preview code
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+
+        const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script>
+          window.onerror = function(e) {
+            parent.postMessage({ 
+              type: 'preview-error', 
+              error: e.toString() 
+            }, '*');
+          };
+        <\/script>
+        <style>
+          body { margin: 0; padding: 1rem; }
+          .error { color: red; }
+        </style>
+      </head>
+      <body>${editor.getValue()}</body>
+      </html>`;
+
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(content);
+        iframe.contentDocument.close();
+
+        updateStatus("Preview updated");
+      }
+    } catch (error) {
+      showError(`Preview error: ${error.message}`);
+    }
+>>>>>>> parent of 8f90ea7 (fixed something [ i think ])
   }
 
   // File operations with enhanced language support
