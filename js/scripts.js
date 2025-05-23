@@ -483,10 +483,10 @@ ${tab.name}
               case 'java':
               case 'rb':
               case 'go':
-              case 'php': return 'brain_melting_shit.png';
+              case 'php': return 'PHP_icon.png';
               case 'swift':
               case 'rs':
-              case 'ts':
+              case 'ts': return 'TypeScript_icon.png';
               case 'xml':
               case 'json':
               case 'yaml':
