@@ -594,7 +594,7 @@ function addFile(parentPath = '') {
                 if (!folder) {
                     throw new Error(`Folder not found: ${part}`);
                 }
-                targetLocation = folder.children;S
+                targetLocation = folder.children;
             }
         }
 
@@ -669,7 +669,6 @@ function addFolder(parentPath = '') {
 }
 
 function deleteFile(path) {
-<<<<<<< HEAD
     if (!confirm(`Are you sure you want to delete "${path}"?`)) {
       return;
     }
@@ -703,57 +702,6 @@ function deleteFile(path) {
       console.error(error);
     }
   }
-=======
-    if (!path || !confirm(`Are you sure you want to delete "${path}"?`)) {
-        return;
-    }
-
-    try {
-        const pathParts = path.split('/');
-        let currentLevel = state.files;
-        let parentLevel = null;
-        let index = -1;
-        let itemName = pathParts[pathParts.length - 1];
-
-        // Navigate to the parent of the item to delete
-        for (let i = 0; i < pathParts.length - 1; i++) {
-            const part = pathParts[i];
-            const folder = currentLevel.find(item => 
-                item.name === part && item.type === 'folder');
-            
-            if (!folder) {
-                throw new Error(`Path not found: ${pathParts.slice(0, i + 1).join('/')}`);
-            }
-            
-            parentLevel = currentLevel;
-            currentLevel = folder.children;
-        }
-
-        // Find the item in the final level
-        index = currentLevel.findIndex(item => item.name === itemName);
-        
-        if (index === -1) {
-            throw new Error(`Item not found: ${itemName}`);
-        }
-
-        // Special handling if it's a non-empty folder
-        const item = currentLevel[index];
-        if (item.type === 'folder' && item.children && item.children.length > 0) {
-            if (!confirm(`Folder "${itemName}" is not empty. Delete all contents as well?`)) {
-                return;
-            }
-        }
-
-        currentLevel.splice(index, 1);
-        saveProjectFiles();
-        renderFileList();
-        updateStatus(`Deleted: ${path}`);
-    } catch (error) {
-        alert(`Error deleting: ${error.message}`);
-        console.error(error);
-    }
-}
->>>>>>> parent of 8f90ea7 (fixed something [ i think ])
 
   function saveProjectFiles() {
     localStorage.setItem('projectFiles', JSON.stringify(state.files));
@@ -761,7 +709,6 @@ function deleteFile(path) {
 
   // Update preview with sandboxed iframe and error handling
   function updatePreview() {
-<<<<<<< HEAD
     const currentTab = getCurrentTab();
     if (!currentTab) return;
 
@@ -791,7 +738,6 @@ function deleteFile(path) {
     };
 
     updateStatus(`Preview updated`);
-=======
     try {
       preview.innerHTML = '';
       const currentTab = getCurrentTab();
@@ -887,7 +833,6 @@ function deleteFile(path) {
     } catch (error) {
       showError(`Preview error: ${error.message}`);
     }
->>>>>>> parent of 8f90ea7 (fixed something [ i think ])
   }
 
   // File operations with enhanced language support
@@ -1762,15 +1707,13 @@ function deleteFile(path) {
 
     let debounceTimer;
     editor.onDidChangeModelContent(() => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(updatePreview, DEBOUNCE_DELAY);
-
       const currentTab = getCurrentTab();
       if (currentTab) {
         currentTab.content = editor.getValue();
         saveTabsToStorage();
       }
-      state.unsavedChanges = true;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updatePreview, DEBOUNCE_DELAY);
     });
 
     editor.onDidChangeCursorPosition((e) => {
