@@ -202,22 +202,19 @@ body, html {
 
 /* File Explorer Styles */
 .file-explorer {
-  width: var(--file-explorer-width);
+  width: 280px;
   background-color: var(--menu-bg-dark);
-  border-right: 1px solid var(--hover-dark);
+  border-right: 1px solid var(--outline-dark);
   display: none;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  transition: width 0.3s ease;
-}
-
-.file-explorer.open {
-  display: flex;
+  transition: transform 0.3s ease;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
 }
 
 .file-explorer-header {
-  padding: 10px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -226,52 +223,63 @@ body, html {
 }
 
 .file-explorer-title {
-  font-weight: bold;
-}
-
-.file-explorer-close {
-  cursor: pointer;
-  padding: 2px 5px;
-  border-radius: 3px;
-}
-
-.file-explorer-close:hover {
-  background-color: var(--hover-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent-color);
 }
 
 .file-explorer-toolbar {
-  padding: 8px 10px;
+  padding: 8px 12px;
   display: flex;
-  gap: 5px;
+  gap: 8px;
   border-bottom: 1px solid var(--outline-dark);
+  background: rgba(0,0,0,0.05);
 }
 
-.file-explorer-button {
-  padding: 4px 8px;
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 0.8em;
-}
-
-.file-explorer-button:hover {
-  opacity: 0.9;
-}
-
-.file-explorer-list {
+.file-explorer-search {
   flex: 1;
-  overflow-y: auto;
-  padding: 5px 0;
+  padding: 6px 12px;
+  background: var(--bg-dark);
+  border: 1px solid var(--outline-dark);
+  border-radius: 4px;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+}
+
+.file-explorer-search:focus {
+  outline: none;
+  border-color: var(--accent-color);
 }
 
 .file-item {
-  padding: 8px 15px;
+  padding: 8px 16px 8px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.file-item::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.file-item[data-type="folder"]::before {
+  background-image: url('icons/folder.svg');
+}
+
+.file-item[data-type="file"]::before {
+  background-image: url('icons/file.svg');
 }
 
 .file-item:hover {
@@ -288,34 +296,87 @@ body, html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+.file-item-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.file-item:hover .file-item-actions {
+  opacity: 1;
 }
 
 .file-item-delete {
-  padding: 2px 5px;
+  padding: 4px;
   border-radius: 3px;
-  display: none;
-}
-
-.file-item:hover .file-item-delete {
-  display: block;
+  display: flex;
+  align-items: center;
 }
 
 .file-item-delete:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.file-item-open {
-  padding: 2px 5px;
-  border-radius: 3px;
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--menu-bg-dark);
+  border-bottom: 1px solid var(--outline-dark);
+  gap: 4px;
+}
+
+.breadcrumb-item {
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.breadcrumb-item:hover {
+  background-color: var(--hover-dark);
+}
+
+.breadcrumb-separator {
+  color: var(--text-dark);
+  opacity: 0.5;
+}
+
+.context-menu {
+  position: fixed;
+  background: var(--menu-bg-dark);
+  border: 1px solid var(--outline-dark);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+  min-width: 160px;
   display: none;
 }
 
-.file-item:hover .file-item-open {
-  display: block;
+.context-menu-item {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.file-item-open:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.context-menu-item:hover {
+  background-color: var(--hover-dark);
+}
+
+.drag-over {
+  background-color: var(--accent-color);
+  opacity: 0.8;
+}
+
+.file-explorer.open {
+  display: flex;
 }
 
 /* Adjust layout when file explorer is open */
