@@ -666,6 +666,78 @@ function addFolder(parentPath = '') {
     }
 }
 
+function deleteFile(path) {
+    if (!confirm(`Are you sure you want to delete "${path}"?`)) {
+      return;
+    }
+  
+    try {
+      const pathParts = path.split('/');
+      const fileName = pathParts.pop();
+      let targetLocation = state.files;
+  
+      // Navigate to the parent folder
+      for (const part of pathParts) {
+        const folder = targetLocation.find(item => item.name === part && item.type === 'folder');
+        if (!folder) {
+          throw new Error(`Folder not found: ${part}`);
+        }
+        targetLocation = folder.children;
+      }
+  
+      // Find and remove the file or folder
+      const fileIndex = targetLocation.findIndex(item => item.name === fileName);
+      if (fileIndex === -1) {
+        throw new Error(`File not found: ${fileName}`);
+      }
+  
+      targetLocation.splice(fileIndex, 1);
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Deleted ${path}`);
+    } catch (error) {
+      alert(`Error deleting file: ${error.message}`);
+      console.error(error);
+    }
+  }
+
+  function saveProjectFiles() {
+    localStorage.setItem('projectFiles', JSON.stringify(state.files));
+  }
+
+  // Update preview with sandboxed iframe and error handling
+  function updatePreview() {
+    const currentTab = getCurrentTab();
+    if (!currentTab) return;
+
+    const previewFrame = document.getElementById('preview-frame');
+    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+
+    // Clear previous content
+    previewDoc.open();
+    previewDoc.write('<html><head><title>Preview</title></head><body>');
+    previewDoc.write('<h2>Preview</h2>');
+    previewDoc.write('<p>Loading...</p>');
+    previewDoc.write('</body></html>');
+    previewDoc.close();
+
+    // Create a blob URL for the current tab content
+    const blob = new Blob([currentTab.content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    // Set the iframe source to the blob URL
+    previewFrame.src = url;
+
+    // Revoke the object URL after the iframe has loaded
+    previewFrame.onload = () => {
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+    };
+
+    updateStatus(`Preview updated`);
+  }
+
   // File operations with enhanced language support
   async function saveFile() {
     try {
@@ -1231,6 +1303,7 @@ function addFolder(parentPath = '') {
         case 'add-file': addFile(); break;
         case 'add-folder': addFolder(); break;
         case 'delete-file': deleteFile(data.path); break;
+        case 'open-file': openFileFromExplorer(data.path); break;
         case 'number-lines':
         // theres this stupid bug where it will set it to off and then not toggle it back on
         const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
@@ -1339,6 +1412,70 @@ function addFolder(parentPath = '') {
     } catch (error) {
       showError(`Action failed: ${error.message}`);
     }
+  }
+
+  async function openFileFromExplorer(filePath) {
+    try {
+      const fileEntry = findFileEntry(filePath, state.files);
+
+      if (!fileEntry || fileEntry.type !== 'file') {
+        throw new Error(`File not found: ${filePath}`);
+      }
+
+      // Create a new tab for the opened file
+      const tabId = generateTabId();
+      const newTab = {
+        id: tabId,
+        name: fileEntry.name,
+        type: fileEntry.name.split('.').pop().toLowerCase(),
+        content: fileEntry.content || '',
+        handle: null,
+        active: true
+      };
+
+      // Deactivate current tab
+      const currentTab = getCurrentTab();
+      if (currentTab) {
+        currentTab.active = false;
+      }
+
+      state.tabs.push(newTab);
+      state.currentTabId = tabId;
+
+      editor.setValue(newTab.content);
+      renderTabs();
+      updateStatus(`Opened ${fileEntry.name}`);
+      addToRecentFiles(newTab);
+      await detectLanguage();
+      saveTabsToStorage();
+
+    } catch (error) {
+      showError(`Open failed: ${error.message}`);
+    }
+  }
+
+  function findFileEntry(path, files) {
+    const pathParts = path.split('/');
+    let currentLevel = files;
+    let fileEntry = null;
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      fileEntry = currentLevel.find(item => item.name === part);
+
+      if (!fileEntry) {
+        return null;
+      }
+
+      if (fileEntry.type === 'folder' && fileEntry.children) {
+        currentLevel = fileEntry.children;
+      } else if (i < pathParts.length - 1) {
+        // If it's a file but not the last part of the path, the path is invalid
+        return null;
+      }
+    }
+
+    return fileEntry;
   }
 
   // Set up menu event listeners
