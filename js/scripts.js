@@ -108,8 +108,7 @@ require(['vs/editor/editor.main'], function () {
 
   // Examples
   const examples = {
-    'basic': `
-<!DOCTYPE html>
+    'basic': `<!DOCTYPE html>
 <html>
 <head>
   <title>Basic Page</title>
@@ -120,8 +119,7 @@ require(['vs/editor/editor.main'], function () {
   </body>
 </html>`
     ,
-    'form': `
-<!DOCTYPE html>
+    'form': `<!DOCTYPE html>
 <html>
   <head>
     <title>Form Example</title>
@@ -167,8 +165,7 @@ require(['vs/editor/editor.main'], function () {
 </body>
 </html>`
     ,
-    'grid': `
-<!DOCTYPE html>
+    'grid': `<!DOCTYPE html>
 <html>
 <head>
   <title>CSS Grid</title>
@@ -200,10 +197,8 @@ require(['vs/editor/editor.main'], function () {
 </body>
 </html>`
     ,
-    'table': `
-<!DOCTYPE html>
+    'table': `<!DOCTYPE html>
 <html>
-
 <head>
   <title>Table Example</title>
   <style>
@@ -250,10 +245,8 @@ require(['vs/editor/editor.main'], function () {
 </body>
 </html>`
     ,
-    'responsive': `
-<!DOCTYPE html>
+    'responsive': `<!DOCTYPE html>
 <html>
-
 <head>
   <title>Responsive Example</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
