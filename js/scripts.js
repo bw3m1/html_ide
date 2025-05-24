@@ -447,6 +447,136 @@ ${tab.name}
     localStorage.setItem('editorTabs', JSON.stringify(sanitizedTabs));
   }
 
+  // Update preview with sandboxed iframe and error handling
+  function updatePreview() {
+    const currentTab = getCurrentTab();
+    if (!currentTab) return;
+
+    const previewFrame = document.getElementById('preview-frame');
+    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+
+    // Clear previous content
+    previewDoc.open();
+    previewDoc.write('<html><head><title>Preview</title></head><body>');
+    previewDoc.write('<h2>Preview</h2>');
+    previewDoc.write('<p>Loading...</p>');
+    previewDoc.write('</body></html>');
+    previewDoc.close();
+
+    // Create a blob URL for the current tab content
+    const blob = new Blob([currentTab.content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    // Set the iframe source to the blob URL
+    previewFrame.src = url;
+
+    // Revoke the object URL after the iframe has loaded
+    previewFrame.onload = () => {
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+    };
+
+    updateStatus(`Preview updated`);
+    try {
+      preview.innerHTML = '';
+      const currentTab = getCurrentTab();
+      const isJsFile = currentTab.name.endsWith('.js');
+
+      if (isJsFile) {
+        // Create a container for JS output
+        const jsOutputContainer = document.createElement('div');
+        jsOutputContainer.id = 'js-output';
+        jsOutputContainer.style.padding = '1rem';
+        jsOutputContainer.style.fontFamily = 'monospace';
+        jsOutputContainer.style.whiteSpace = 'pre';
+        jsOutputContainer.style.overflow = 'auto';
+        jsOutputContainer.style.height = '100%';
+
+        // Create a console div
+        const consoleDiv = document.createElement('div');
+        consoleDiv.id = 'js-console';
+        consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
+        consoleDiv.style.padding = '0.5rem';
+        consoleDiv.style.marginTop = '1rem';
+        consoleDiv.style.borderRadius = '4px';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+
+        preview.appendChild(jsOutputContainer);
+        preview.appendChild(consoleDiv);
+
+
+        // Override console.log to capture output
+        const originalConsoleLog = console.log;
+        const logs = [];
+
+        console.log = function (...args) {
+          logs.push(args.join(' '));
+          consoleDiv.textContent = logs.join('\n');
+          consoleDiv.scrollTop = consoleDiv.scrollHeight;
+          originalConsoleLog.apply(console, args);
+        };
+
+        try {
+          // Execute the JS code
+          const result = new Function(editor.getValue())();
+
+          if (result !== undefined) {
+            jsOutputContainer.textContent = String(result);
+          } else {
+            jsOutputContainer.textContent = 'Code executed (no return value)';
+          }
+        } catch (error) {
+          jsOutputContainer.textContent = `Error: ${error.message}`;
+          jsOutputContainer.style.color = 'var(--error-red)';
+        }
+
+        // Restore original console.log
+        console.log = originalConsoleLog;
+
+        updateStatus("JavaScript executed");
+      } else {
+        // Original HTML preview code
+        const iframe = document.createElement('iframe');
+        iframe.id = 'preview-frame';
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+
+        const content = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <script>
+            window.onerror = function(e) {
+              parent.postMessage({ 
+                type: 'preview-error', 
+                error: e.toString() 
+              }, '*');
+            };
+          <\/script>
+          <style>
+            body { margin: 0; padding: 1rem; }
+            .error { color: red; }
+          </style>
+        </head>
+        <body>${editor.getValue()}</body>
+        </html>`;
+
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(content);
+        iframe.contentDocument.close();
+
+        updateStatus("Preview updated");
+      }
+    } catch (error) {
+      showError(`Preview error: ${error.message}`);
+    }
+  }
+
   // File Explorer Functions
   function toggleFileExplorer() {
     state.fileExplorerOpen = !state.fileExplorerOpen;
@@ -1496,112 +1626,43 @@ ${tab.name}
     }
   }
 
-  // Fixed deleteFile implementation
-  async function deleteFile(path) {
-    if (!path) {
-      const selectedItem = document.querySelector('.context-menu').dataset.path;
-      if (!selectedItem) return;
-      path = selectedItem;
-    }
+  function findFileEntry(path, files) {
+    const pathParts = path.split('/');
+    let currentLevel = files;
+    let fileEntry = null;
 
-    if (!confirm(`Are you sure you want to delete "${path}"?`)) return;
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      fileEntry = currentLevel.find(item => item.name === part);
 
-    try {
-      const pathParts = path.split('/');
-      const fileName = pathParts.pop();
-      let currentLevel = state.files;
-
-      for (const part of pathParts) {
-        const folder = currentLevel.find(item => 
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        currentLevel = folder.children;
+      if (!fileEntry) {
+        return null;
       }
 
-      const index = currentLevel.findIndex(item => item.name === fileName);
-      if (index === -1) throw new Error('File not found');
-      
-      currentLevel.splice(index, 1);
-      saveProjectFiles();
-      renderFileList();
-      updateStatus(`Deleted ${path}`);
-    } catch (error) {
-      showError(`Delete failed: ${error.message}`);
+      if (fileEntry.type === 'folder' && fileEntry.children) {
+        currentLevel = fileEntry.children;
+      } else if (i < pathParts.length - 1) {
+        // If it's a file but not the last part of the path, the path is invalid
+        return null;
+      }
     }
+
+    return fileEntry;
   }
 
-  // Fixed addFile implementation
-  function addFile() {
-    const currentPath = state.fileExplorerPath || '';
-    const fileName = prompt('Enter file name with extension:');
-    if (!fileName) return;
-
-    try {
-      let targetLocation = state.files;
-      const pathParts = currentPath.split('/').filter(p => p);
-
-      for (const part of pathParts) {
-        const folder = targetLocation.find(item => 
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        targetLocation = folder.children;
-      }
-
-      if (targetLocation.some(item => item.name === fileName)) {
-        throw new Error(`"${fileName}" already exists`);
-      }
-
-      const newFile = {
-        name: fileName,
-        type: 'file',
-        content: getDefaultContent(fileName)
-      };
-
-      targetLocation.push(newFile);
-      saveProjectFiles();
-      renderFileList();
-      updateStatus(`Added ${currentPath}/${fileName}`);
-    } catch (error) {
-      showError(error.message);
-    }
-  }
-
-  // Fixed addFolder implementation
-  function addFolder() {
-    const currentPath = state.fileExplorerPath || '';
-    const folderName = prompt('Enter folder name:');
-    if (!folderName) return;
-
-    try {
-      let targetLocation = state.files;
-      const pathParts = currentPath.split('/').filter(p => p);
-
-      for (const part of pathParts) {
-        const folder = targetLocation.find(item => 
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        targetLocation = folder.children;
-      }
-
-      if (targetLocation.some(item => item.name === folderName)) {
-        throw new Error(`"${folderName}" already exists`);
-      }
-
-      targetLocation.push({
-        name: folderName,
-        type: 'folder',
-        children: [],
-        expanded: true
-      });
-
-      saveProjectFiles();
-      renderFileList();
-      updateStatus(`Added folder ${currentPath}/${folderName}`);
-    } catch (error) {
-      showError(error.message);
+  function getDefaultContent(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    switch (ext) {
+      case 'html':
+        return INIT_CONTENTS;
+      case 'css':
+        return '/* New CSS file */\n';
+      case 'js':
+        return '// New JavaScript file\n';
+      case 'json':
+        return '{\n  \n}';
+      default:
+        return '';
     }
   }
 
