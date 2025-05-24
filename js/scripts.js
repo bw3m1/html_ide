@@ -447,37 +447,7 @@ ${tab.name}
     localStorage.setItem('editorTabs', JSON.stringify(sanitizedTabs));
   }
 
-  // Update preview with sandboxed iframe and error handling
   function updatePreview() {
-    const currentTab = getCurrentTab();
-    if (!currentTab) return;
-
-    const previewFrame = document.getElementById('preview-frame');
-    const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-
-    // Clear previous content
-    previewDoc.open();
-    previewDoc.write('<html><head><title>Preview</title></head><body>');
-    previewDoc.write('<h2>Preview</h2>');
-    previewDoc.write('<p>Loading...</p>');
-    previewDoc.write('</body></html>');
-    previewDoc.close();
-
-    // Create a blob URL for the current tab content
-    const blob = new Blob([currentTab.content], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-
-    // Set the iframe source to the blob URL
-    previewFrame.src = url;
-
-    // Revoke the object URL after the iframe has loaded
-    previewFrame.onload = () => {
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 100);
-    };
-
-    updateStatus(`Preview updated`);
     try {
       preview.innerHTML = '';
       const currentTab = getCurrentTab();
@@ -504,7 +474,6 @@ ${tab.name}
         consoleDiv.style.whiteSpace = 'pre-wrap';
 
         preview.appendChild(jsOutputContainer);
-        preview.appendChild(consoleDiv);
 
 
         // Override console.log to capture output
@@ -539,7 +508,6 @@ ${tab.name}
       } else {
         // Original HTML preview code
         const iframe = document.createElement('iframe');
-        iframe.id = 'preview-frame';
         iframe.sandbox = 'allow-same-origin';
         iframe.style.width = '100%';
         iframe.style.height = '100%';
@@ -547,24 +515,24 @@ ${tab.name}
         preview.appendChild(iframe);
 
         const content = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <script>
-            window.onerror = function(e) {
-              parent.postMessage({ 
-                type: 'preview-error', 
-                error: e.toString() 
-              }, '*');
-            };
-          <\/script>
-          <style>
-            body { margin: 0; padding: 1rem; }
-            .error { color: red; }
-          </style>
-        </head>
-        <body>${editor.getValue()}</body>
-        </html>`;
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script>
+          window.onerror = function(e) {
+            parent.postMessage({ 
+              type: 'preview-error', 
+              error: e.toString() 
+            }, '*');
+          };
+        <\/script>
+        <style>
+          body { margin: 0; padding: 1rem; }
+          .error { color: red; }
+        </style>
+      </head>
+      <body>${editor.getValue()}</body>
+      </html>`;
 
         iframe.contentDocument.open();
         iframe.contentDocument.write(content);
