@@ -6,3 +6,15 @@ const examples = {
     'responsive': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Responsive Example</title>\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <style>\n    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n    .header { background: #007acc; color: white; padding: 20px; text-align: center; }\n    .main { display: flex; flex-wrap: wrap; }\n    .sidebar { flex: 1; min-width: 200px; background: #f0f0f0; padding: 20px; }\n    .content { flex: 3; min-width: 300px; padding: 20px; }\n    @media (max-width: 600px) {\n      .main { flex-direction: column; }\n    }\n  </style>\n</head>\n<body>\n  <div class="container">\n    <div class="header">\n      <h1>Responsive Layout</h1>\n    </div>\n    <div class="main">\n      <div class="sidebar">\n        <h3>Sidebar</h3>\n        <p>Content here</p>\n      </div>\n      <div class="content">\n        <h2>Main Content</h2>\n        <p>Resize the browser to see the responsive effect.</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>`,
     'json-example': `{\n  "name": "My Project",\n  "version": "1.0.0",\n  "description": "A sample JSON file",\n  "dependencies": {\n    "monaco-editor": "^0.40.0",\n    "jszip": "^3.10.1"\n  },\n  "scripts": {\n    "start": "node server.js",\n    "build": "webpack"\n  }\n}`
   };
+
+export function loadExample(exampleName) {
+  if (examples[exampleName]) {
+    return examples[exampleName];
+  } else {
+    throw new Error(`Example "${exampleName}" not found.`);
+  }
+}
+
+export {
+  loadExample
+}

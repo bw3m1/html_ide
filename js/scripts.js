@@ -1,3 +1,4 @@
+
 // Constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const DEFAULT_FONT_SIZE = 16;
@@ -23,7 +24,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
       // JS goes here
       
     </script>
-  </body>
+  </body>s
 </html>`;
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
