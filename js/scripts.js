@@ -15,9 +15,9 @@ const INIT_CONTENTS = `<!DOCTYPE html>
     </style>
   </head>
   <body>
-      
+    
     <!-- body -->
-      
+    
     <script>
       
       // JS goes here
