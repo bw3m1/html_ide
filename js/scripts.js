@@ -1,4 +1,3 @@
-
 // Constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const DEFAULT_FONT_SIZE = 16;
@@ -113,7 +112,7 @@ require(['vs/editor/editor.main'], function () {
     'form': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Form Example</title>\n  <style>\n    form {\n      max-width: 500px;\n      margin: 20px auto;\n      padding: 20px;\n      border: 1px solid #ddd;\n      border-radius: 5px;\n    }\n    label { display: block; margin-bottom: 5px; }\n    input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }\n    button { background: #007acc; color: white; border: none; padding: 10px 15px; }\n  </style>\n</head>\n<body>\n  <form>\n    <label>Name:</label>\n    <input type="text">\n    <label>Email:</label>\n    <input type="email">\n    <label>Message:</label>\n    <textarea rows="4"></textarea>\n    <button type="submit">Submit</button>\n  </form>\n</body>\n</html>`,
     'grid': `<!DOCTYPE html>\n<html>\n<head>\n  <title>CSS Grid</title>\n  <style>\n    .grid-container {\n      display: grid;\n      grid-template-columns: repeat(3, 1fr);\n      gap: 10px;\n    }\n    .grid-item {\n      background: #007acc;\n      color: white;\n      padding: 20px;\n      text-align: center;\n    }\n  </style>\n</head>\n<body>\n  <div class="grid-container">\n    <div class="grid-item">1</div>\n    <div class="grid-item">2</div>\n    <div class="grid-item">3</div>\n    <div class="grid-item">4</div>\n    <div class="grid-item">5</div>\n    <div class="grid-item">6</div>\n  </div>\n</body>\n</html>`,
     'table': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Table Example</title>\n  <style>\n    table { border-collapse: collapse; width: 100%; }\n    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n    th { background-color: #007acc; color: white; }\n    tr:nth-child(even) { background-color: #f2f2f2; }\n  </style>\n</head>\n<body>\n  <table>\n    <tr>\n      <th>Name</th>\n      <th>Email</th>\n      <th>Role</th>\n    </tr>\n    <tr>\n      <td>Blue</td>\n      <td>Blue@amongus.sussy</td>\n      <td>Crew mate</td>\n    </tr>\n    <tr>\n      <td>Red</td>\n      <td>Red@amongus.sussy</td>\n      <td>Imposter</td>\n    </tr>\n  </table>\n</body>\n</html>`,
-    'responsive': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Responsive Example</title>\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <style>\n    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n    .header { background: #007acc; color: white; padding: 20px; text-align: center; }\n    .main { display: flex; flex-wrap: wrap; }\n    .sidebar { flex: 1; min-width: 200px; background: #f0f0f0; padding: 20px; }\n    .content { flex: 3; min-width: 300px; padding: 20px; }\n    @media (max-width: 600px) {\n      .main { flex-direction: column; }\n    }\n  </style>\n</head>\n<body>\n  <div class="container">\n    <div class="header">\n      <h1>Responsive Layout</h1>\n    </div>\n    <div class="main">\n      <div class="sidebar">\n        <h3>Sidebar</h3>\n        <p>Content here</p>\n      </div>\n      <div class="content">\n        <h2>Main Content</h2>\n        <p>Resize the browser to see the responsive effect.</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>`,
+    'responsive': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Responsive Example</title>\n  <meta name="viewport" contdth=device-width, initial-scale=1.0">\n  <style>\n    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n    .header { background: #007acc; color: white; padding: 20px; text-align: center; }\n    .main { display: flex; flex-wrap: wrap; }\n    .sidebar { flex: 1; min-width: 200px; background: #f0f0f0; padding: 20px; }\n    .content { flex: 3; min-width: 300px; padding: 20px; }\n    @media (max-width: 600px) {\n      .main { flex-direction: column; }\n    }\n  </style>\n</head>\n<body>\n  <div class="container">\n    <div class="header">\n      <h1>Responsive Layout</h1>\n    </div>\n    <div class="main">\n      <div class="sidebar">\n        <h3>Sidebar</h3>\n        <p>Content here</p>\n      </div>\n      <div class="content">\n        <h2>Main Content</h2>\n        <p>Resize the browser to see the responsive effect.</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>`,
   };
 
   const examples_json = {
@@ -561,7 +560,7 @@ ${tab.name}
         // Determine theme (light or dark)
         const isLightTheme = document.body.classList.contains('light-theme');
         const openFolderIcon = isLightTheme ? 'icons/open_folder_icon_lite.svg' : 'icons/open_folder_icon_dark.svg';
-        const closedFolderIcon = isLightTheme ? 'icons/closed_folder_icon_lite.svg' : 'icons/closed_folder_icon_dark.svg';
+        const closedFolderIcon = isLightTheme ? 'icons/closed_folder_icon_lite' : 'icons/closed_folder_icon_dark.svg';
 
         const iconSrc = item.type === 'folder' 
           ? item.expanded ? openFolderIcon : closedFolderIcon
@@ -1592,70 +1591,6 @@ ${tab.name}
         });
       }
     });
-  });
-
-  // Set up resizer
-  const resizer = document.getElementById('resizer');
-  let isResizing = false;
-
-  resizer.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    document.body.style.cursor = 'col-resize';
-    document.addEventListener('mousemove', resize);
-    document.addEventListener('mouseup', stopResize);
-  });
-
-  function resize(e) {
-    if (!isResizing) return;
-    const containerWidth = document.getElementById('mainContainer').offsetWidth;
-    const editorWidth = (e.clientX / containerWidth) * 100;
-    document.querySelector('.editor-wrapper').style.flex = `0 0 ${editorWidth}%`;
-    document.querySelector('.preview-pane').style.flex = `0 0 ${100 - editorWidth}%`;
-  }
-
-  function stopResize() {
-    isResizing = false;
-    document.body.style.cursor = '';
-    document.removeEventListener('mousemove', resize);
-    document.removeEventListener('mouseup', stopResize);
-  }
-
-  // File input handler
-  document.getElementById('fileInput').addEventListener('change', async function (e) {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > MAX_FILE_SIZE) {
-        showError(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
-        return;
-      }
-
-      // Create a new tab for the opened file
-      const tabId = generateTabId();
-      const newTab = {
-        id: tabId,
-        name: file.name,
-        type: file.name.split('.').pop().toLowerCase(),
-        content: await file.text(),
-        handle: null,
-        active: true
-      };
-
-      // Deactivate current tab
-      const currentTab = getCurrentTab();
-      if (currentTab) {
-        currentTab.active = false;
-      }
-
-      state.tabs.push(newTab);
-      state.currentTabId = tabId;
-
-      editor.setValue(newTab.content);
-      renderTabs();
-      updateStatus(`Opened ${file.name}`);
-      addToRecentFiles(newTab);
-      await detectLanguage();
-      saveTabsToStorage();
-    }
   });
 
   // Initialize
