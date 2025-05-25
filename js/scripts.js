@@ -108,223 +108,63 @@ require(['vs/editor/editor.main'], function () {
   let updateTimeout;
 
   // Examples
-  const examples = {
-    'basic': `<!DOCTYPE html>
-<html>
-<head>
-  <title>Basic Page</title>
-</head>
-  <body>
-    <h1>Hello World</h1>
-    <p>This is a basic HTML page.</p>
-  </body>
-</html>`
-    ,
-    'form': `<!DOCTYPE html>
-<html>
-  <head>
-    <title>Form Example</title>
-    <style>
-      form {
-        max-width: 500px;
-        margin: 20px auto;
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 5px;
-      }
-
-      input, textarea {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-      }
-
-      button {
-        background: #007acc;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-      }
-
-    </style>
-  </head>
-<body>
-  <form>
-    <label>Name:</label>
-    <input type="text">
-    <label>Email:</label>
-    <input type="email">
-    <label>Message:</label>
-    <textarea rows="4"></textarea>
-    <button type="submit">Submit</button>
-  </form>
-</body>
-</html>`
-    ,
-    'grid': `<!DOCTYPE html>
-<html>
-<head>
-  <title>CSS Grid</title>
-  <style>
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .grid-item {
-      background: #007acc;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-  </style>
-</head>
-<body>
-  <div class="grid-container">
-    <div class="grid-item">1</div>
-    <div class="grid-item">2</div>
-    <div class="grid-item">3</div>
-    <div class="grid-item">4</div>
-    <div class="grid-item">5</div>
-    <div class="grid-item">6</div>
-  </div>
-</body>
-</html>`
-    ,
-    'table': `<!DOCTYPE html>
-<html>
-<head>
-  <title>Table Example</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #007acc;
-      color: white;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-
-  </style>
-</head>
-<body>
-  <table>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Role</th>
-    </tr>
-    <tr>
-      <td>Blue</td>
-      <td>Blue@amongus.sussy</td>
-      <td>Crew mate</td>
-    </tr>
-    <tr>
-      <td>Red</td>
-      <td>Red@amongus.sussy</td>
-      <td>Imposter</td>
-    </tr>
-  </table>
-</body>
-</html>`
-    ,
-    'responsive': `<!DOCTYPE html>
-<html>
-<head>
-  <title>Responsive Example</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .header {
-      background: #007acc;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .main {
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    .sidebar {
-      flex: 1;
-      min-width: 200px;
-      background: #f0f0f0;
-      padding: 20px;
-    }
-
-    .content {
-      flex: 3;
-      min-width: 300px;
-      padding: 20px;
-    }
-
-    @media (max-width: 600px) {
-      .main {
-        flex-direction: column;
-      }
-
-    }
-
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Responsive Layout</h1>
-    </div>
-    <div class="main">
-      <div class="sidebar">
-        <h3>Sidebar</h3>
-        <p>Content here</p>
-      </div>
-      <div class="content">
-        <h2>Main Content</h2>
-        <p>Resize the browser to see the responsive effect.</p>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`
-    ,
-    'json-example': `{
-  "name": "My Project",
-  "version": "1.0.0",
-  "description": "A sample JSON file",
-  "dependencies": {
-    "monaco-editor": "^0.40.0",
-    "jszip": "^3.10.1"
-  },
-  "scripts": {
-    "start": "node server.js",
-    "build": "webpack"
-  }
-}`
+  const examples_html = {
+    'basic': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Basic Page</title>\n</head>\n<body>\n  <h1>Hello World</h1>\n  <p>This is a basic HTML page.</p>\n</body>\n</html>`,
+    'form': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Form Example</title>\n  <style>\n    form {\n      max-width: 500px;\n      margin: 20px auto;\n      padding: 20px;\n      border: 1px solid #ddd;\n      border-radius: 5px;\n    }\n    label { display: block; margin-bottom: 5px; }\n    input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }\n    button { background: #007acc; color: white; border: none; padding: 10px 15px; }\n  </style>\n</head>\n<body>\n  <form>\n    <label>Name:</label>\n    <input type="text">\n    <label>Email:</label>\n    <input type="email">\n    <label>Message:</label>\n    <textarea rows="4"></textarea>\n    <button type="submit">Submit</button>\n  </form>\n</body>\n</html>`,
+    'grid': `<!DOCTYPE html>\n<html>\n<head>\n  <title>CSS Grid</title>\n  <style>\n    .grid-container {\n      display: grid;\n      grid-template-columns: repeat(3, 1fr);\n      gap: 10px;\n    }\n    .grid-item {\n      background: #007acc;\n      color: white;\n      padding: 20px;\n      text-align: center;\n    }\n  </style>\n</head>\n<body>\n  <div class="grid-container">\n    <div class="grid-item">1</div>\n    <div class="grid-item">2</div>\n    <div class="grid-item">3</div>\n    <div class="grid-item">4</div>\n    <div class="grid-item">5</div>\n    <div class="grid-item">6</div>\n  </div>\n</body>\n</html>`,
+    'table': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Table Example</title>\n  <style>\n    table { border-collapse: collapse; width: 100%; }\n    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n    th { background-color: #007acc; color: white; }\n    tr:nth-child(even) { background-color: #f2f2f2; }\n  </style>\n</head>\n<body>\n  <table>\n    <tr>\n      <th>Name</th>\n      <th>Email</th>\n      <th>Role</th>\n    </tr>\n    <tr>\n      <td>Blue</td>\n      <td>Blue@amongus.sussy</td>\n      <td>Crew mate</td>\n    </tr>\n    <tr>\n      <td>Red</td>\n      <td>Red@amongus.sussy</td>\n      <td>Imposter</td>\n    </tr>\n  </table>\n</body>\n</html>`,
+    'responsive': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Responsive Example</title>\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <style>\n    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n    .header { background: #007acc; color: white; padding: 20px; text-align: center; }\n    .main { display: flex; flex-wrap: wrap; }\n    .sidebar { flex: 1; min-width: 200px; background: #f0f0f0; padding: 20px; }\n    .content { flex: 3; min-width: 300px; padding: 20px; }\n    @media (max-width: 600px) {\n      .main { flex-direction: column; }\n    }\n  </style>\n</head>\n<body>\n  <div class="container">\n    <div class="header">\n      <h1>Responsive Layout</h1>\n    </div>\n    <div class="main">\n      <div class="sidebar">\n        <h3>Sidebar</h3>\n        <p>Content here</p>\n      </div>\n      <div class="content">\n        <h2>Main Content</h2>\n        <p>Resize the browser to see the responsive effect.</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>`,
   };
+
+  const examples_json = {
+    'json': `{\n  "name": "My Project",\n  "version": "1.0.0",\n  "description": "A sample JSON file",\n  "dependencies": {\n    "monaco-editor": "^0.40.0",\n    "jszip": "^3.10.1"\n  },\n  "scripts": {\n    "start": "node server.js",\n    "build": "webpack"\n  }\n}`,
+    'manifest': `{\n  "name": "My Project",\n  "version": "1.0.0",\n  "description": "A sample project manifest",\n  "main": "index.js",\n  "scripts": {\n    "test": "echo \\"Error: no test specified\\" && exit 1"\n  },\n  "author": "",\n  "license": "ISC"\n}`,
+    'package-lock': `{\n  "name": "my-project",\n  "version": "1.0.0",\n  "lockfileVersion": 1,\n  "dependencies": {\n    "monaco-editor": {\n      "version": "0.40.0",\n      "resolved": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.40.0.tgz",\n      "integrity": "sha512-..."\n    },\n    "jszip": {\n      "version": "3.10.1",\n      "resolved": "https://registry.npmjs.org/jszip/-/jszip-3.10.1.tgz",\n      "integrity": "sha512-..."\n    }\n  }\n}`
+  };
+
+  const examples_js = {
+    'basic': `console.log('Hello, World!');\n\nfunction greet(name) {\n  return 'Hello, ' + name + '!';\n}\n\ngreet('User');`,
+    'math': `function add(a, b) {\n  return a + b;\n}\n\nfunction subtract(a, b) {\n  return a - b;\n}\n\nconsole.log('Add:', add(5, 3));\nconsole.log('Subtract:', subtract(5, 3));`,
+    'array': `const numbers = [1, 2, 3, 4, 5];\n\nconst doubled = numbers.map(num => num * 2);\n\nconsole.log('Original:', numbers);\nconsole.log('Doubled:', doubled);`,
+    'object': `const person = {\n  name: 'John Doe',\n  age: 30,\n  greet() {\n    return 'Hello, ' + this.name;\n  }\n};\n\nconsole.log(person.greet());`,
+    'async': `async function fetchData(url) {\n  try {\n    const response = await fetch(url);\n    if (!response.ok) throw new Error('Network response was not ok');\n    const data = await response.json();\n    console.log(data);\n  } catch (error) {\n    console.error('Fetch error:', error);\n  }\n}\n\nfetchData('https://api.example.com/data');`
+  };
+
+  const examples_css = {
+    'basic': `body {\n  font-family: Arial, sans-serif;\n  background-color:rgb(32, 29, 29);\n  color: #333;\n}\n\nh1 {\n  color: #007acc;\n}\n\np {\n  line-height: 1.6;\n}\n\nbutton {\n  background-color: #007acc;\n  color: white;\n  border: none;\n  padding: 10px 15px;\n  cursor: pointer;\n}\n\nbutton:hover {\n  background-color: #005f99;\n}`,
+    'grid': `.grid-container {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 10px;\n}\n\n.grid-item {\n  background-color: #007acc;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}`,
+    'responsive': `.container {\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 20px;\n}\n\n.header {\n  background-color: #007acc;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n\n.main {\n  display: flex;\n  flex-wrap: wrap;\n}\n\n.sidebar {\n  flex: 1;\n  min-width: 200px;\n  background-color: #f0f0f0;\n  padding: 20px;\n}\n\n.content {\n  flex: 3;\n  min-width: 300px;\n  padding: 20px;\n}\n\n@media (max-width: 600px) {\n  .main {\n    flex-direction: column;\n  }\n}`,
+    'flexbox': `.flex-container {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n.flex-item {\n  background-color: #007acc;\n  color: white;\n  padding: 20px;\n  margin: 10px;\n}\n\n@media (max-width: 600px) {\n  .flex-container {\n    flex-direction: column;\n  }\n}`,
+    'animations': `@keyframes fadeIn {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n.fade-in {\n  animation: fadeIn 0.5s ease-in;\n}`
+  };
+
+  function loadExample(exampleName, language = 'html') {
+    if (language == 'html') {
+      if (examples_html[exampleName]) {
+        return examples_html[exampleName];
+      } else {
+        throw new Error(`Example "${exampleName}" not found.`);
+      }
+    } else if (language == 'css') {
+      if (examples_css[exampleName]) {
+        return examples_css[exampleName];
+      } else {
+        throw new Error(`Example "${exampleName}" not found.`);
+      }
+    } else if (language == 'js') {
+      if (examples_js[exampleName]) {
+        return examples_js[exampleName];
+      } else {
+        throw new Error(`Example "${exampleName}" not found.`);
+      }
+    } else if (language == 'json') {
+      if (examples_json[exampleName]) {
+        return examples_json[exampleName];
+      } else {
+        throw new Error(`Example "${exampleName}" not found.`);
+      }
+    }
+  }
 
   // Tab management functions
   function generateTabId() {
@@ -1539,12 +1379,24 @@ ${tab.name}
         case 'zoom-in': adjustFontSize(2); break;
         case 'zoom-out': adjustFontSize(-2); break;
         case 'reset-zoom': resetFontSize(); break;
-        case 'example-basic': editor.setValue(examples.basic); break;
-        case 'example-form': editor.setValue(examples.form); break;
-        case 'example-grid': editor.setValue(examples.grid); break;
-        case 'example-table': editor.setValue(examples.table); break;
-        case 'example-responsive': editor.setValue(examples.responsive); break;
-        case 'example-json': editor.setValue(examples['json-example']); break;
+        case 'example-html-basic': editor.setValue(loadExample('basic', 'html')); break;
+        case 'example-html-form': editor.setValue(loadExample('form', 'html')); break;
+        case 'example-html-grid': editor.setValue(loadExample('grid', 'html')); break;
+        case 'example-html-table': editor.setValue(loadExample('table', 'html')); break;
+        case 'example-html-responsive': editor.setValue(loadExample('responsive', 'html')); break;
+        case 'example-json-json': editor.setValue(loadExample('json', 'json')); break;
+        case 'example-json-manifest': editor.setValue(loadExample('manifest', 'json')); break;
+        case 'example-json-package-lock': editor.setValue(loadExample('package-lock', 'json')); break;
+        case 'example-js-basic': editor.setValue(loadExample('basic', 'js')); break;
+        case 'example-js-math': editor.setValue(loadExample('math', 'js')); break;
+        case 'example-js-array': editor.setValue(loadExample('array', 'js')); break;
+        case 'example-js-object': editor.setValue(loadExample('object', 'js')); break;
+        case 'example-js-async': editor.setValue(loadExample('async', 'js')); break;
+        case 'example-css-basic': editor.setValue(loadExample('basic', 'css')); break;
+        case 'example-css-grid': editor.setValue(loadExample('grid', 'css')); break;
+        case 'example-css-flexbox': editor.setValue(loadExample('flexbox', 'css')); break;
+        case 'example-css-responsive': editor.setValue(loadExample('responsive', 'css')); break;
+        case 'example-css-animations': editor.setValue(loadExample('animations', 'css')); break;
         case 'theme-contrast-dark': setTheme('contrast-dark'); break;
         case 'theme-contrast-light': setTheme('contrast-light'); break;
         case 'documentation':
