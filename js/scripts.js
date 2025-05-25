@@ -1588,6 +1588,7 @@ ${tab.name}
         case 'file-2-css': setFileType('css'); detectLanguage(); break;
         case 'file-2-js': setFileType('js'); detectLanguage(); break;
         case 'file-2-txt': setFileType('txt'); detectLanguage(); break;
+        case 'file-2-json': setFileType('json'); detectLanguage(); break;
         case 'file-2-md': setFileType('md'); detectLanguage(); break;
         case 'file-2-c': setFileType('c'); detectLanguage(); break;
         case 'file-2-cpp': setFileType('cpp'); detectLanguage(); break;
