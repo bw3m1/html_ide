@@ -491,3 +491,56 @@ body, html {
   color: var(--text-dark);
   border-color: var(--outline-dark);
 }
+
+/* Editor empty state background - VS Code style */
+.editor-wrapper.empty {
+  background: linear-gradient(135deg, var(--menu-bg-dark) 60%, var(--bg-dark) 100%);
+  position: relative;
+}
+
+.editor-wrapper.empty #editor {
+  background: transparent !important;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Centered VS Code-like logo and message */
+.editor-wrapper.empty::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 96px;
+  height: 96px;
+  background: url('icons/vscode_logo.svg') center/contain no-repeat;
+  opacity: 0.13;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.editor-wrapper.empty::before {
+  content: "No tabs open";
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 100%;
+  text-align: center;
+  font-size: 1.3em;
+  color: var(--text-dark);
+  opacity: 0.7;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .editor-wrapper.empty::after {
+    width: 64px;
+    height: 64px;
+  }
+  .editor-wrapper.empty::before {
+    font-size: 1em;
+  }
+}

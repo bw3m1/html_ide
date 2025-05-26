@@ -322,11 +322,33 @@ require(['vs/editor/editor.main'], function () {
 
   // Tab management functions
   function generateTabId() {
-    return 'tab' + Date.now() + Math.floor(Math.random() * 1000);
+    return `tab_${Date.now()}_${Math.floor(Math.random() * 1e9)}`;
   }
 
   function getCurrentTab() {
-    return state.tabs.find(tab => tab.id === state.currentTabId);
+    // Always return a valid tab if possible
+    if (state.tabs.length === 0) {
+      // Add a default tab if none exist
+      const tabId = generateTabId();
+      const newTab = {
+        id: tabId,
+        name: 'untitled.html',
+        type: 'html',
+        content: INIT_CONTENTS,
+        handle: null,
+        active: true
+      };
+      state.tabs.push(newTab);
+      state.currentTabId = tabId;
+      // Defensive: update Monaco editor if available
+      if (window.monacoEditorInstance) {
+        window.monacoEditorInstance.setValue(newTab.content);
+      }
+      renderTabs();
+      saveTabsToStorage();
+      return newTab;
+    }
+    return state.tabs.find(tab => tab.id === state.currentTabId) || state.tabs[0];
   }
 
   function getTabById(tabId) {
@@ -354,6 +376,16 @@ ${tab.name}
 
       tabsContainer.appendChild(tabElement);
     });
+
+    // Add/remove empty state class on editor-wrapper
+    const editorWrapper = document.querySelector('.editor-wrapper');
+    if (state.tabs.length === 0) {
+      editorWrapper.classList.add('empty');
+      // Always ensure at least one tab exists
+      getCurrentTab();
+    } else {
+      editorWrapper.classList.remove('empty');
+    }
   }
 
   function switchToTab(tabId) {
@@ -421,6 +453,10 @@ ${tab.name}
     editor.setValue(newTab.content);
     updateStatus(`Created new tab: ${newTab.name}`);
     saveTabsToStorage();
+
+    // Remove empty state
+    const editorWrapper = document.querySelector('.editor-wrapper');
+    editorWrapper.classList.remove('empty');
   }
 
   function closeTab(tabId = null) {
@@ -468,8 +504,10 @@ ${tab.name}
         const newIndex = Math.min(tabIndex, state.tabs.length - 1);
         switchToTab(state.tabs[newIndex].id);
       } else {
-        // Create new default tab if none remain
-        addNewTab();
+        // Always add a new default tab if none remain
+        const newTab = getCurrentTab();
+        editor.setValue(newTab.content);
+        renderTabs();
       }
     }
 
@@ -478,6 +516,16 @@ ${tab.name}
     saveTabsToStorage();
     state.unsavedChanges = false;
     updateStatus(`Closed tab: ${tabToClose.name}`);
+
+    // Ensure empty state if no tabs
+    const editorWrapper = document.querySelector('.editor-wrapper');
+    if (state.tabs.length === 0) {
+      editorWrapper.classList.add('empty');
+      // Always ensure at least one tab exists
+      getCurrentTab();
+    } else {
+      editorWrapper.classList.remove('empty');
+    }
   }
 
   function saveTabsToStorage() {
@@ -1788,11 +1836,19 @@ ${tab.name}
   function init() {
     setupBeforeUnload();
     updateRecentFilesMenu();
+    // Always ensure at least one tab exists
+    getCurrentTab();
     renderTabs();
     renderFileList();
 
-    if (state.fileExplorerOpen) {
-      toggleFileExplorer();
+    // Set empty state on load if needed
+    const editorWrapper = document.querySelector('.editor-wrapper');
+    if (state.tabs.length === 0) {
+      editorWrapper.classList.add('empty');
+      // Always ensure at least one tab exists
+      getCurrentTab();
+    } else {
+      editorWrapper.classList.remove('empty');
     }
 
     let debounceTimer;
