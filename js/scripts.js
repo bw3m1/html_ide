@@ -23,7 +23,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
       // JS goes here
       
     </script>
-  </body>s
+  </body>
 </html>`;
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
@@ -107,63 +107,172 @@ require(['vs/editor/editor.main'], function () {
   let updateTimeout;
 
   // Examples
-  const examples_html = {
-    'basic': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Basic Page</title>\n</head>\n<body>\n  <h1>Hello World</h1>\n  <p>This is a basic HTML page.</p>\n</body>\n</html>`,
-    'form': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Form Example</title>\n  <style>\n    form {\n      max-width: 500px;\n      margin: 20px auto;\n      padding: 20px;\n      border: 1px solid #ddd;\n      border-radius: 5px;\n    }\n    label { display: block; margin-bottom: 5px; }\n    input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }\n    button { background: #007acc; color: white; border: none; padding: 10px 15px; }\n  </style>\n</head>\n<body>\n  <form>\n    <label>Name:</label>\n    <input type="text">\n    <label>Email:</label>\n    <input type="email">\n    <label>Message:</label>\n    <textarea rows="4"></textarea>\n    <button type="submit">Submit</button>\n  </form>\n</body>\n</html>`,
-    'grid': `<!DOCTYPE html>\n<html>\n<head>\n  <title>CSS Grid</title>\n  <style>\n    .grid-container {\n      display: grid;\n      grid-template-columns: repeat(3, 1fr);\n      gap: 10px;\n    }\n    .grid-item {\n      background: #007acc;\n      color: white;\n      padding: 20px;\n      text-align: center;\n    }\n  </style>\n</head>\n<body>\n  <div class="grid-container">\n    <div class="grid-item">1</div>\n    <div class="grid-item">2</div>\n    <div class="grid-item">3</div>\n    <div class="grid-item">4</div>\n    <div class="grid-item">5</div>\n    <div class="grid-item">6</div>\n  </div>\n</body>\n</html>`,
-    'table': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Table Example</title>\n  <style>\n    table { border-collapse: collapse; width: 100%; }\n    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n    th { background-color: #007acc; color: white; }\n    tr:nth-child(even) { background-color: #f2f2f2; }\n  </style>\n</head>\n<body>\n  <table>\n    <tr>\n      <th>Name</th>\n      <th>Email</th>\n      <th>Role</th>\n    </tr>\n    <tr>\n      <td>Blue</td>\n      <td>Blue@amongus.sussy</td>\n      <td>Crew mate</td>\n    </tr>\n    <tr>\n      <td>Red</td>\n      <td>Red@amongus.sussy</td>\n      <td>Imposter</td>\n    </tr>\n  </table>\n</body>\n</html>`,
-    'responsive': `<!DOCTYPE html>\n<html>\n<head>\n  <title>Responsive Example</title>\n  <meta name="viewport" contdth=device-width, initial-scale=1.0">\n  <style>\n    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n    .header { background: #007acc; color: white; padding: 20px; text-align: center; }\n    .main { display: flex; flex-wrap: wrap; }\n    .sidebar { flex: 1; min-width: 200px; background: #f0f0f0; padding: 20px; }\n    .content { flex: 3; min-width: 300px; padding: 20px; }\n    @media (max-width: 600px) {\n      .main { flex-direction: column; }\n    }\n  </style>\n</head>\n<body>\n  <div class="container">\n    <div class="header">\n      <h1>Responsive Layout</h1>\n    </div>\n    <div class="main">\n      <div class="sidebar">\n        <h3>Sidebar</h3>\n        <p>Content here</p>\n      </div>\n      <div class="content">\n        <h2>Main Content</h2>\n        <p>Resize the browser to see the responsive effect.</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>`,
-  };
+  const examples = {
+    'basic': `
+<!DOCTYPE html>\n<html>\n
 
-  const examples_json = {
-    'json': `{\n  "name": "My Project",\n  "version": "1.0.0",\n  "description": "A sample JSON file",\n  "dependencies": {\n    "monaco-editor": "^0.40.0",\n    "jszip": "^3.10.1"\n  },\n  "scripts": {\n    "start": "node server.js",\n    "build": "webpack"\n  }\n}`,
-    'manifest': `{\n  "name": "My Project",\n  "version": "1.0.0",\n  "description": "A sample project manifest",\n  "main": "index.js",\n  "scripts": {\n    "test": "echo \\"Error: no test specified\\" && exit 1"\n  },\n  "author": "",\n  "license": "ISC"\n}`,
-    'package-lock': `{\n  "name": "my-project",\n  "version": "1.0.0",\n  "lockfileVersion": 1,\n  "dependencies": {\n    "monaco-editor": {\n      "version": "0.40.0",\n      "resolved": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.40.0.tgz",\n      "integrity": "sha512-..."\n    },\n    "jszip": {\n      "version": "3.10.1",\n      "resolved": "https://registry.npmjs.org/jszip/-/jszip-3.10.1.tgz",\n      "integrity": "sha512-..."\n    }\n  }\n}`
-  };
+<head>\n <title>Basic Page</title>\n</head>\n
 
-  const examples_js = {
-    'basic': `console.log('Hello, World!');\n\nfunction greet(name) {\n  return 'Hello, ' + name + '!';\n}\n\ngreet('User');`,
-    'math': `function add(a, b) {\n  return a + b;\n}\n\nfunction subtract(a, b) {\n  return a - b;\n}\n\nconsole.log('Add:', add(5, 3));\nconsole.log('Subtract:', subtract(5, 3));`,
-    'array': `const numbers = [1, 2, 3, 4, 5];\n\nconst doubled = numbers.map(num => num * 2);\n\nconsole.log('Original:', numbers);\nconsole.log('Doubled:', doubled);`,
-    'object': `const person = {\n  name: 'John Doe',\n  age: 30,\n  greet() {\n    return 'Hello, ' + this.name;\n  }\n};\n\nconsole.log(person.greet());`,
-    'async': `async function fetchData(url) {\n  try {\n    const response = await fetch(url);\n    if (!response.ok) throw new Error('Network response was not ok');\n    const data = await response.json();\n    console.log(data);\n  } catch (error) {\n    console.error('Fetch error:', error);\n  }\n}\n\nfetchData('https://api.example.com/data');`
-  };
+<body>\n <h1>Hello World</h1>\n <p>This is a basic HTML page.</p>\n</body>\n
 
-  const examples_css = {
-    'basic': `body {\n  font-family: Arial, sans-serif;\n  background-color:rgb(32, 29, 29);\n  color: #333;\n}\n\nh1 {\n  color: #007acc;\n}\n\np {\n  line-height: 1.6;\n}\n\nbutton {\n  background-color: #007acc;\n  color: white;\n  border: none;\n  padding: 10px 15px;\n  cursor: pointer;\n}\n\nbutton:hover {\n  background-color: #005f99;\n}`,
-    'grid': `.grid-container {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 10px;\n}\n\n.grid-item {\n  background-color: #007acc;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}`,
-    'responsive': `.container {\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 20px;\n}\n\n.header {\n  background-color: #007acc;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n\n.main {\n  display: flex;\n  flex-wrap: wrap;\n}\n\n.sidebar {\n  flex: 1;\n  min-width: 200px;\n  background-color: #f0f0f0;\n  padding: 20px;\n}\n\n.content {\n  flex: 3;\n  min-width: 300px;\n  padding: 20px;\n}\n\n@media (max-width: 600px) {\n  .main {\n    flex-direction: column;\n  }\n}`,
-    'flexbox': `.flex-container {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n.flex-item {\n  background-color: #007acc;\n  color: white;\n  padding: 20px;\n  margin: 10px;\n}\n\n@media (max-width: 600px) {\n  .flex-container {\n    flex-direction: column;\n  }\n}`,
-    'animations': `@keyframes fadeIn {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n.fade-in {\n  animation: fadeIn 0.5s ease-in;\n}`
-  };
+</html>`,
+    'form': `
+<!DOCTYPE html>\n<html>\n
 
-  function loadExample(exampleName, language = 'html') {
-    if (language == 'html') {
-      if (examples_html[exampleName]) {
-        return examples_html[exampleName];
-      } else {
-        throw new Error(`Example "${exampleName}" not found.`);
-      }
-    } else if (language == 'css') {
-      if (examples_css[exampleName]) {
-        return examples_css[exampleName];
-      } else {
-        throw new Error(`Example "${exampleName}" not found.`);
-      }
-    } else if (language == 'js') {
-      if (examples_js[exampleName]) {
-        return examples_js[exampleName];
-      } else {
-        throw new Error(`Example "${exampleName}" not found.`);
-      }
-    } else if (language == 'json') {
-      if (examples_json[exampleName]) {
-        return examples_json[exampleName];
-      } else {
-        throw new Error(`Example "${exampleName}" not found.`);
-      }
+<head>\n <title>Form Example</title>\n <style>
+    \n form {
+      \n max-width: 500px;
+      \n margin: 20px auto;
+      \n padding: 20px;
+      \n border: 1px solid #ddd;
+      \n border-radius: 5px;
+      \n
     }
-  }
+
+    \n label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    \n input,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    \n button {
+      background: #007acc;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+    }
+
+    \n
+  </style>\n</head>\n
+
+<body>\n <form>\n <label>Name:</label>\n <input type="text">\n <label>Email:</label>\n <input type="email">\n
+    <label>Message:</label>\n <textarea rows="4"></textarea>\n <button type="submit">Submit</button>\n </form>\n</body>
+\n
+
+</html>`,
+    'grid': `
+<!DOCTYPE html>\n<html>\n
+
+<head>\n <title>CSS Grid</title>\n <style>
+    \n .grid-container {
+      \n display: grid;
+      \n grid-template-columns: repeat(3, 1fr);
+      \n gap: 10px;
+      \n
+    }
+
+    \n .grid-item {
+      \n background: #007acc;
+      \n color: white;
+      \n padding: 20px;
+      \n text-align: center;
+      \n
+    }
+
+    \n
+  </style>\n</head>\n
+
+<body>\n <div class="grid-container">\n <div class="grid-item">1</div>\n <div class="grid-item">2</div>\n <div
+      class="grid-item">3</div>\n <div class="grid-item">4</div>\n <div class="grid-item">5</div>\n <div
+      class="grid-item">6</div>\n </div>\n</body>\n
+
+</html>`,
+    'table': `
+<!DOCTYPE html>\n<html>\n
+
+<head>\n <title>Table Example</title>\n <style>
+    \n table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    \n th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    \n th {
+      background-color: #007acc;
+      color: white;
+    }
+
+    \n tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    \n
+  </style>\n</head>\n
+
+<body>\n <table>\n <tr>\n <th>Name</th>\n <th>Email</th>\n <th>Role</th>\n </tr>\n <tr>\n <td>Blue</td>\n <td>
+        Blue@amongus.sussy</td>\n <td>Crew mate</td>\n </tr>\n <tr>\n <td>Red</td>\n <td>Red@amongus.sussy</td>\n <td>
+        Imposter</td>\n </tr>\n </table>\n</body>\n
+
+</html>`,
+    'responsive': `
+<!DOCTYPE html>\n<html>\n
+
+<head>\n <title>Responsive Example</title>\n
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n <style>
+    \n .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    \n .header {
+      background: #007acc;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    \n .main {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    \n .sidebar {
+      flex: 1;
+      min-width: 200px;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+
+    \n .content {
+      flex: 3;
+      min-width: 300px;
+      padding: 20px;
+    }
+
+    \n @media (max-width: 600px) {
+      \n .main {
+        flex-direction: column;
+      }
+
+      \n
+    }
+
+    \n
+  </style>\n
+</head>\n
+
+<body>\n <div class="container">\n <div class="header">\n <h1>Responsive Layout</h1>\n </div>\n <div class="main">\n
+      <div class="sidebar">\n <h3>Sidebar</h3>\n <p>Content here</p>\n </div>\n <div class="content">\n <h2>Main Content
+        </h2>\n <p>Resize the browser to see the responsive effect.</p>\n </div>\n </div>\n </div>\n</body>\n
+
+</html>`,
+    'json-example': `{\n "name": "My Project",\n "version": "1.0.0",\n "description": "A sample JSON file",\n
+"dependencies": {\n "monaco-editor": "^0.40.0",\n "jszip": "^3.10.1"\n },\n "scripts": {\n "start": "node server.js",\n
+"build": "webpack"\n }\n}`
+  };
 
   // Tab management functions
   function generateTabId() {
@@ -235,11 +344,6 @@ ${tab.name}
   }
 
   function addNewTab() {
-
-    //  !!
-
-    // ether im bat at codeing or im bad at iplamenting code in html or both
-
     const tabId = generateTabId();
     const newTab = {
       id: tabId,
@@ -338,104 +442,6 @@ ${tab.name}
     localStorage.setItem('editorTabs', JSON.stringify(sanitizedTabs));
   }
 
-  function updatePreview() {
-    try {
-      preview.innerHTML = '';
-      const currentTab = getCurrentTab();
-      const isJsFile = currentTab.name.endsWith('.js');
-
-      if (isJsFile) {
-        // Create a container for JS output
-        const jsOutputContainer = document.createElement('div');
-        jsOutputContainer.id = 'js-output';
-        jsOutputContainer.style.padding = '1rem';
-        jsOutputContainer.style.fontFamily = 'monospace';
-        jsOutputContainer.style.whiteSpace = 'pre';
-        jsOutputContainer.style.overflow = 'auto';
-        jsOutputContainer.style.height = '100%';
-
-        // Create a console div
-        const consoleDiv = document.createElement('div');
-        consoleDiv.id = 'js-console';
-        consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
-        consoleDiv.style.padding = '0.5rem';
-        consoleDiv.style.marginTop = '1rem';
-        consoleDiv.style.borderRadius = '4px';
-        consoleDiv.style.fontFamily = 'monospace';
-        consoleDiv.style.whiteSpace = 'pre-wrap';
-
-        preview.appendChild(jsOutputContainer);
-
-
-        // Override console.log to capture output
-        const originalConsoleLog = console.log;
-        const logs = [];
-
-        console.log = function (...args) {
-          logs.push(args.join(' '));
-          consoleDiv.textContent = logs.join('\n');
-          consoleDiv.scrollTop = consoleDiv.scrollHeight;
-          originalConsoleLog.apply(console, args);
-        };
-
-        try {
-          // Execute the JS code
-          const result = new Function(editor.getValue())();
-
-          if (result !== undefined) {
-            jsOutputContainer.textContent = String(result);
-          } else {
-            jsOutputContainer.textContent = 'Code executed (no return value)';
-          }
-        } catch (error) {
-          jsOutputContainer.textContent = `Error: ${error.message}`;
-          jsOutputContainer.style.color = 'var(--error-red)';
-        }
-
-        // Restore original console.log
-        console.log = originalConsoleLog;
-
-        updateStatus("JavaScript executed");
-      } else {
-        // Original HTML preview code
-        const iframe = document.createElement('iframe');
-        iframe.sandbox = 'allow-same-origin';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        preview.appendChild(iframe);
-
-        const content = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <script>
-          window.onerror = function(e) {
-            parent.postMessage({ 
-              type: 'preview-error', 
-              error: e.toString() 
-            }, '*');
-          };
-        <\/script>
-        <style>
-          body { margin: 0; padding: 1rem; }
-          .error { color: red; }
-        </style>
-      </head>
-      <body>${editor.getValue()}</body>
-      </html>`;
-
-        iframe.contentDocument.open();
-        iframe.contentDocument.write(content);
-        iframe.contentDocument.close();
-
-        updateStatus("Preview updated");
-      }
-    } catch (error) {
-      showError(`Preview error: ${error.message}`);
-    }
-  }
-
   // File Explorer Functions
   function toggleFileExplorer() {
     state.fileExplorerOpen = !state.fileExplorerOpen;
@@ -453,6 +459,7 @@ ${tab.name}
   }
 
   function renderFileList() {
+    // !!
     fileList.innerHTML = '';
     const currentPath = state.fileExplorerPath || '';
 
@@ -465,8 +472,8 @@ ${tab.name}
       ${pathParts.map((part, index) => `
         <div class="breadcrumb-separator">›</div>
         <div class="breadcrumb-item" 
-             data-action="navigate-up" 
-             data-path="${pathParts.slice(0, index+1).join('/')}">
+          data-action="navigate-up" 
+          data-path="${pathParts.slice(0, index + 1).join('/')}">
           ${part}
         </div>
       `).join('')}
@@ -499,53 +506,54 @@ ${tab.name}
 
     function getFileIcon(filename) {
       const extension = filename.split('.').pop().toLowerCase();
-      switch(extension) {
+      switch (extension) {
         case 'txt': return 'text_icon.png';
-          case 'png': return 'png_img_icon.png';
-          case 'jpg': return 'jpeg_img_icon.png';
-          case 'jpeg': return 'jpeg_img_icon.png';
-          case 'gif': return 'gif_video_icon.png';
-          case 'svg': return 'svg_img_icon.svg';
-          case 'mp4': return 'gif_video_icon.png';
-          case 'mp3': return 'mp3_audio_icon.png';
-          case 'pdf':
-          case 'zip':
-          case 'brl': return 'BRL_icon.png';
-          case 'py':
-          case 'java':
-          case 'rb':
-          case 'go':
-          case 'php': return 'PHP_icon.png';
-          case 'swift':
-          case 'rs':
-          case 'ts': return 'TypeScript_icon.png';
-          case 'xml':
-          case 'json':
-          case 'yaml':
-          case 'yml':
-          case 'sql': 
-          case 'bash':
-          case 'sh': return 'shell_icon.png';
-          case 'cjs': return 'JavaScripts_icon.png';
-          case 'c': return 'Clang_icon.png';
-          case 'h': return 'Clang_icon.png';
-          case 'cpp': return 'Cpp_icon.png';
-          case 'hpp': return 'Cpp_icon.png';
-          case 'cxx': return 'Clang_icon.png';
-          case 'hxx': return 'Cpp_icon.png';
-          case 'cs': return 'Csharp_icon.png';
-          case 'css': return 'CSS_icon.png';
-          case 'html': return 'html_icon.png';
-          case 'js': return 'JavaScripts_icon.png';
-          case 'jsx': return 'react_icon.png';
-          case 'mjs': return 'JavaScripts_icon.png';
-          case 'md': return 'README_icon.png';
-          case 'txt': return 'README_icon.png';
-          case 'license': return 'LICENSE_icon.png';
-          case 'zip':
-          case 'rar':
-          case '7z': return 'closed_zip_folder_icon.svg';
-          default:  return 'text_icon.png';
+        case 'png': return 'png_img_icon.png';
+        case 'jpg': return 'jpeg_img_icon.png';
+        case 'jpeg': return 'jpeg_img_icon.png';
+        case 'gif': return 'gif_video_icon.png';
+        case 'svg': return 'svg_img_icon.svg';
+        case 'mp4': return 'gif_video_icon.png';
+        case 'mp3': return 'mp3_audio_icon.png';
+        case 'pdf':
+        case 'zip':
+        case 'brl': return 'BRL_icon.png';
+        case 'brainrot': return 'BRL_icon.png';
+        case 'py':
+        case 'java':
+        case 'rb':
+        case 'go':
+        case 'php': return 'PHP_icon.png';
+        case 'swift':
+        case 'rs':
+        case 'ts': return 'TypeScript_icon.png';
+        case 'xml':
+        case 'json':
+        case 'yaml':
+        case 'yml':
+        case 'sql':
+        case 'bash':
+        case 'sh': return 'shell_icon.png';
+        case 'cjs': return 'JavaScripts_icon.png';
+        case 'c': return 'Clang_icon.png';
+        case 'h': return 'Clang_icon.png';
+        case 'cpp': return 'Cpp_icon.png';
+        case 'hpp': return 'Cpp_icon.png';
+        case 'cxx': return 'Clang_icon.png';
+        case 'hxx': return 'Cpp_icon.png';
+        case 'cs': return 'Csharp_icon.png';
+        case 'css': return 'CSS_icon.png';
+        case 'html': return 'html_icon.png';
+        case 'js': return 'JavaScripts_icon.png';
+        case 'jsx': return 'react_icon.png';
+        case 'mjs': return 'JavaScripts_icon.png';
+        case 'md': return 'README_icon.png';
+        case 'txt': return 'README_icon.png';
+        case 'license': return 'LICENSE_icon.png';
+        case 'zip':
+        case 'rar':
+        case '7z': return 'closed_zip_folder_icon.svg';
+        default: return 'text_icon.png';
       }
     }
 
@@ -560,9 +568,9 @@ ${tab.name}
         // Determine theme (light or dark)
         const isLightTheme = document.body.classList.contains('light-theme');
         const openFolderIcon = isLightTheme ? 'icons/open_folder_icon_lite.svg' : 'icons/open_folder_icon_dark.svg';
-        const closedFolderIcon = isLightTheme ? 'icons/closed_folder_icon_lite' : 'icons/closed_folder_icon_dark.svg';
+        const closedFolderIcon = isLightTheme ? 'icons/closed_folder_icon_lite.svg' : 'icons/closed_folder_icon_dark.svg';
 
-        const iconSrc = item.type === 'folder' 
+        const iconSrc = item.type === 'folder'
           ? item.expanded ? openFolderIcon : closedFolderIcon
           : `icons/${getFileIcon(item.name)}`;
 
@@ -573,7 +581,7 @@ ${tab.name}
           </div>
           <div class="file-item-actions">
             ${item.type === 'file' ?
-              `<span class="file-item-open" data-action="open-file" data-path="${path}">Open</span>` : ''}
+            `<span class="file-item-open" data-action="open-file" data-path="${path}">Open</span>` : ''}
             <span class="file-item-delete" data-action="delete-file" data-path="${path}">×</span>
           </div>
         `;
@@ -605,7 +613,7 @@ ${tab.name}
     renderItems(state.files);
 
     // Add event delegation for file explorer actions
-    fileList.addEventListener('click', function(e) {
+    fileList.addEventListener('click', function (e) {
       const openBtn = e.target.closest('.file-item-open');
       if (openBtn) {
         const path = openBtn.dataset.path;
@@ -629,8 +637,8 @@ ${tab.name}
     const items = fileList.querySelectorAll('.file-item');
     items.forEach(item => {
       const name = item.querySelector('.file-item-name').textContent;
-      item.style.display = name.toLowerCase().includes(query.toLowerCase()) 
-        ? 'flex' 
+      item.style.display = name.toLowerCase().includes(query.toLowerCase())
+        ? 'flex'
         : 'none';
     });
   }
@@ -644,7 +652,7 @@ ${tab.name}
       contextMenu.style.display = 'block';
       contextMenu.style.left = `${e.pageX}px`;
       contextMenu.style.top = `${e.pageY}px`;
-      
+
       // Store selected file path
       contextMenu.dataset.path = fileItem.dataset.path;
     }
@@ -679,7 +687,7 @@ ${tab.name}
     e.preventDefault();
     const target = e.target.closest('.file-item');
     target?.classList.remove('drag-over');
-    
+
     if (draggedItem && target) {
       // Handle file/folder move logic
       const sourcePath = draggedItem.dataset.path;
@@ -705,7 +713,7 @@ ${tab.name}
           fetch(file.path, { method: 'HEAD' })
             .then(response => {
               const lastModified = new Date(response.headers.get('Last-Modified'));
-              
+
               // If the file was modified after it was last loaded
               if (lastModified > new Date(file.lastLoaded)) {
                 // Update the file content and last loaded time
@@ -729,13 +737,14 @@ ${tab.name}
   }
 
   // Shortcuts manager
+  // !!
   const shortcuts = {
     'Ctrl+S': async (e) => { e.preventDefault(); await saveFile(); },
     'Ctrl+Shift+S': async (e) => { e.preventDefault(); await saveFileAs(); },
     'Ctrl+O': async (e) => { e.preventDefault(); await openFile(); },
     'Ctrl+N': (e) => { e.preventDefault(); newFile(); },
-    'Ctrl+T': (e) => { e.preventDefault(); addNewTab(); },
     'Ctrl+W': (e) => { e.preventDefault(); closeTab(); },
+    'Ctrl+B': (e) => { e.preventDefault(); toggleFileExplorer(); },
     'Ctrl+Z': (e) => { e.preventDefault(); editor.trigger('', 'undo'); },
     'Ctrl+Y': (e) => { e.preventDefault(); editor.trigger('', 'redo'); },
     'Ctrl+F': (e) => { e.preventDefault(); editor.getAction('actions.find').run(); },
@@ -752,7 +761,7 @@ ${tab.name}
     'ArrowUp': (e) => { e.preventDefault(); /* Implement navigate up */ },
     'ArrowDown': (e) => { e.preventDefault(); /* Implement navigate down */ },
     'ArrowLeft': (e) => { e.preventDefault(); /* Implement navigate left */ },
-    'ArrowRight': (e) => { e.preventDefault(); /* Implement navigate right */ },
+    'ArrowRight': (e) => { e.preventDefault(); /* Implement navigate right */ }
   };
 
   document.addEventListener('keydown', (e) => {
@@ -1003,9 +1012,6 @@ ${tab.name}
   }
 
   function newFile() {
-    if (state.unsavedChanges && !confirm('You have unsaved changes. Create new file anyway?')) {
-      return;
-    }
 
     // Create a new tab instead of replacing current one
     const tabId = generateTabId();
@@ -1121,14 +1127,6 @@ ${tab.name}
     }
   }
 
-  function updateSyntaxHighlighting(language) {
-    const model = editor.getModel();
-    if (model) {
-      monaco.editor.setModelLanguage(model, language);
-      updateStatus(`Syntax highlighting set to ${language}`);
-    }
-  }
-
   // Recent files management
   function addToRecentFiles(file) {
     state.recentFiles = [
@@ -1187,6 +1185,7 @@ ${tab.name}
   }
 
   // Theme switching
+  // shold implament device perfred [ Automaitc ]  !!
   function setTheme(theme) {
     // Remove all theme classes first
     document.body.classList.remove('light-theme', 'contrast-dark-theme', 'contrast-light-theme');
@@ -1280,7 +1279,6 @@ ${tab.name}
     try {
       switch (action) {
         case 'new': newFile(); break;
-        case 'new-tab': addNewTab(); break;
         case 'close-tab': closeTab(data.tabId); break;
         case 'open': await openFile(); break;
         case 'open-recent': await openRecentFile(data.file); break;
@@ -1336,8 +1334,9 @@ ${tab.name}
           break;
         case 'open-file': openFileFromExplorer(data.path); break;
         case 'number-lines':
-        // theres this stupid bug where it will set it to off and then not toggle it back on
-        const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
+          // theres this stupid bug where it will set it to off and then not toggle it back on
+          // !!
+          const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
           editor.updateOptions({ lineNumbers: lineNumbers === 'off' ? 'on' : 'off' });
           localStorage.setItem('editorLineNumbers', lineNumbers === 'off' ? 'on' : 'off');
           updateStatus(`Line numbers ${lineNumbers === 'off' ? 'enabled' : 'disabled'}`);
@@ -1378,24 +1377,12 @@ ${tab.name}
         case 'zoom-in': adjustFontSize(2); break;
         case 'zoom-out': adjustFontSize(-2); break;
         case 'reset-zoom': resetFontSize(); break;
-        case 'example-html-basic': editor.setValue(loadExample('basic', 'html')); break;
-        case 'example-html-form': editor.setValue(loadExample('form', 'html')); break;
-        case 'example-html-grid': editor.setValue(loadExample('grid', 'html')); break;
-        case 'example-html-table': editor.setValue(loadExample('table', 'html')); break;
-        case 'example-html-responsive': editor.setValue(loadExample('responsive', 'html')); break;
-        case 'example-json-json': editor.setValue(loadExample('json', 'json')); break;
-        case 'example-json-manifest': editor.setValue(loadExample('manifest', 'json')); break;
-        case 'example-json-package-lock': editor.setValue(loadExample('package-lock', 'json')); break;
-        case 'example-js-basic': editor.setValue(loadExample('basic', 'js')); break;
-        case 'example-js-math': editor.setValue(loadExample('math', 'js')); break;
-        case 'example-js-array': editor.setValue(loadExample('array', 'js')); break;
-        case 'example-js-object': editor.setValue(loadExample('object', 'js')); break;
-        case 'example-js-async': editor.setValue(loadExample('async', 'js')); break;
-        case 'example-css-basic': editor.setValue(loadExample('basic', 'css')); break;
-        case 'example-css-grid': editor.setValue(loadExample('grid', 'css')); break;
-        case 'example-css-flexbox': editor.setValue(loadExample('flexbox', 'css')); break;
-        case 'example-css-responsive': editor.setValue(loadExample('responsive', 'css')); break;
-        case 'example-css-animations': editor.setValue(loadExample('animations', 'css')); break;
+        case 'example-basic': editor.setValue(examples.basic); break;
+        case 'example-form': editor.setValue(examples.form); break;
+        case 'example-grid': editor.setValue(examples.grid); break;
+        case 'example-table': editor.setValue(examples.table); break;
+        case 'example-responsive': editor.setValue(examples.responsive); break;
+        case 'example-json': editor.setValue(examples['json-example']); break;
         case 'theme-contrast-dark': setTheme('contrast-dark'); break;
         case 'theme-contrast-light': setTheme('contrast-light'); break;
         case 'documentation':
@@ -1439,14 +1426,14 @@ ${tab.name}
         case 'file-2-css': setFileType('css'); detectLanguage(); break;
         case 'file-2-js': setFileType('js'); detectLanguage(); break;
         case 'file-2-txt': setFileType('txt'); detectLanguage(); break;
-        case 'file-2-json': setFileType('json'); detectLanguage(); break;
         case 'file-2-md': setFileType('md'); detectLanguage(); break;
+        case 'file-2-json': setFileType('json'); detectLanguage(); break;
         case 'file-2-c': setFileType('c'); detectLanguage(); break;
         case 'file-2-cpp': setFileType('cpp'); detectLanguage(); break;
         case 'file-2-cs': setFileType('cs'); detectLanguage(); break;
         case 'file-2-py': setFileType('py'); detectLanguage(); break;
         case 'file-2-java': setFileType('java'); detectLanguage(); break;
-        case 'file-2-rust': setFileType('rust'); detectLanguage(); break;
+        case 'file-2-rust': setFileType('rs'); detectLanguage(); break;
         case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
           alert('html IDE\n\nVersion:                  0.4.2.1\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveuped by Bryson J G.');
@@ -1498,43 +1485,112 @@ ${tab.name}
     }
   }
 
-  function findFileEntry(path, files) {
-    const pathParts = path.split('/');
-    let currentLevel = files;
-    let fileEntry = null;
-
-    for (let i = 0; i < pathParts.length; i++) {
-      const part = pathParts[i];
-      fileEntry = currentLevel.find(item => item.name === part);
-
-      if (!fileEntry) {
-        return null;
-      }
-
-      if (fileEntry.type === 'folder' && fileEntry.children) {
-        currentLevel = fileEntry.children;
-      } else if (i < pathParts.length - 1) {
-        // If it's a file but not the last part of the path, the path is invalid
-        return null;
-      }
+  // Fixed deleteFile implementation
+  async function deleteFile(path) {
+    if (!path) {
+      const selectedItem = document.querySelector('.context-menu').dataset.path;
+      if (!selectedItem) return;
+      path = selectedItem;
     }
 
-    return fileEntry;
+    if (!confirm(`Are you sure you want to delete "${path}"?`)) return;
+
+    try {
+      const pathParts = path.split('/');
+      const fileName = pathParts.pop();
+      let currentLevel = state.files;
+
+      for (const part of pathParts) {
+        const folder = currentLevel.find(item =>
+          item.name === part && item.type === 'folder'
+        );
+        if (!folder) throw new Error(`Folder not found: ${part}`);
+        currentLevel = folder.children;
+      }
+
+      const index = currentLevel.findIndex(item => item.name === fileName);
+      if (index === -1) throw new Error('File not found');
+
+      currentLevel.splice(index, 1);
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Deleted ${path}`);
+    } catch (error) {
+      showError(`Delete failed: ${error.message}`);
+    }
   }
 
-  function getDefaultContent(fileName) {
-    const ext = fileName.split('.').pop().toLowerCase();
-    switch (ext) {
-      case 'html':
-        return INIT_CONTENTS;
-      case 'css':
-        return '/* New CSS file */\n';
-      case 'js':
-        return '// New JavaScript file\n';
-      case 'json':
-        return '{\n  \n}';
-      default:
-        return '';
+  // Fixed addFile implementation
+  function addFile() {
+    const currentPath = state.fileExplorerPath || '';
+    const fileName = prompt('Enter file name with extension:');
+    if (!fileName) return;
+
+    try {
+      let targetLocation = state.files;
+      const pathParts = currentPath.split('/').filter(p => p);
+
+      for (const part of pathParts) {
+        const folder = targetLocation.find(item =>
+          item.name === part && item.type === 'folder'
+        );
+        if (!folder) throw new Error(`Folder not found: ${part}`);
+        targetLocation = folder.children;
+      }
+
+      if (targetLocation.some(item => item.name === fileName)) {
+        throw new Error(`"${fileName}" already exists`);
+      }
+
+      const newFile = {
+        name: fileName,
+        type: 'file',
+        content: getDefaultContent(fileName)
+      };
+
+      targetLocation.push(newFile);
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Added ${currentPath}/${fileName}`);
+    } catch (error) {
+      showError(error.message);
+    }
+  }
+
+  // Fixed addFolder implementation
+  function addFolder() {
+    const currentPath = state.fileExplorerPath || '';
+    const folderName = prompt('Enter folder name:');
+    if (!folderName) return;
+
+    try {
+      let targetLocation = state.files;
+      const pathParts = currentPath.split('/').filter(p => p);
+
+      for (const part of pathParts) {
+        const folder = targetLocation.find(item =>
+          item.name === part && item.type === 'folder'
+        );
+        if (!folder) throw new Error(`Folder not found: ${part}`);
+        targetLocation = folder.children;
+      }
+
+      if (targetLocation.some(item => item.name === folderName)) {
+        throw new Error(`"${folderName}" already exists`);
+      }
+
+      targetLocation.push({
+        name: folderName,
+        type: 'folder',
+        children: [],
+        expanded: true
+      });
+
+      saveProjectFiles();
+      renderFileList();
+      updateStatus(`Added folder ${currentPath}/${folderName}`);
+    } catch (error) {
+      showError(error.message);
     }
   }
 
@@ -1591,6 +1647,70 @@ ${tab.name}
         });
       }
     });
+  });
+
+  // Set up resizer
+  const resizer = document.getElementById('resizer');
+  let isResizing = false;
+
+  resizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    document.body.style.cursor = 'col-resize';
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
+  });
+
+  function resize(e) {
+    if (!isResizing) return;
+    const containerWidth = document.getElementById('mainContainer').offsetWidth;
+    const editorWidth = (e.clientX / containerWidth) * 100;
+    document.querySelector('.editor-wrapper').style.flex = `0 0 ${editorWidth}%`;
+    document.querySelector('.preview-pane').style.flex = `0 0 ${100 - editorWidth}%`;
+  }
+
+  function stopResize() {
+    isResizing = false;
+    document.body.style.cursor = '';
+    document.removeEventListener('mousemove', resize);
+    document.removeEventListener('mouseup', stopResize);
+  }
+
+  // File input handler
+  document.getElementById('fileInput').addEventListener('change', async function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        showError(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+        return;
+      }
+
+      // Create a new tab for the opened file
+      const tabId = generateTabId();
+      const newTab = {
+        id: tabId,
+        name: file.name,
+        type: file.name.split('.').pop().toLowerCase(),
+        content: await file.text(),
+        handle: null,
+        active: true
+      };
+
+      // Deactivate current tab
+      const currentTab = getCurrentTab();
+      if (currentTab) {
+        currentTab.active = false;
+      }
+
+      state.tabs.push(newTab);
+      state.currentTabId = tabId;
+
+      editor.setValue(newTab.content);
+      renderTabs();
+      updateStatus(`Opened ${file.name}`);
+      addToRecentFiles(newTab);
+      await detectLanguage();
+      saveTabsToStorage();
+    }
   });
 
   // Initialize
