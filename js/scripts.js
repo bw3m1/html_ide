@@ -1260,9 +1260,13 @@ ${tab.name}
       if (prefersDark) {
         monaco.editor.setTheme('vs-dark');
         document.body.classList.remove('light-theme');
+        document.body.classList.remove('contrast-light-theme');
+        document.body.classList.remove('contrast-dark-theme');
       } else {
         monaco.editor.setTheme('vs');
         document.body.classList.add('light-theme');
+        document.body.classList.remove('contrast-light-theme');
+        document.body.classList.remove('contrast-dark-theme');
       }
       // Listen for changes in system theme
       if (!setTheme._autoListener) {
