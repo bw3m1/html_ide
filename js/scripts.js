@@ -811,9 +811,15 @@ ${tab.name}
   };
 
   document.addEventListener('keydown', (e) => {
-    const key = e.ctrlKey ? 'Ctrl+' + e.key : e.key;
-    if (shortcuts[key]) {
-      shortcuts[key](e);
+    let keyCombo = '';
+    if (e.ctrlKey) keyCombo += 'Ctrl+';
+    if (e.shiftKey) keyCombo += 'Shift+';
+    if (e.altKey) keyCombo += 'Alt+';
+    // Use e.code for non-character keys, e.key for character keys
+    let key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    keyCombo += key;
+    if (shortcuts[keyCombo]) {
+      shortcuts[keyCombo](e);
     }
   });
 
@@ -1380,12 +1386,12 @@ ${tab.name}
           break;
         case 'open-file': openFileFromExplorer(data.path); break;
         case 'number-lines':
-          // theres this stupid bug where it will set it to off and then not toggle it back on
-          // !!
-          const lineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
-          editor.updateOptions({ lineNumbers: lineNumbers === 'off' ? 'on' : 'off' });
-          localStorage.setItem('editorLineNumbers', lineNumbers === 'off' ? 'on' : 'off');
-          updateStatus(`Line numbers ${lineNumbers === 'off' ? 'enabled' : 'disabled'}`);
+          // Fix: Toggle line numbers based on the current setting in localStorage or invert the value directly
+          const currentLineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
+          const newLineNumbers = currentLineNumbers === 'on' ? 'off' : 'on';
+          editor.updateOptions({ lineNumbers: newLineNumbers });
+          localStorage.setItem('editorLineNumbers', newLineNumbers);
+          updateStatus(`Line numbers ${newLineNumbers === 'on' ? 'enabled' : 'disabled'}`);
           break;
         case 'font-family-monospace':
           editor.updateOptions({ fontFamily: 'monospace' });
