@@ -1237,7 +1237,6 @@ ${tab.name}
   }
 
   // Theme switching
-  // shold implament device perfred [ Automaitc ]  !!
   function setTheme(theme) {
     // Remove all theme classes first
     document.body.classList.remove('light-theme', 'contrast-dark-theme', 'contrast-light-theme');
