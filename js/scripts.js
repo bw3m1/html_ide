@@ -1255,6 +1255,22 @@ ${tab.name}
       document.body.classList.add('contrast-light-theme');
       monaco.editor.setTheme('hc-light');
     }
+    else if (theme === 'automatic') {
+      // Detect system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        monaco.editor.setTheme('vs-dark');
+        document.body.classList.remove('light-theme');
+      } else {
+        monaco.editor.setTheme('vs');
+        document.body.classList.add('light-theme');
+      }
+      // Listen for changes in system theme
+      if (!setTheme._autoListener) {
+        setTheme._autoListener = (e) => setTheme('automatic');
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
+      }
+    }
     else {
       // Default dark theme
       monaco.editor.setTheme('vs-dark');
@@ -1373,6 +1389,9 @@ ${tab.name}
         case 'layout-output-only': setLayout('output-only'); break;
         case 'theme-dark': setTheme('dark'); break;
         case 'theme-light': setTheme('light'); break;
+        case 'theme-auto': setTheme('automatic'); break;
+        case 'theme-contrast-dark': setTheme('contrast-dark'); break;
+        case 'theme-contrast-light': setTheme('contrast-light'); break;
         case 'toggle-explorer': toggleFileExplorer(); break;
         case 'add-file': addFile(); break;
         case 'add-folder': addFolder(); break;
@@ -1434,8 +1453,6 @@ ${tab.name}
         case 'example-table': editor.setValue(examples.table); break;
         case 'example-responsive': editor.setValue(examples.responsive); break;
         case 'example-json': editor.setValue(examples['json-example']); break;
-        case 'theme-contrast-dark': setTheme('contrast-dark'); break;
-        case 'theme-contrast-light': setTheme('contrast-light'); break;
         case 'documentation':
           const docUrl = new URL('IDE_docmtn.html', window.location.href).href;
           window.open(docUrl, '_blank');
