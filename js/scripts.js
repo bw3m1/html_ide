@@ -1386,8 +1386,7 @@ ${tab.name}
           break;
         case 'open-file': openFileFromExplorer(data.path); break;
         case 'number-lines':
-          // Fix: Toggle line numbers based on the current setting in localStorage or invert the value directly
-          const currentLineNumbers = editor.getOption(monaco.editor.EditorOption.lineNumbers);
+          const currentLineNumbers = editor.getRawOptions().lineNumbers;
           const newLineNumbers = currentLineNumbers === 'on' ? 'off' : 'on';
           editor.updateOptions({ lineNumbers: newLineNumbers });
           localStorage.setItem('editorLineNumbers', newLineNumbers);
