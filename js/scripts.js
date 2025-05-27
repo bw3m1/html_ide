@@ -552,180 +552,146 @@ ${tab.name}
     updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
   }
 
-  function renderFileList() {
-    // !!
-    fileList.innerHTML = '';
-    const currentPath = state.fileExplorerPath || '';
+ function renderFileList() {
+  fileList.innerHTML = ''; // Clear existing content
 
-    // Add breadcrumbs
-    const breadcrumbs = document.createElement('div');
-    breadcrumbs.className = 'breadcrumbs';
-    const pathParts = currentPath.split('/').filter(p => p);
-    breadcrumbs.innerHTML = `
-      <div class="breadcrumb-item" data-action="navigate-up" data-path="">Root</div>
-      ${pathParts.map((part, index) => `
-        <div class="breadcrumb-separator">›</div>
-        <div class="breadcrumb-item" 
-          data-action="navigate-up" 
-          data-path="${pathParts.slice(0, index + 1).join('/')}">
-          ${part}
-        </div>
-      `).join('')}
-    `;
-    fileList.appendChild(breadcrumbs);
+  // Create container for the tree view
+  const treeContainer = document.createElement('div');
+  treeContainer.className = 'tree-view';
+  fileList.appendChild(treeContainer);
 
-    // Add search bar
-    const search = document.createElement('input');
-    search.className = 'file-explorer-search';
-    search.placeholder = 'Search files...';
-    search.addEventListener('input', (e) => {
-      filterFileList(e.target.value);
-    });
-    fileList.appendChild(search);
+  // Recursive function to render items
+  function renderItems(items, parentElement, depth = 0) {
+    items.forEach(item => {
+      const itemElement = createTreeItem(item, depth);
+      parentElement.appendChild(itemElement);
 
-    // Render items
-    const listContainer = document.createElement('div');
-    listContainer.className = 'file-explorer-list';
-    fileList.appendChild(listContainer);
-
-    // Context menu
-    const contextMenu = document.createElement('div');
-    contextMenu.className = 'context-menu';
-    contextMenu.innerHTML = `
-      <div class="context-menu-item" data-action="rename-file">Rename</div>
-      <div class="context-menu-item" data-action="delete-file">Delete</div>
-      <div class="context-menu-item" data-action="duplicate-file">Duplicate</div>
-    `;
-    fileList.appendChild(contextMenu);
-
-    function getFileIcon(filename) {
-      const extension = filename.split('.').pop().toLowerCase();
-      switch (extension) {
-        case 'txt': return 'text_icon.png';
-        case 'png': return 'png_img_icon.png';
-        case 'jpg': return 'jpeg_img_icon.png';
-        case 'jpeg': return 'jpeg_img_icon.png';
-        case 'gif': return 'gif_video_icon.png';
-        case 'svg': return 'svg_img_icon.svg';
-        case 'mp4': return 'gif_video_icon.png';
-        case 'mp3': return 'mp3_audio_icon.png';
-        case 'pdf':
-        case 'zip':
-        case 'brl': return 'BRL_icon.png';
-        case 'brainrot': return 'BRL_icon.png';
-        case 'py':
-        case 'java':
-        case 'rb':
-        case 'go':
-        case 'php': return 'PHP_icon.png';
-        case 'swift':
-        case 'rs':
-        case 'ts': return 'TypeScript_icon.png';
-        case 'xml':
-        case 'json':
-        case 'yaml':
-        case 'yml':
-        case 'sql':
-        case 'bash':
-        case 'sh': return 'shell_icon.png';
-        case 'cjs': return 'JavaScripts_icon.png';
-        case 'c': return 'Clang_icon.png';
-        case 'h': return 'Clang_icon.png';
-        case 'cpp': return 'Cpp_icon.png';
-        case 'hpp': return 'Cpp_icon.png';
-        case 'cxx': return 'Clang_icon.png';
-        case 'hxx': return 'Cpp_icon.png';
-        case 'cs': return 'Csharp_icon.png';
-        case 'css': return 'CSS_icon.png';
-        case 'html': return 'html_icon.png';
-        case 'js': return 'JavaScripts_icon.png';
-        case 'jsx': return 'react_icon.png';
-        case 'mjs': return 'JavaScripts_icon.png';
-        case 'md': return 'README_icon.png';
-        case 'txt': return 'README_icon.png';
-        case 'license': return 'LICENSE_icon.png';
-        case 'zip':
-        case 'rar':
-        case '7z': return 'closed_zip_folder_icon.svg';
-        default: return 'text_icon.png';
-      }
-    }
-
-    function renderItems(items, parentPath = '', container = listContainer) {
-      items.forEach(item => {
-        const path = parentPath ? `${parentPath}/${item.name}` : item.name;
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.dataset.path = path;
-        fileItem.dataset.type = item.type;
-
-        // Determine theme (light or dark)
-        const isLightTheme = document.body.classList.contains('light-theme');
-        const openFolderIcon = isLightTheme ? 'icons/open_folder_icon_lite.svg' : 'icons/open_folder_icon_dark.svg';
-        const closedFolderIcon = isLightTheme ? 'icons/closed_folder_icon_lite.svg' : 'icons/closed_folder_icon_dark.svg';
-
-        const iconSrc = item.type === 'folder'
-          ? item.expanded ? openFolderIcon : closedFolderIcon
-          : `icons/${getFileIcon(item.name)}`;
-
-        fileItem.innerHTML = `
-          <div class="file-item-name" style="display: flex; align-items: center;">
-            <img src="${iconSrc}" alt="${item.type}" class="file-icon" style="width: 16px; height: 16px; margin-right: 4px;" />
-            <span>${item.name}</span>
-          </div>
-          <div class="file-item-actions">
-            ${item.type === 'file' ?
-            `<span class="file-item-open" data-action="open-file" data-path="${path}">Open</span>` : ''}
-            <span class="file-item-delete" data-action="delete-file" data-path="${path}">×</span>
-          </div>
-        `;
-
-        fileItem.addEventListener('click', (e) => {
-          if (e.target.classList.contains('file-item-delete') ||
-            e.target.classList.contains('file-item-open')) {
-            return;
-          }
-
-          if (item.type === 'folder') {
-            item.expanded = !item.expanded;
-            renderFileList(); // Re-render to show/hide children
-          }
-        });
-
-        container.appendChild(fileItem);
-
-        if (item.type === 'folder' && item.children && item.expanded) {
-          const childContainer = document.createElement('div');
-          childContainer.className = 'folder-children';
-          childContainer.style.marginLeft = '16px'; // Indent children
-          fileItem.appendChild(childContainer);
-          renderItems(item.children, path, childContainer);
-        }
-      });
-    }
-
-    renderItems(state.files);
-
-    // Add event delegation for file explorer actions
-    fileList.addEventListener('click', function (e) {
-      const openBtn = e.target.closest('.file-item-open');
-      if (openBtn) {
-        const path = openBtn.dataset.path;
-        if (path) {
-          handleMenuAction('open-file', { path });
-          e.stopPropagation();
-        }
-      }
-      const deleteBtn = e.target.closest('.file-item-delete');
-      if (deleteBtn) {
-        const path = deleteBtn.dataset.path;
-        if (path) {
-          handleMenuAction('delete-file', { path });
-          e.stopPropagation();
-        }
+      if (item.type === 'folder' && item.expanded && item.children) {
+        const childrenContainer = document.createElement('div');
+        childrenContainer.className = 'folder-children';
+        renderItems(item.children, childrenContainer, depth + 1);
+        parentElement.appendChild(childrenContainer);
       }
     });
   }
+
+  // Function to create individual tree items
+  function createTreeItem(item, depth) {
+    const itemElement = document.createElement('div');
+    itemElement.className = `tree-item ${item.selected ? 'selected' : ''}`;
+    itemElement.style.paddingLeft = `${depth * 16}px`;
+    itemElement.dataset.path = item.path || item.name;
+    itemElement.dataset.type = item.type;
+
+    // Folder/File icon logic
+    const icon = document.createElement('img');
+    icon.className = 'file-icon';
+    icon.src = item.type === 'folder' ? 
+      (item.expanded ? 'icons/folder-open.svg' : 'icons/folder-closed.svg') :
+      `icons/${getFileIcon(item.name)}`;
+
+    // Collapse/expand chevron for folders
+    let chevron = '';
+    if (item.type === 'folder') {
+      chevron = `<span class="material-icons chevron ${
+        item.expanded ? '' : 'collapsed'
+      }">chevron_right</span>`;
+    }
+
+    itemElement.innerHTML = `
+      ${chevron}
+      <div class="item-content">
+        ${icon.outerHTML}
+        <span class="item-name">${item.name}</span>
+      </div>
+      <div class="item-actions">
+        ${item.type === 'file' ? `<span class="open-file-btn">◷</span>` : ''}
+        <span class="delete-btn">×</span>
+      </div>
+    `;
+
+    // Event handlers
+    if (item.type === 'folder') {
+      itemElement.querySelector('.chevron').addEventListener('click', (e) => {
+        e.stopPropagation();
+        item.expanded = !item.expanded;
+        renderFileList();
+      });
+    }
+
+    itemElement.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('delete-btn')) {
+        // Select item
+        document.querySelectorAll('.tree-item').forEach(i => 
+          i.classList.remove('selected'));
+        itemElement.classList.add('selected');
+        state.selectedPath = item.path || item.name;
+      }
+    });
+
+    itemElement.addEventListener('dblclick', () => {
+      if (item.type === 'folder') {
+        item.expanded = !item.expanded;
+        renderFileList();
+      } else {
+        handleMenuAction('open-file', { path: item.path || item.name });
+      }
+    });
+
+    itemElement.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showContextMenu(e, item);
+    });
+
+    return itemElement;
+  }
+
+  // Context menu handling
+  function showContextMenu(e, item) {
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'context-menu';
+    contextMenu.style.left = `${e.pageX}px`;
+    contextMenu.style.top = `${e.pageY}px`;
+
+    const menuItems = [
+      { label: 'New File', action: 'add-file' },
+      { label: 'New Folder', action: 'add-folder' },
+      { label: 'Rename', action: 'rename-file' },
+      { label: 'Delete', action: 'delete-file' },
+      { label: 'Refresh', action: 'refresh-explorer' }
+    ];
+
+    menuItems.forEach(menuItem => {
+      const menuOption = document.createElement('div');
+      menuOption.className = 'context-menu-item';
+      menuOption.textContent = menuItem.label;
+      menuOption.dataset.action = menuItem.action;
+      menuOption.dataset.path = item.path || item.name;
+      contextMenu.appendChild(menuOption);
+    });
+
+    document.body.appendChild(contextMenu);
+
+    const closeMenu = () => {
+      contextMenu.remove();
+      document.removeEventListener('click', closeMenu);
+    };
+
+    contextMenu.addEventListener('click', (e) => {
+      const action = e.target.dataset.action;
+      const path = e.target.dataset.path;
+      if (action) {
+        handleMenuAction(action, { path });
+      }
+      closeMenu();
+    });
+
+    document.addEventListener('click', closeMenu);
+  }
+
+  // Start rendering from root items
+  renderItems(state.files, treeContainer);
+}
 
   function filterFileList(query) {
     const items = fileList.querySelectorAll('.file-item');
