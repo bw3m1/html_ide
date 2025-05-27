@@ -11,6 +11,7 @@
   --menu-text-hover: #4d4d4d;
 }
 
+/* Theme classes */
 .light-theme {
   --bg-dark: #fff;
   --text-dark: #333;
@@ -44,6 +45,7 @@
   --menu-text-hover: #000;
 }
 
+/* Base styles */
 body, html {
   margin: 0;
   padding: 0;
@@ -54,6 +56,7 @@ body, html {
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* Menu bar */
 .menu-bar {
   display: flex;
   background-color: var(--menu-bg-dark);
@@ -72,7 +75,6 @@ body, html {
 
 .menu-item:hover {
   background-color: var(--hover-dark);
-  color: var(--hover-text-dark);
 }
 
 .dropdown {
@@ -133,6 +135,7 @@ body, html {
   display: block;
 }
 
+/* Layout */
 .split-container {
   display: flex;
   height: calc(100vh - 40px);
@@ -200,7 +203,7 @@ body, html {
   }
 }
 
-/* File Explorer Styles */
+/* File Explorer */
 .file-explorer {
   width: 280px;
   background-color: var(--menu-bg-dark);
@@ -211,44 +214,6 @@ body, html {
   overflow: hidden;
   transition: transform 0.3s ease;
   box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-}
-
-.file-explorer-header {
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--outline-dark);
-  background-color: var(--menu-bg-dark);
-}
-
-.file-explorer-title {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--accent-color);
-}
-
-.file-explorer-toolbar {
-  padding: 8px 12px;
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid var(--outline-dark);
-  background: rgba(0,0,0,0.05);
-}
-
-.file-explorer-search {
-  flex: 1;
-  padding: 6px 12px;
-  background: var(--bg-dark);
-  border: 1px solid var(--outline-dark);
-  border-radius: 4px;
-  color: var(--text-dark);
-  font-size: 0.85rem;
-}
-
-.file-explorer-search:focus {
-  outline: none;
-  border-color: var(--accent-color);
 }
 
 .file-item {
@@ -385,12 +350,11 @@ body, html {
   width: calc(100% - var(--file-explorer-width));
 }
 
-/* Tab Bar Styles */
+/* Tab Bar */
 .tab-bar {
   position: fixed;
   top: 0;
   right: 0;
-  height: 0rem 1rem;
   display: flex;
   background-color: var(--menu-bg-dark);
   border-bottom: 1px solid var(--outline-dark);
@@ -473,8 +437,7 @@ body, html {
   opacity: 0.8;
 }
 
-/* Add to styles.css */
-/* the code shold execut as  */
+/* JS Output */
 #js-output {
   background-color: var(--bg-dark);
   color: var(--text-dark);
@@ -484,7 +447,6 @@ body, html {
   overflow: auto;
 }
 
-/* When in light theme */
 .light-theme #js-output,
 .light-theme #js-console {
   background-color: var(--menu-bg-dark);
@@ -492,7 +454,7 @@ body, html {
   border-color: var(--outline-dark);
 }
 
-/* Editor empty state background - VS Code style */
+/* Editor empty state */
 .editor-wrapper.empty {
   background: linear-gradient(135deg, var(--menu-bg-dark) 60%, var(--bg-dark) 100%);
   position: relative;
@@ -504,7 +466,6 @@ body, html {
   pointer-events: none;
 }
 
-/* Centered VS Code-like logo and message */
 .editor-wrapper.empty::after {
   content: "";
   display: block;
