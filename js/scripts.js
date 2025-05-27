@@ -103,6 +103,7 @@ require(['vs/editor/editor.main'], function () {
   const fileExplorer = document.getElementById('file-explorer');
   const fileList = document.getElementById('file-list');
   const tabsContainer = document.getElementById('tabsContainer');
+  const preview = document.getElementById('preview');
 
   // Examples
   const examples = {
@@ -698,6 +699,7 @@ ${tab.name}
       preview.innerHTML = '';
       const currentTab = getCurrentTab();
       const isJsFile = currentTab.name.endsWith('.js');
+      const isOtherFormat = !isJsFile && !currentTab.name.endsWith('.html');
 
       if (isJsFile) {
         // Create a container for JS output
@@ -751,6 +753,18 @@ ${tab.name}
         console.log = originalConsoleLog;
 
         updateStatus("JavaScript executed");
+      } else if (isOtherFormat) {
+        // Handle other file formats
+        const otherOutputContainer = document.createElement('div');
+        otherOutputContainer.id = 'other-output';
+        otherOutputContainer.style.padding = '1rem';
+        otherOutputContainer.style.fontFamily = 'monospace';
+        otherOutputContainer.style.whiteSpace = 'pre';
+        otherOutputContainer.style.overflow = 'auto';
+        otherOutputContainer.style.height = '100%';
+
+        preview.appendChild(otherOutputContainer);
+        otherOutputContainer.textContent = 'Preview not available for this file type.\nPlease go to view > layout > editor only to not view this error message';
       } else {
         // Original HTML preview code
         const iframe = document.createElement('iframe');
@@ -773,7 +787,7 @@ ${tab.name}
           };
         <\/script>
         <style>
-          body { margin: 0; padding: 1rem; }
+          body { margin: 0; padding: 0; }
           .error { color: red; }
         </style>
       </head>
