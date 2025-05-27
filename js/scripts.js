@@ -693,14 +693,102 @@ ${tab.name}
   renderItems(state.files, treeContainer);
 }
 
-  function filterFileList(query) {
-    const items = fileList.querySelectorAll('.file-item');
-    items.forEach(item => {
-      const name = item.querySelector('.file-item-name').textContent;
-      item.style.display = name.toLowerCase().includes(query.toLowerCase())
-        ? 'flex'
-        : 'none';
-    });
+  function updatePreview() {
+    try {
+      preview.innerHTML = '';
+      const currentTab = getCurrentTab();
+      const isJsFile = currentTab.name.endsWith('.js');
+
+      if (isJsFile) {
+        // Create a container for JS output
+        const jsOutputContainer = document.createElement('div');
+        jsOutputContainer.id = 'js-output';
+        jsOutputContainer.style.padding = '1rem';
+        jsOutputContainer.style.fontFamily = 'monospace';
+        jsOutputContainer.style.whiteSpace = 'pre';
+        jsOutputContainer.style.overflow = 'auto';
+        jsOutputContainer.style.height = '100%';
+
+        // Create a console div
+        const consoleDiv = document.createElement('div');
+        consoleDiv.id = 'js-console';
+        consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
+        consoleDiv.style.padding = '0.5rem';
+        consoleDiv.style.marginTop = '1rem';
+        consoleDiv.style.borderRadius = '4px';
+        consoleDiv.style.fontFamily = 'monospace';
+        consoleDiv.style.whiteSpace = 'pre-wrap';
+
+        preview.appendChild(jsOutputContainer);
+
+
+        // Override console.log to capture output
+        const originalConsoleLog = console.log;
+        const logs = [];
+
+        console.log = function (...args) {
+          logs.push(args.join(' '));
+          consoleDiv.textContent = logs.join('\n');
+          consoleDiv.scrollTop = consoleDiv.scrollHeight;
+          originalConsoleLog.apply(console, args);
+        };
+
+        try {
+          // Execute the JS code
+          const result = new Function(editor.getValue())();
+
+          if (result !== undefined) {
+            jsOutputContainer.textContent = String(result);
+          } else {
+            jsOutputContainer.textContent = 'Code executed (no return value)';
+          }
+        } catch (error) {
+          jsOutputContainer.textContent = `Error: ${error.message}`;
+          jsOutputContainer.style.color = 'var(--error-red)';
+        }
+
+        // Restore original console.log
+        console.log = originalConsoleLog;
+
+        updateStatus("JavaScript executed");
+      } else {
+        // Original HTML preview code
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+
+        const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <script>
+          window.onerror = function(e) {
+            parent.postMessage({ 
+              type: 'preview-error', 
+              error: e.toString() 
+            }, '*');
+          };
+        <\/script>
+        <style>
+          body { margin: 0; padding: 1rem; }
+          .error { color: red; }
+        </style>
+      </head>
+      <body>${editor.getValue()}</body>
+      </html>`;
+
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(content);
+        iframe.contentDocument.close();
+
+        updateStatus("Preview updated");
+      }
+    } catch (error) {
+      showError(`Preview error: ${error.message}`);
+    }
   }
 
   // Add these event listeners
