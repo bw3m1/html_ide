@@ -387,6 +387,7 @@ ${tab.name}
     } else {
       editorWrapper.classList.remove('empty');
     }
+    refreshExploreFileList(); // Ensure file list stays in sync
   }
 
   function switchToTab(tabId) {
@@ -419,6 +420,7 @@ ${tab.name}
       updatePreview();
       updateStatus(`Switched to ${newTab.name}`);
       saveTabsToStorage();
+      refreshExploreFileList();
     }
   }
 
@@ -454,6 +456,7 @@ ${tab.name}
     editor.setValue(newTab.content);
     updateStatus(`Created new tab: ${newTab.name}`);
     saveTabsToStorage();
+    refreshExploreFileList();
 
     // Remove empty state
     const editorWrapper = document.querySelector('.editor-wrapper');
@@ -517,6 +520,7 @@ ${tab.name}
     saveTabsToStorage();
     state.unsavedChanges = false;
     updateStatus(`Closed tab: ${tabToClose.name}`);
+    refreshExploreFileList();
 
     // Ensure empty state if no tabs
     const editorWrapper = document.querySelector('.editor-wrapper');
@@ -535,6 +539,7 @@ ${tab.name}
       handle: null // Exclude handle
     }));
     localStorage.setItem('editorTabs', JSON.stringify(sanitizedTabs));
+    refreshExploreFileList();
   }
 
   // File Explorer Functions
@@ -553,146 +558,70 @@ ${tab.name}
     updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
   }
 
- function renderFileList() {
-  fileList.innerHTML = ''; // Clear existing content
+function renderFileList() {
+  // Render open tabs as a list in the file explorer
+  const openTabsSection = document.createElement('div');
+  openTabsSection.className = 'open-tabs-section';
+  openTabsSection.innerHTML = '<div class="file-explorer-section-title">Open Tabs</div>';
 
-  // Create container for the tree view
-  const treeContainer = document.createElement('div');
-  treeContainer.className = 'tree-view';
-  fileList.appendChild(treeContainer);
+  if (state.tabs.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.className = 'file-item empty';
+    emptyMsg.textContent = 'No open tabs';
+    openTabsSection.appendChild(emptyMsg);
+  } else {
+    state.tabs.forEach(tab => {
+      const tabItem = document.createElement('div');
+      tabItem.className = 'file-item tab-item' + (tab.active ? ' active' : '');
+      tabItem.textContent = tab.name;
+      tabItem.dataset.tabId = tab.id;
+      tabItem.title = tab.name + (tab.active ? ' (active)' : '');
 
-  // Recursive function to render items
-  function renderItems(items, parentElement, depth = 0) {
-    items.forEach(item => {
-      const itemElement = createTreeItem(item, depth);
-      parentElement.appendChild(itemElement);
-
-      if (item.type === 'folder' && item.expanded && item.children) {
-        const childrenContainer = document.createElement('div');
-        childrenContainer.className = 'folder-children';
-        renderItems(item.children, childrenContainer, depth + 1);
-        parentElement.appendChild(childrenContainer);
-      }
-    });
-  }
-
-  // Function to create individual tree items
-  function createTreeItem(item, depth) {
-    const itemElement = document.createElement('div');
-    itemElement.className = `tree-item ${item.selected ? 'selected' : ''}`;
-    itemElement.style.paddingLeft = `${depth * 16}px`;
-    itemElement.dataset.path = item.path || item.name;
-    itemElement.dataset.type = item.type;
-
-    // Folder/File icon logic
-    const icon = document.createElement('img');
-    icon.className = 'file-icon';
-    icon.src = item.type === 'folder' ? 
-      (item.expanded ? 'icons/folder-open.svg' : 'icons/folder-closed.svg') :
-      `icons/${getFileIcon(item.name)}`;
-
-    // Collapse/expand chevron for folders
-    let chevron = '';
-    if (item.type === 'folder') {
-      chevron = `<span class="material-icons chevron ${
-        item.expanded ? '' : 'collapsed'
-      }">chevron_right</span>`;
-    }
-
-    itemElement.innerHTML = `
-      ${chevron}
-      <div class="item-content">
-        ${icon.outerHTML}
-        <span class="item-name">${item.name}</span>
-      </div>
-      <div class="item-actions">
-        ${item.type === 'file' ? `<span class="open-file-btn">◷</span>` : ''}
-        <span class="delete-btn">×</span>
-      </div>
-    `;
-
-    // Event handlers
-    if (item.type === 'folder') {
-      itemElement.querySelector('.chevron').addEventListener('click', (e) => {
-        e.stopPropagation();
-        item.expanded = !item.expanded;
-        renderFileList();
+      tabItem.addEventListener('click', () => {
+        switchToTab(tab.id);
       });
-    }
 
-    itemElement.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('delete-btn')) {
-        // Select item
-        document.querySelectorAll('.tree-item').forEach(i => 
-          i.classList.remove('selected'));
-        itemElement.classList.add('selected');
-        state.selectedPath = item.path || item.name;
-      }
+      openTabsSection.appendChild(tabItem);
     });
-
-    itemElement.addEventListener('dblclick', () => {
-      if (item.type === 'folder') {
-        item.expanded = !item.expanded;
-        renderFileList();
-      } else {
-        handleMenuAction('open-file', { path: item.path || item.name });
-      }
-    });
-
-    itemElement.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      showContextMenu(e, item);
-    });
-
-    return itemElement;
   }
 
-  // Context menu handling
-  function showContextMenu(e, item) {
-    const contextMenu = document.createElement('div');
-    contextMenu.className = 'context-menu';
-    contextMenu.style.left = `${e.pageX}px`;
-    contextMenu.style.top = `${e.pageY}px`;
-
-    const menuItems = [
-      { label: 'New File', action: 'add-file' },
-      { label: 'New Folder', action: 'add-folder' },
-      { label: 'Rename', action: 'rename-file' },
-      { label: 'Delete', action: 'delete-file' },
-      { label: 'Refresh', action: 'refresh-explorer' }
-    ];
-
-    menuItems.forEach(menuItem => {
-      const menuOption = document.createElement('div');
-      menuOption.className = 'context-menu-item';
-      menuOption.textContent = menuItem.label;
-      menuOption.dataset.action = menuItem.action;
-      menuOption.dataset.path = item.path || item.name;
-      contextMenu.appendChild(menuOption);
-    });
-
-    document.body.appendChild(contextMenu);
-
-    const closeMenu = () => {
-      contextMenu.remove();
-      document.removeEventListener('click', closeMenu);
-    };
-
-    contextMenu.addEventListener('click', (e) => {
-      const action = e.target.dataset.action;
-      const path = e.target.dataset.path;
-      if (action) {
-        handleMenuAction(action, { path });
-      }
-      closeMenu();
-    });
-
-    document.addEventListener('click', closeMenu);
-  }
-
-  // Start rendering from root items
-  renderItems(state.files, treeContainer);
+  // Clear and append to file list
+  fileList.innerHTML = '';
+  fileList.appendChild(openTabsSection);
 }
+
+// Auto-refresh file list when tabs change
+function refreshExploreFileList() {
+  renderFileList();
+}
+
+// Show open tabs in file explorer context menu
+document.addEventListener('click', function (e) {
+  const contextMenu = fileList.querySelector('.context-menu');
+  if (contextMenu && contextMenu.style.display === 'block') {
+    if (e.target.dataset.action === 'tabs') {
+      // Build a list of open tabs
+      let tabsHtml = '<div style="padding:4px 8px;font-weight:bold;">Open Tabs:         \/</div>';
+      if (state.tabs.length === 0) {
+        tabsHtml += '<div style="padding:4px 8px;">No open tabs</div>';
+      } else {
+        state.tabs.forEach(tab => {
+          tabsHtml += `<div class="dropdown-item" data-action="switch-tab" data-tab-id="${tab.id}">${tab.name}${tab.active ? ' <span style="color:var(--accent)">[active]</span>' : ''}</div>`;
+        });
+      }
+      contextMenu.innerHTML = tabsHtml +
+        `<div class="dropdown-item" data-action="close-tab-list">Close</div>`;
+    } else if (e.target.dataset.action === 'switch-tab') {
+      const tabId = e.target.dataset.tabId;
+      if (tabId) {
+        switchToTab(tabId);
+        contextMenu.style.display = 'none';
+      }
+    } else if (e.target.dataset.action === 'close-tab-list') {
+      contextMenu.style.display = 'none';
+    }
+  }
+});
 
   function updatePreview() {
     try {
@@ -991,6 +920,7 @@ ${tab.name}
       await detectLanguage();
       renderTabs();
       saveTabsToStorage();
+      refreshExploreFileList();
 
       return true;
     } catch (error) {
@@ -1111,6 +1041,7 @@ ${tab.name}
       addToRecentFiles(newTab);
       await detectLanguage();
       saveTabsToStorage();
+      refreshExploreFileList();
 
     } catch (error) {
       if (error.name !== 'AbortError') {
@@ -1152,6 +1083,7 @@ ${tab.name}
         updateStatus(`Opened ${file.name}`);
         await detectLanguage();
         saveTabsToStorage();
+        refreshExploreFileList();
       } else {
         showError("File not found. It may have been moved or deleted.");
         state.recentFiles = state.recentFiles.filter(f => f.name !== fileName);
@@ -1207,6 +1139,7 @@ ${tab.name}
     updateStatus("Created new file");
     detectLanguage();
     saveTabsToStorage();
+    refreshExploreFileList();
   }
 
   function nameFile() {
@@ -1218,6 +1151,7 @@ ${tab.name}
       renderTabs();
       updateStatus(`Renamed to ${currentTab.name}`);
       saveTabsToStorage();
+      refreshExploreFileList();
     }
   }
 
@@ -1666,6 +1600,7 @@ ${tab.name}
       addToRecentFiles(newTab);
       await detectLanguage();
       saveTabsToStorage();
+      refreshExploreFileList();
 
     } catch (error) {
       showError(`Open failed: ${error.message}`);
@@ -1707,11 +1642,17 @@ ${tab.name}
     }
   }
 
-  // Fixed addFile implementation
+  // Improved addFile implementation with validation
   function addFile() {
     const currentPath = state.fileExplorerPath || '';
-    const fileName = prompt('Enter file name with extension:');
+    let fileName = prompt('Enter file name with extension:');
     if (!fileName) return;
+    fileName = fileName.trim();
+    // Prevent empty, whitespace, or invalid file names
+    if (!fileName || /[\\/:*?"<>|]/.test(fileName)) {
+      showError('Invalid file name.');
+      return;
+    }
 
     try {
       let targetLocation = state.files;
@@ -1744,11 +1685,36 @@ ${tab.name}
     }
   }
 
-  // Fixed addFolder implementation
+  // Provide default content for new files based on extension
+  function getDefaultContent(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    switch (ext) {
+      case 'html':
+        return INIT_CONTENTS;
+      case 'css':
+        return '/* New CSS file */\n';
+      case 'js':
+        return '// New JavaScript file\n';
+      case 'json':
+        return '{\n  \n}';
+      case 'txt':
+        return '';
+      default:
+        return '';
+    }
+  }
+
+  // Fixed addFolder implementation with validation
   function addFolder() {
     const currentPath = state.fileExplorerPath || '';
-    const folderName = prompt('Enter folder name:');
+    let folderName = prompt('Enter folder name:');
     if (!folderName) return;
+    folderName = folderName.trim();
+    // Prevent empty, whitespace, or invalid folder names
+    if (!folderName || /[\\/:*?"<>|]/.test(folderName)) {
+      showError('Invalid folder name.');
+      return;
+    }
 
     try {
       let targetLocation = state.files;
@@ -1908,6 +1874,7 @@ ${tab.name}
     getCurrentTab();
     renderTabs();
     renderFileList();
+    refreshExploreFileList();
 
     // Set empty state on load if needed
     const editorWrapper = document.querySelector('.editor-wrapper');
@@ -1935,6 +1902,9 @@ ${tab.name}
     });
 
     updatePreview();
+    refreshExploreFileList();
+    setTheme(localStorage.getItem('editorTheme') || 'automatic');
+    updateStatus("IDE Setup Ready");
     watchFileChanges();
   }
 
