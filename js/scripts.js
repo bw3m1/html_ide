@@ -558,42 +558,46 @@ ${tab.name}
     updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
   }
 
-function renderFileList() {
-  // Render open tabs as a list in the file explorer
-  const openTabsSection = document.createElement('div');
-  openTabsSection.className = 'open-tabs-section';
-  openTabsSection.innerHTML = '<div class="file-explorer-section-title">Open Tabs</div>';
+  function renderFileExplorer() {
+    // Render open tabs as a list in the file explorer
+    const openTabsSection = document.createElement('div');
+    openTabsSection.className = 'open-tabs-section';
+    openTabsSection.innerHTML = '<div class="file-explorer-section-title">Open Tabs</div>';
 
-  if (state.tabs.length === 0) {
-    const emptyMsg = document.createElement('div');
-    emptyMsg.className = 'file-item empty';
-    emptyMsg.textContent = 'No open tabs';
-    openTabsSection.appendChild(emptyMsg);
-  } else {
-    state.tabs.forEach(tab => {
-      const tabItem = document.createElement('div');
-      tabItem.className = 'file-item tab-item' + (tab.active ? ' active' : '');
-      tabItem.textContent = tab.name;
-      tabItem.dataset.tabId = tab.id;
-      tabItem.title = tab.name + (tab.active ? ' (active)' : '');
+    if (state.tabs.length === 0) {
+      const emptyMsg = document.createElement('div');
+      emptyMsg.className = 'file-item empty';
+      emptyMsg.textContent = 'No open tabs';
+      openTabsSection.appendChild(emptyMsg);
+    } else {
+      state.tabs.forEach(tab => {
+        const tabItem = document.createElement('div');
+        tabItem.className = 'file-item tab-item' + (tab.active ? ' active' : '');
+        // Use getIcon for the tab icon
+        const iconPath = getIcon(tab.name, false, false, localStorage.getItem('editorTheme') === 'light' ? 'light' : 'dark');
+        tabItem.innerHTML = `<img src="${iconPath}" alt="" class="file-icon" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;">${tab.name}`;
+        tabItem.dataset.tabId = tab.id;
+        tabItem.title = tab.name + (tab.active ? ' (active)' : '');
 
-      tabItem.addEventListener('click', () => {
-        switchToTab(tab.id);
+        tabItem.addEventListener('click', () => {
+          switchToTab(tab.id);
+        });
+
+        openTabsSection.appendChild(tabItem);
       });
+    }
 
-      openTabsSection.appendChild(tabItem);
-    });
+    // Clear and append to file list
+    fileList.innerHTML = '';
+    fileList.appendChild(openTabsSection);
   }
 
-  // Clear and append to file list
-  fileList.innerHTML = '';
-  fileList.appendChild(openTabsSection);
-}
 
-// Auto-refresh file list when tabs change
-function refreshExploreFileList() {
-  renderFileList();
-}
+  
+  // Auto-refresh file list when tabs change
+  function refreshExploreFileList() {
+    renderFileExplorer();
+  }
 
 // Show open tabs in file explorer context menu
 document.addEventListener('click', function (e) {
@@ -785,7 +789,7 @@ document.addEventListener('click', function (e) {
       const targetPath = target.dataset.path;
       // Implement your move logic here
       updateStatus(`Moved ${sourcePath} to ${targetPath}`);
-      renderFileList();
+      renderFileExplorer();
     }
   });
 
@@ -1607,7 +1611,43 @@ document.addEventListener('click', function (e) {
     }
   }
 
-  // Fixed deleteFile implementation
+  // Returns the icon path for a given file or folder
+  function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
+    if (theme === 'light') {
+      if (isFolder) return isOpen ? 'icons/open_folder_icon_light.svg' : 'icons/closed_folder_icon_light.svg';
+    } else {
+      if (isFolder) return isOpen ? 'icons/open_folder_icon_dark.svg' : 'icons/closed_folder_icon_dark.svg';
+    }
+    if (!fileName) return 'icons/text_icon.png';
+    if (!isFolder && fileName && fileName.includes('.')) {
+      const ext = fileName.split('.').pop().toLowerCase();
+      switch (ext) {
+        case 'html': return 'icons/html_icon.png';
+        case 'css': return 'icons/CSS_icon.png';
+        case 'js': return 'icons/JavaScripts_icon.png';
+        case 'json': return 'icons/json_icon.png';
+        case 'md': return 'icons/README_icon.png';
+        case 'txt': return 'icons/text_icon.png';
+        case 'png': return 'icons/png_img_icon.png';
+        case 'jpg': return 'icons/jpeg_img_icon.png';
+        case 'jpeg': return 'icons/jpeg_img_icon.png';
+        case 'gif': return 'icons/gif_video_icon.png';
+        case 'svg': return 'icons/svg_img_icon.png';
+        case 'zip': return 'icons/closed_zip_folder_icon.svg';
+        case 'c': return 'icons/Clang_icon.png';
+        case 'cpp': return 'icons/Cpp_icon.png';
+        case 'cs': return 'icons/Csharp_icon.png';
+        case 'py': return 'icons/python_icon.png';
+        case 'java': return 'icons/java_icon.png'; 
+        case 'rs': return 'icons/rust_icon.png';
+        case 'go': return 'icons/golang_icon.png';
+        case 'jsx': return 'icons/react_icon.png';
+        case 'mp3': return 'icons/mp3_audio_icon.png';
+        default: return 'icons/text_icon.png';
+      }
+    }
+  }
+
   async function deleteFile(path) {
     if (!path) {
       const selectedItem = document.querySelector('.context-menu').dataset.path;
@@ -1635,7 +1675,7 @@ document.addEventListener('click', function (e) {
 
       currentLevel.splice(index, 1);
       saveProjectFiles();
-      renderFileList();
+      renderFileExplorer();
       updateStatus(`Deleted ${path}`);
     } catch (error) {
       showError(`Delete failed: ${error.message}`);
@@ -1678,7 +1718,7 @@ document.addEventListener('click', function (e) {
 
       targetLocation.push(newFile);
       saveProjectFiles();
-      renderFileList();
+      renderFileExplorer();
       updateStatus(`Added ${currentPath}/${fileName}`);
     } catch (error) {
       showError(error.message);
@@ -1740,7 +1780,7 @@ document.addEventListener('click', function (e) {
       });
 
       saveProjectFiles();
-      renderFileList();
+      renderFileExplorer();
       updateStatus(`Added folder ${currentPath}/${folderName}`);
     } catch (error) {
       showError(error.message);
@@ -1873,7 +1913,7 @@ document.addEventListener('click', function (e) {
     // Always ensure at least one tab exists
     getCurrentTab();
     renderTabs();
-    renderFileList();
+    renderFileExplorer();
     refreshExploreFileList();
 
     // Set empty state on load if needed
