@@ -337,7 +337,8 @@ require(['vs/editor/editor.main'], function () {
         type: 'html',
         content: INIT_CONTENTS,
         handle: null,
-        active: true
+        active: true,
+        unsaved: false
       };
       state.tabs.push(newTab);
       state.currentTabId = tabId;
@@ -364,7 +365,12 @@ require(['vs/editor/editor.main'], function () {
       tabElement.className = `tab ${tab.active ? 'active' : ''}`;
       tabElement.dataset.tabId = tab.id;
 
+      // Add icon to tab
+      const fileType = tab.name.split('.').pop().toLowerCase();
+      const iconPath = getIcon(tab.name, false, false, localStorage.getItem('editorTheme') === 'light' ? 'light' : 'dark');
+
       tabElement.innerHTML = `
+<img src="${iconPath}" class="tab-icon" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
 ${tab.name}
 <div class="tab-close" data-action="close-tab" data-tab-id="${tab.id}">×</div>
 `;
@@ -539,6 +545,13 @@ ${tab.name}
       handle: null // Exclude handle
     }));
     localStorage.setItem('editorTabs', JSON.stringify(sanitizedTabs));
+    // Sync tab content to state.files if file exists
+    state.tabs.forEach(tab => {
+      const fileEntry = findFileEntry(tab.name, state.files);
+      if (fileEntry && fileEntry.type === 'file') {
+        fileEntry.content = tab.content;
+      }
+    });
     refreshExploreFileList();
   }
 
@@ -559,37 +572,67 @@ ${tab.name}
   }
 
   function renderFileExplorer() {
-    // Render open tabs as a list in the file explorer
-    const openTabsSection = document.createElement('div');
-    openTabsSection.className = 'open-tabs-section';
-    openTabsSection.innerHTML = '<div class="file-explorer-section-title">Open Tabs</div>';
-
-    if (state.tabs.length === 0) {
-      const emptyMsg = document.createElement('div');
-      emptyMsg.className = 'file-item empty';
-      emptyMsg.textContent = 'No open tabs';
-      openTabsSection.appendChild(emptyMsg);
-    } else {
-      state.tabs.forEach(tab => {
-        const tabItem = document.createElement('div');
-        tabItem.className = 'file-item tab-item' + (tab.active ? ' active' : '');
-        // Use getIcon for the tab icon
-        const iconPath = getIcon(tab.name, false, false, localStorage.getItem('editorTheme') === 'light' ? 'light' : 'dark');
-        tabItem.innerHTML = `<img src="${iconPath}" alt="" class="file-icon" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;">${tab.name}`;
-        tabItem.dataset.tabId = tab.id;
-        tabItem.title = tab.name + (tab.active ? ' (active)' : '');
-
-        tabItem.addEventListener('click', () => {
-          switchToTab(tab.id);
-        });
-
-        openTabsSection.appendChild(tabItem);
+    // Helper to recursively render files/folders
+    function renderItems(items, parentPath = '') {
+      const fragment = document.createDocumentFragment();
+      items.forEach(item => {
+        const itemPath = parentPath ? `${parentPath}/${item.name}` : item.name;
+        const isFolder = item.type === 'folder';
+        const div = document.createElement('div');
+        div.className = `file-item${isFolder ? ' folder' : ''}`;
+        div.dataset.path = itemPath;
+        div.setAttribute('tabindex', '0'); // Accessibility
+        div.innerHTML = `<img src="${getIcon(item.name, isFolder, item.expanded, localStorage.getItem('editorTheme') === 'light' ? 'light' : 'dark')}" class="file-icon" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;">${item.name}`;
+        if (isFolder) {
+          div.addEventListener('click', () => {
+            item.expanded = !item.expanded;
+            renderFileExplorer();
+          });
+        } else {
+          div.addEventListener('click', () => openFileFromExplorer(itemPath));
+        }
+        fragment.appendChild(div);
+        if (isFolder && item.expanded && item.children) {
+          const children = renderItems(item.children, itemPath);
+          children.style.marginLeft = '16px';
+          fragment.appendChild(children);
+        }
       });
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+      return container;
     }
-
-    // Clear and append to file list
     fileList.innerHTML = '';
-    fileList.appendChild(openTabsSection);
+    fileList.appendChild(renderItems(state.files));
+
+    // --- Open Editors Section ---
+    const openEditorsSection = document.createElement('div');
+    openEditorsSection.className = 'open-editors-section';
+    openEditorsSection.innerHTML = `<div class="open-editors-title" style="font-weight:bold;margin:8px 0 4px 0;">Open Editors</div>`;
+    state.tabs.forEach(tab => {
+      const tabDiv = document.createElement('div');
+      tabDiv.className = `open-editor-item${tab.active ? ' active' : ''}`;
+      tabDiv.style.display = 'flex';
+      tabDiv.style.alignItems = 'center';
+      tabDiv.style.cursor = 'pointer';
+      tabDiv.style.padding = '2px 0 2px 20px';
+      tabDiv.dataset.tabId = tab.id;
+      tabDiv.innerHTML = `
+        <span style="flex:1">${tab.name}${tab.unsaved ? ' <span style="color:var(--accent)">*</span>' : ''}${tab.active ? ' <span style="color:var(--accent)">[active]</span>' : ''}</span>
+        <span class="open-editor-close" title="Close" style="margin-left:8px;color:#888;cursor:pointer;">&#10005;</span>
+      `;
+      tabDiv.addEventListener('click', (e) => {
+        if (e.target.classList.contains('open-editor-close')) {
+          closeTab(tab.id);
+          e.stopPropagation();
+        } else {
+          switchToTab(tab.id);
+        }
+      });
+      openEditorsSection.appendChild(tabDiv);
+    });
+    fileList.appendChild(openEditorsSection);
+    // --- End Open Editors Section ---
   }
 
 
@@ -631,6 +674,65 @@ document.addEventListener('click', function (e) {
     try {
       preview.innerHTML = '';
       const currentTab = getCurrentTab();
+      const value = editor.getValue();
+      const fileName = currentTab.name.toLowerCase();
+
+      // --- Image Previewer ---
+      if (
+        fileName.endsWith('.png') ||
+        fileName.endsWith('.jpg') ||
+        fileName.endsWith('.jpeg')
+      ) {
+        // For PNG/JPG/JPEG, show as data URL
+        const base64 = btoa(
+          Uint8Array.from(value, c => c.charCodeAt(0))
+            .reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        let mime = 'image/png';
+        if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) mime = 'image/jpeg';
+        const img = document.createElement('img');
+        img.src = `data:${mime};base64,${base64}`;
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        img.alt = currentTab.name;
+        preview.appendChild(img);
+        updateStatus("Image preview");
+        return;
+      }
+      if (fileName.endsWith('.svg')) {
+        // For SVG, show as inline SVG
+        const svgContainer = document.createElement('div');
+        svgContainer.innerHTML = value;
+        svgContainer.style.display = 'flex';
+        svgContainer.style.alignItems = 'center';
+        svgContainer.style.justifyContent = 'center';
+        svgContainer.style.height = '100%';
+        svgContainer.style.width = '100%';
+        preview.appendChild(svgContainer);
+        updateStatus("SVG preview");
+        return;
+      }
+      // --- End Image Preview ---
+
+      const isHtml = currentTab.name.endsWith('.html');
+      if (isHtml) {
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        preview.appendChild(iframe);
+        let content = value;
+        if (!/^<!DOCTYPE html>/i.test(value)) {
+          content = `<!DOCTYPE html><html><head></head><body>${value}</body></html>`;
+        }
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(content);
+        iframe.contentDocument.close();
+        updateStatus("Preview updated");
+        return;
+      }
+
       const isJsFile = currentTab.name.endsWith('.js');
       const isOtherFormat = !isJsFile && !currentTab.name.endsWith('.html');
 
@@ -1578,6 +1680,12 @@ document.addEventListener('click', function (e) {
         throw new Error(`File not found: ${filePath}`);
       }
 
+      // Check if tab already open
+      if (state.tabs.some(tab => tab.name === fileEntry.name)) {
+        switchToTab(state.tabs.find(tab => tab.name === fileEntry.name).id);
+        return;
+      }
+
       // Create a new tab for the opened file
       const tabId = generateTabId();
       const newTab = {
@@ -1677,6 +1785,11 @@ document.addEventListener('click', function (e) {
       saveProjectFiles();
       renderFileExplorer();
       updateStatus(`Deleted ${path}`);
+
+      // Close any open tab with this file name
+      state.tabs = state.tabs.filter(tab => tab.name !== fileName);
+      saveTabsToStorage();
+      renderTabs();
     } catch (error) {
       showError(`Delete failed: ${error.message}`);
     }
@@ -1931,6 +2044,7 @@ document.addEventListener('click', function (e) {
       const currentTab = getCurrentTab();
       if (currentTab) {
         currentTab.content = editor.getValue();
+        markTabUnsaved(currentTab.id, true);
         saveTabsToStorage();
       }
       clearTimeout(debounceTimer);
@@ -1945,8 +2059,24 @@ document.addEventListener('click', function (e) {
     refreshExploreFileList();
     setTheme(localStorage.getItem('editorTheme') || 'automatic');
     updateStatus("IDE Setup Ready");
-    watchFileChanges();
+    // watchFileChanges();
   }
 
   init();
+
+  // Add this helper near other file explorer helpers
+  function findFileEntry(path, files) {
+    if (!path) return null;
+    const parts = path.split('/').filter(Boolean);
+    let current = files;
+    let entry = null;
+    for (const part of parts) {
+      entry = current.find(item => item.name === part);
+      if (!entry) return null;
+      if (entry.type === 'folder') {
+        current = entry.children;
+      }
+    }
+    return entry;
+  }
 });
