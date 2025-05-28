@@ -670,6 +670,127 @@ document.addEventListener('click', function (e) {
   }
 });
 
+  let imageOverlay = null;
+
+  function showImageOverlay(src, alt) {
+    if (imageOverlay) {
+      imageOverlay.remove();
+    }
+    imageOverlay = document.createElement('div');
+    imageOverlay.style.position = 'fixed';
+    imageOverlay.style.top = '0';
+    imageOverlay.style.left = '0';
+    imageOverlay.style.width = '100vw';
+    imageOverlay.style.height = '100vh';
+    imageOverlay.style.background = 'rgba(0,0,0,0.95)';
+    imageOverlay.style.display = 'flex';
+    imageOverlay.style.alignItems = 'center';
+    imageOverlay.style.justifyContent = 'center';
+    imageOverlay.style.zIndex = '9999';
+    imageOverlay.style.cursor = 'zoom-out';
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = alt || '';
+    img.style.maxWidth = '90vw';
+    img.style.maxHeight = '90vh';
+    img.style.boxShadow = '0 0 32px #000';
+
+    // Optional: add a close button
+    const closeBtn = document.createElement('div');
+    closeBtn.textContent = '×';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '24px';
+    closeBtn.style.right = '48px';
+    closeBtn.style.fontSize = '3rem';
+    closeBtn.style.color = '#fff';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.userSelect = 'none';
+
+    closeBtn.onclick = hideImageOverlay;
+    imageOverlay.onclick = hideImageOverlay;
+    img.onclick = (e) => e.stopPropagation(); // Prevent closing when clicking image
+
+    imageOverlay.appendChild(img);
+    imageOverlay.appendChild(closeBtn);
+    document.body.appendChild(imageOverlay);
+
+    // Hide editor and preview pane
+    document.querySelector('.editor-wrapper').style.display = 'none';
+    document.querySelector('.preview-pane').style.display = 'none';
+  }
+
+  function hideImageOverlay() {
+    if (imageOverlay) {
+      imageOverlay.remove();
+      imageOverlay = null;
+    }
+    // Restore editor and preview pane
+    document.querySelector('.editor-wrapper').style.display = '';
+    document.querySelector('.preview-pane').style.display = '';
+  }
+
+  function showImagePreviewInPane(src, alt, isSvg, svgContent) {
+    // Hide editor, show preview pane
+    document.querySelector('.editor-wrapper').style.display = 'none';
+    const previewPane = document.querySelector('.preview-pane');
+    previewPane.style.display = 'flex';
+    previewPane.style.justifyContent = 'center';
+    previewPane.style.alignItems = 'center';
+    previewPane.style.background = '#111';
+
+    // Clear preview and add image
+    preview.innerHTML = '';
+    if (isSvg) {
+      // Render SVG markup directly
+      const svgWrapper = document.createElement('div');
+      svgWrapper.innerHTML = svgContent;
+      svgWrapper.style.maxWidth = '100%';
+      svgWrapper.style.maxHeight = '100%';
+      svgWrapper.style.display = 'flex';
+      svgWrapper.style.alignItems = 'center';
+      svgWrapper.style.justifyContent = 'center';
+      svgWrapper.style.background = '#111';
+      svgWrapper.style.cursor = 'zoom-out';
+      svgWrapper.onclick = hideImagePreviewInPane;
+      preview.appendChild(svgWrapper);
+    } else {
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = alt || '';
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '100%';
+      img.style.objectFit = 'contain';
+      img.style.background = '#111';
+      img.style.cursor = 'zoom-out';
+      img.onclick = hideImagePreviewInPane;
+      preview.appendChild(img);
+    }
+
+    // Optional: add a hint
+    const hint = document.createElement('div');
+    hint.textContent = 'Click image to return to editor';
+    hint.style.position = 'absolute';
+    hint.style.bottom = '24px';
+    hint.style.left = '50%';
+    hint.style.transform = 'translateX(-50%)';
+    hint.style.color = '#fff';
+    hint.style.background = 'rgba(0,0,0,0.5)';
+    hint.style.padding = '4px 12px';
+    hint.style.borderRadius = '8px';
+    hint.style.fontSize = '0.9rem';
+    preview.appendChild(hint);
+  }
+
+  function hideImagePreviewInPane() {
+    document.querySelector('.editor-wrapper').style.display = '';
+    const previewPane = document.querySelector('.preview-pane');
+    previewPane.style.justifyContent = '';
+    previewPane.style.alignItems = '';
+    previewPane.style.background = '';
+    updatePreview(); // Restore normal preview
+  }
+
   function updatePreview() {
     try {
       preview.innerHTML = '';
@@ -677,42 +798,46 @@ document.addEventListener('click', function (e) {
       const value = editor.getValue();
       const fileName = currentTab.name.toLowerCase();
 
-      // --- Image Previewer ---
+      // --- SVG Preview from markup ---
+      if (fileName.endsWith('.svg')) {
+        showImagePreviewInPane('', currentTab.name, true, value);
+        updateStatus("SVG preview (click to return to editor)");
+        return;
+      }
+      // --- PNG/JPG/JPEG: Show message, not preview ---
       if (
         fileName.endsWith('.png') ||
         fileName.endsWith('.jpg') ||
         fileName.endsWith('.jpeg')
       ) {
-        // For PNG/JPG/JPEG, show as data URL
-        const base64 = btoa(
-          Uint8Array.from(value, c => c.charCodeAt(0))
-            .reduce((data, byte) => data + String.fromCharCode(byte), '')
-        );
-        let mime = 'image/png';
-        if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) mime = 'image/jpeg';
-        const img = document.createElement('img');
-        img.src = `data:${mime};base64,${base64}`;
-        img.style.maxWidth = '100%';
-        img.style.maxHeight = '100%';
-        img.alt = currentTab.name;
-        preview.appendChild(img);
-        updateStatus("Image preview");
-        return;
-      }
-      if (fileName.endsWith('.svg')) {
-        // For SVG, show as inline SVG
-        const svgContainer = document.createElement('div');
-        svgContainer.innerHTML = value;
-        svgContainer.style.display = 'flex';
-        svgContainer.style.alignItems = 'center';
-        svgContainer.style.justifyContent = 'center';
-        svgContainer.style.height = '100%';
-        svgContainer.style.width = '100%';
-        preview.appendChild(svgContainer);
-        updateStatus("SVG preview");
+        document.querySelector('.editor-wrapper').style.display = 'none';
+        const previewPane = document.querySelector('.preview-pane');
+        previewPane.style.display = 'flex';
+        previewPane.style.justifyContent = 'center';
+        previewPane.style.alignItems = 'center';
+        previewPane.style.background = '#111';
+        preview.innerHTML = '';
+        const msg = document.createElement('div');
+        msg.textContent = 'Image preview not available for PNG/JPG unless file is opened as binary.';
+        msg.style.color = '#fff';
+        msg.style.fontSize = '1.2rem';
+        msg.style.background = 'rgba(0,0,0,0.7)';
+        msg.style.padding = '2rem';
+        msg.style.borderRadius = '12px';
+        msg.style.textAlign = 'center';
+        msg.style.cursor = 'pointer';
+        msg.onclick = hideImagePreviewInPane;
+        preview.appendChild(msg);
         return;
       }
       // --- End Image Preview ---
+
+      // Restore editor if not viewing image
+      document.querySelector('.editor-wrapper').style.display = '';
+      const previewPane = document.querySelector('.preview-pane');
+      previewPane.style.justifyContent = '';
+      previewPane.style.alignItems = '';
+      previewPane.style.background = '';
 
       const isHtml = currentTab.name.endsWith('.html');
       if (isHtml) {
