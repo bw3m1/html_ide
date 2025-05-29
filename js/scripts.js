@@ -461,7 +461,7 @@ require(['vs/editor/editor.main'], function () {
         };
         document.addEventListener('keydown', escapeHandler);
     });
-}
+  }
 
   // Tab management functions
   function generateTabId() {
