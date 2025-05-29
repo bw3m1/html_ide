@@ -13,7 +13,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
       /* Style Sheets goes here */
       
     </style>
-  </head>
+  </head>s
   <body>
     
     <!-- body -->
@@ -330,6 +330,138 @@ require(['vs/editor/editor.main'], function () {
   }
 }`
   };
+
+
+  function showAlert(message, type = 'ERR', title = 'Error Alert', icon = 'ERR') {
+    const VALID_TYPES = ['ERR', 'INFO', 'QUERY', 'REQUEST', 'SUCCESS', 'WARNING', 'CONFIRM'];
+    
+    return new Promise((resolve) => {
+        // Validate and sanitize parameters
+        type = VALID_TYPES.includes(type.toUpperCase()) ? type.toUpperCase() : 'ERR';
+        icon = VALID_TYPES.includes(icon.toUpperCase()) ? icon.toUpperCase() : type;
+        
+        // Remove any existing alerts
+        const existingAlerts = document.querySelectorAll('.alert-view');
+        existingAlerts.forEach(alert => alert.remove());
+
+        // Create alert container
+        const alertView = document.createElement('div');
+        alertView.className = `alert-view alert-${type.toLowerCase()}`;
+        alertView.setAttribute('role', 'alertdialog');
+        alertView.setAttribute('aria-modal', 'true');
+        alertView.setAttribute('aria-labelledby', 'alertTitle');
+        alertView.setAttribute('aria-describedby', 'alertMessage');
+
+        // Create header with icon and title
+        const header = document.createElement('div');
+        header.className = 'alert-header';
+        
+        const iconElement = document.createElement('img');
+        iconElement.src = `icons/nodeifications/${icon.toLowerCase()}_icon.png`;
+        iconElement.className = 'alert-icon';
+        iconElement.alt = `${type} icon`;
+        
+        const titleElement = document.createElement('div');
+        titleElement.className = 'alert-title';
+        titleElement.id = 'alertTitle';
+        titleElement.textContent = title;
+        
+        header.appendChild(iconElement);
+        header.appendChild(titleElement);
+        alertView.appendChild(header);
+
+        // Create message and input if QUERY type
+        if (type === 'QUERY') {
+            const messageText = document.createElement('div');
+            messageText.className = 'alert-message';
+            messageText.id = 'alertMessage';
+            messageText.textContent = message;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'alert-input';
+            input.style.width = '100%';
+            input.style.padding = '8px';
+            input.style.marginTop = '10px';
+            input.style.marginBottom = '20px';
+            input.style.borderRadius = '4px';
+            input.style.border = '1px solid var(--outline-dark)';
+            input.style.background = 'var(--menu-bg-dark)';
+            input.style.color = 'var(--text-dark)';
+            
+            alertView.appendChild(messageText);
+            alertView.appendChild(input);
+            
+            // Focus input after a short delay
+            setTimeout(() => input.focus(), 50);
+
+            // Handle enter key
+            input.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    resolve(input.value);
+                    alertView.remove();
+                }
+            });
+        } else {
+            const messageText = document.createElement('div');
+            messageText.className = 'alert-message';
+            messageText.id = 'alertMessage';
+            messageText.innerHTML = message.replace(/\n/g, '<br>');
+            alertView.appendChild(messageText);
+        }
+
+        // Create buttons
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.gap = '10px';
+        buttonContainer.style.justifyContent = 'flex-end';
+
+        if (type === 'QUERY') {
+            const okButton = document.createElement('button');
+            okButton.className = 'alert-button';
+            okButton.textContent = 'OK';
+            okButton.onclick = () => {
+                resolve(alertView.querySelector('input').value);
+                alertView.remove();
+            };
+
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'alert-button alert-button-secondary';
+            cancelButton.textContent = 'Cancel';
+            cancelButton.onclick = () => {
+                resolve(null);
+                alertView.remove();
+            };
+
+            buttonContainer.appendChild(cancelButton);
+            buttonContainer.appendChild(okButton);
+        } else {
+            const okButton = document.createElement('button');
+            okButton.className = 'alert-button';
+            okButton.textContent = 'OK';
+            okButton.onclick = () => {
+                resolve();
+                alertView.remove();
+            };
+            buttonContainer.appendChild(okButton);
+        }
+
+        alertView.appendChild(buttonContainer);
+
+        // Add to document
+        document.body.appendChild(alertView);
+
+        // Handle escape key
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                resolve(null);
+                alertView.remove();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+    });
+}
 
   // Tab management functions
   function generateTabId() {
@@ -1712,16 +1844,15 @@ document.addEventListener('click', function (e) {
     refreshExploreFileList();
   }
 
-  function nameFile() {
+  async function nameFile() {
     const currentTab = getCurrentTab();
-    const name = prompt('Enter new file name (without extension):',
-      currentTab.name.replace(/\..*$/, ''));
+    const name = await showAlert('Enter new file name (without extension):', 'QUERY', 'Rename File', 'QUERY');
     if (name) {
-      currentTab.name = `${name}${FILE_TYPES[currentTab.type].ext}`;
-      renderTabs();
-      updateStatus(`Renamed to ${currentTab.name}`);
-      saveTabsToStorage();
-      refreshExploreFileList();
+        currentTab.name = `${name}${FILE_TYPES[currentTab.type].ext}`;
+        renderTabs();
+        updateStatus(`Renamed to ${currentTab.name}`);
+        saveTabsToStorage();
+        refreshExploreFileList();
     }
   }
 
@@ -1870,6 +2001,7 @@ document.addEventListener('click', function (e) {
 
   function showError(message) {
     console.error(message);
+    showAlert(message); // Replace updateStatus with showAlert for errors
     updateStatus(message, true);
   }
 
@@ -1999,7 +2131,7 @@ document.addEventListener('click', function (e) {
         case 'save-as-zip': await saveZip(); break;
         case 'export-ide': await exportIdeProject(); break;
         case 'import-ide': await importIdeProject(); break;
-        case 'rename': nameFile(); break;
+        case 'rename': await nameFile(); break;
         case 'clear': clearFile(); break;
         case 'undo': editor.trigger('', 'undo'); break;
         case 'redo': editor.trigger('', 'redo'); break;
@@ -2146,9 +2278,14 @@ document.addEventListener('click', function (e) {
         case 'file-2-rust': setFileType('rs'); detectLanguage(); break;
         case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
-          alert('html IDE\n\nVersion:                  0.4.2.1\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveuped by Bryson J G.');
-          updateStatus("About dialog shown");
-          break;
+            showAlert(
+                'html IDE\n\nVersion:                  0.4.3\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveloped by Bryson J G.',
+                'INFO',
+                'About html IDE',
+                'INFO'
+            );
+            updateStatus("About dialog shown");
+            break;
         case 'toggle-autosave':
           state.autosaveEnabled = !state.autosaveEnabled;
           localStorage.setItem('autosaveEnabled', state.autosaveEnabled);
@@ -2557,5 +2694,4 @@ document.addEventListener('click', function (e) {
   }
 
   init();
-  
-  });
+});

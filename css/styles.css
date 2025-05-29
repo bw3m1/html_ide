@@ -568,3 +568,128 @@ body, html {
 #imgPrevZoomIn:hover, #imgPrevZoomOut:hover, #imgPrevReset:hover {
   background: var(--accent-color);
 }
+
+/* Alert View */
+.alert-view {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--menu-bg-dark);
+  border: 1px solid var(--outline-dark);
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 300px;
+  max-width: 80%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--text-dark);
+  animation: alertFadeIn 0.2s ease-out;
+}
+
+.alert-message {
+  font-size: 1.1em;
+  line-height: 1.4;
+}
+
+.alert-button {
+  align-self: flex-end;
+  padding: 8px 20px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.alert-button:hover {
+  background-color: #0066aa;
+}
+
+@keyframes alertFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes alertFadeOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+}
+
+/* Alert View Styles */
+.alert-view {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--menu-bg-dark);
+    color: var(--text-dark);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 300px;
+    max-width: 80vw;
+    z-index: 99999;
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.alert-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.alert-title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.alert-message {
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.alert-button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.alert-button:hover {
+    background: #0056b3;
+}
+
+/* Alert type styles */
+.alert-err { border-left: 4px solid var(--error-red); }
+.alert-info { border-left: 4px solid var(--accent-color); }
+.alert-query { border-left: 4px solid var(--accent-color); }
+.alert-request { border-left: 4px solid var(--accent-color); }
+.alert-success { border-left: 4px solid var(--success-green); }
+.alert-warning { border-left: 4px solid #ffc107; }
+.alert-confirm { border-left: 4px solid var(--accent-color); }
