@@ -791,6 +791,203 @@ document.addEventListener('click', function (e) {
     updatePreview(); // Restore normal preview
   }
 
+  let imagePreviewerOverlay = null;
+
+  function showImagePreviewerOverlay(fileType, imageData, alt = '') {
+    // Remove any existing overlay
+    if (imagePreviewerOverlay) imagePreviewerOverlay.remove();
+
+    // Find the container to overlay (editor + preview only)
+    const editorWrapper = document.querySelector('.editor-wrapper');
+    const previewPane = document.querySelector('.preview-pane');
+    // Create a container div to wrap both editor and preview if not already
+    let overlayContainer = document.getElementById('imgPreviewerOverlayContainer');
+    if (!overlayContainer) {
+      overlayContainer = document.createElement('div');
+      overlayContainer.id = 'imgPreviewerOverlayContainer';
+      overlayContainer.style.position = 'absolute';
+      overlayContainer.style.top = '0';
+      overlayContainer.style.left = '0';
+      overlayContainer.style.width = '100%';
+      overlayContainer.style.height = '100%';
+      overlayContainer.style.zIndex = '10000';
+      overlayContainer.style.pointerEvents = 'none';
+      // Insert overlayContainer as parent of editorWrapper and previewPane
+      const splitContainer = document.getElementById('mainContainer');
+      splitContainer.style.position = 'relative';
+      splitContainer.appendChild(overlayContainer);
+    }
+    overlayContainer.style.display = 'block';
+
+    imagePreviewerOverlay = document.createElement('div');
+    imagePreviewerOverlay.style.position = 'absolute';
+    imagePreviewerOverlay.style.top = '0';
+    imagePreviewerOverlay.style.left = '0';
+    imagePreviewerOverlay.style.width = '100%';
+    imagePreviewerOverlay.style.height = '100%';
+    imagePreviewerOverlay.style.background = '#222';
+    imagePreviewerOverlay.style.zIndex = '10001';
+    imagePreviewerOverlay.style.display = 'flex';
+    imagePreviewerOverlay.style.flexDirection = 'column';
+    imagePreviewerOverlay.style.justifyContent = 'center';
+    imagePreviewerOverlay.style.alignItems = 'center';
+    imagePreviewerOverlay.style.pointerEvents = 'auto';
+
+    // Controls
+    const controls = document.createElement('div');
+    controls.style.position = 'absolute';
+    controls.style.top = '10px';
+    controls.style.left = '10px';
+    controls.style.zIndex = '10';
+    controls.style.background = 'rgba(0,0,0,0.6)';
+    controls.style.padding = '6px 10px';
+    controls.style.borderRadius = '8px';
+    controls.style.color = 'white';
+    controls.style.display = 'flex';
+    controls.style.alignItems = 'center';
+    controls.innerHTML = `
+      <button id="imgPrevZoomIn">+</button>
+      <button id="imgPrevZoomOut">−</button>
+      <button id="imgPrevReset">Reset</button>
+      <button id="imgPrevClose" title="Close (Esc)">×</button>
+      <span id="imgPrevZoomLabel" style="margin-left:8px;">100%</span>
+    `;
+
+    // Canvas
+    const canvas = document.createElement('canvas');
+    canvas.id = 'imgPrevCanvas';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    canvas.style.background = "repeating-conic-gradient(#444 0% 25%, #555 0% 50%) 0 0 / 20px 20px";
+    canvas.style.cursor = 'grab';
+    canvas.tabIndex = 0;
+
+    imagePreviewerOverlay.appendChild(canvas);
+    imagePreviewerOverlay.appendChild(controls);
+    overlayContainer.appendChild(imagePreviewerOverlay);
+
+    // Hide only the Monaco editor, not the whole UI
+    editorWrapper.style.visibility = 'hidden';
+    previewPane.style.visibility = 'hidden';
+
+    // Image logic
+    const ctx = canvas.getContext('2d');
+    let image = new window.Image();
+    let zoom = 1, panX = 0, panY = 0;
+    let isPanning = false, startX = 0, startY = 0;
+    const zoomLabel = controls.querySelector('#imgPrevZoomLabel');
+    const ZOOM_MIN = 0.01, ZOOM_MAX = 8;
+
+    function resizeCanvas() {
+      // Fit to overlay size
+      canvas.width = imagePreviewerOverlay.offsetWidth;
+      canvas.height = imagePreviewerOverlay.offsetHeight;
+      drawImage();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawImage() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!image.complete || !image.width) return;
+      const drawWidth = image.width * zoom;
+      const drawHeight = image.height * zoom;
+      const x = (canvas.width - drawWidth) / 2 + panX;
+      const y = (canvas.height - drawHeight) / 2 + panY;
+      ctx.drawImage(image, x, y, drawWidth, drawHeight);
+    }
+
+    function updateZoomLabel() {
+      // Show as integer percent, clamp to 2 decimals, no scientific notation
+      let percent = zoom * 100;
+      if (percent < 1) percent = percent.toFixed(2);
+      else percent = Math.round(percent);
+      zoomLabel.textContent = percent + "%";
+    }
+
+    controls.querySelector('#imgPrevZoomIn').onclick = () => {
+      zoom = Math.min(zoom * 1.25, ZOOM_MAX);
+      updateZoomLabel();
+      drawImage();
+    };
+    controls.querySelector('#imgPrevZoomOut').onclick = () => {
+      zoom = Math.max(zoom / 1.25, ZOOM_MIN);
+      updateZoomLabel();
+      drawImage();
+    };
+    controls.querySelector('#imgPrevReset').onclick = () => {
+      zoom = 1; panX = 0; panY = 0;
+      updateZoomLabel();
+      drawImage();
+    };
+    controls.querySelector('#imgPrevClose').onclick = hideImagePreviewerOverlay;
+
+    canvas.addEventListener('mousedown', (e) => {
+      isPanning = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      panX += e.clientX - startX;
+      panY += e.clientY - startY;
+      startX = e.clientX;
+      startY = e.clientY;
+      drawImage();
+    });
+    canvas.addEventListener('mouseup', () => { isPanning = false; canvas.style.cursor = 'grab'; });
+    canvas.addEventListener('mouseleave', () => { isPanning = false; canvas.style.cursor = 'grab'; });
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 0.9;
+      zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom * factor));
+      updateZoomLabel();
+      drawImage();
+    });
+
+    // ESC closes
+    function escListener(e) {
+      if (e.key === "Escape") hideImagePreviewerOverlay();
+    }
+    document.addEventListener('keydown', escListener);
+
+    function hideImagePreviewerOverlay() {
+      if (imagePreviewerOverlay) imagePreviewerOverlay.remove();
+      imagePreviewerOverlay = null;
+      // Restore editor and preview pane visibility
+      editorWrapper.style.visibility = '';
+      previewPane.style.visibility = '';
+      window.removeEventListener('resize', resizeCanvas);
+      document.removeEventListener('keydown', escListener);
+      // Hide overlay container if present
+      if (overlayContainer) overlayContainer.style.display = 'none';
+      updatePreview();
+    }
+
+    // Load image
+    image.onload = function () {
+      zoom = 1; panX = 0; panY = 0;
+      updateZoomLabel();
+      resizeCanvas();
+    };
+    if (fileType === 'svg') {
+      // SVG as text
+      const blob = new Blob([imageData], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      image.onload = function () {
+        URL.revokeObjectURL(url);
+        zoom = 1; panX = 0; panY = 0;
+        updateZoomLabel();
+        resizeCanvas();
+      };
+      image.src = url;
+    } else {
+      // PNG/JPG/JPEG as data URL
+      image.src = imageData;
+    }
+  }
+
   function updatePreview() {
     try {
       preview.innerHTML = '';
@@ -800,34 +997,45 @@ document.addEventListener('click', function (e) {
 
       // --- SVG Preview from markup ---
       if (fileName.endsWith('.svg')) {
-        showImagePreviewInPane('', currentTab.name, true, value);
-        updateStatus("SVG preview (click to return to editor)");
+        // Use the new image previewer overlay for SVG
+        showImagePreviewerOverlay('svg', value, currentTab.name);
+        updateStatus("SVG preview (zoom/pan/drag, Esc to close)");
         return;
       }
-      // --- PNG/JPG/JPEG: Show message, not preview ---
+      // --- PNG/JPG/JPEG: Use image previewer overlay ---
       if (
         fileName.endsWith('.png') ||
         fileName.endsWith('.jpg') ||
         fileName.endsWith('.jpeg')
       ) {
-        document.querySelector('.editor-wrapper').style.display = 'none';
-        const previewPane = document.querySelector('.preview-pane');
-        previewPane.style.display = 'flex';
-        previewPane.style.justifyContent = 'center';
-        previewPane.style.alignItems = 'center';
-        previewPane.style.background = '#111';
-        preview.innerHTML = '';
-        const msg = document.createElement('div');
-        msg.textContent = 'Image preview not available for PNG/JPG unless file is opened as binary.';
-        msg.style.color = '#fff';
-        msg.style.fontSize = '1.2rem';
-        msg.style.background = 'rgba(0,0,0,0.7)';
-        msg.style.padding = '2rem';
-        msg.style.borderRadius = '12px';
-        msg.style.textAlign = 'center';
-        msg.style.cursor = 'pointer';
-        msg.onclick = hideImagePreviewInPane;
-        preview.appendChild(msg);
+        // Try to detect if the editor content is a base64 data URL, else show message
+        let dataUrl = '';
+        if (/^data:image\/(png|jpe?g);base64,/.test(value.trim())) {
+          dataUrl = value.trim();
+        } else {
+          // Not a data URL, show message
+          document.querySelector('.editor-wrapper').style.display = 'none';
+          const previewPane = document.querySelector('.preview-pane');
+          previewPane.style.display = 'flex';
+          previewPane.style.justifyContent = 'center';
+          previewPane.style.alignItems = 'center';
+          previewPane.style.background = '#111';
+          preview.innerHTML = '';
+          const msg = document.createElement('div');
+          msg.textContent = 'Image preview not available for PNG/JPG unless file is opened as binary or pasted as data URL.';
+          msg.style.color = '#fff';
+          msg.style.fontSize = '1.2rem';
+          msg.style.background = 'rgba(0,0,0,0.7)';
+          msg.style.padding = '2rem';
+          msg.style.borderRadius = '12px';
+          msg.style.textAlign = 'center';
+          msg.style.cursor = 'pointer';
+          msg.onclick = hideImagePreviewInPane;
+          preview.appendChild(msg);
+          return;
+        }
+        showImagePreviewerOverlay('img', dataUrl, currentTab.name);
+        updateStatus("Image preview (zoom/pan/drag, Esc to close)");
         return;
       }
       // --- End Image Preview ---
@@ -1842,10 +2050,11 @@ document.addEventListener('click', function (e) {
     } catch (error) {
       showError(`Open failed: ${error.message}`);
     }
+ }
   }
 
   // Returns the icon path for a given file or folder
-  function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
+  ,function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
     if (theme === 'light') {
       if (isFolder) return isOpen ? 'icons/open_folder_icon_light.svg' : 'icons/closed_folder_icon_light.svg';
     } else {
@@ -1881,7 +2090,7 @@ document.addEventListener('click', function (e) {
     }
   }
 
-  async function deleteFile(path) {
+  ,async function deleteFile(path) {
     if (!path) {
       const selectedItem = document.querySelector('.context-menu').dataset.path;
       if (!selectedItem) return;
@@ -1921,7 +2130,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Improved addFile implementation with validation
-  function addFile() {
+  ,function addFile() {
     const currentPath = state.fileExplorerPath || '';
     let fileName = prompt('Enter file name with extension:');
     if (!fileName) return;
@@ -1964,7 +2173,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Provide default content for new files based on extension
-  function getDefaultContent(fileName) {
+  ,function getDefaultContent(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
     switch (ext) {
       case 'html':
@@ -1983,7 +2192,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Fixed addFolder implementation with validation
-  function addFolder() {
+  ,function addFolder() {
     const currentPath = state.fileExplorerPath || '';
     let folderName = prompt('Enter folder name:');
     if (!folderName) return;
@@ -2026,7 +2235,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Set up menu event listeners
-  document.querySelectorAll('.menu-item').forEach(menu => {
+  ,document.querySelectorAll('.menu-item').forEach(menu => {
     menu.addEventListener('mouseenter', () => {
       document.querySelectorAll('.dropdown').forEach(dropdown => {
         if (dropdown !== menu.querySelector('.dropdown')) {
@@ -2043,7 +2252,7 @@ document.addEventListener('click', function (e) {
         if (dropdown) dropdown.style.display = 'none';
       }
     });
-  });
+  }));
 
   // Special handling for sub-menus
   document.querySelectorAll('.sub-menus').forEach(subMenu => {
@@ -2204,4 +2413,3 @@ document.addEventListener('click', function (e) {
     }
     return entry;
   }
-});
