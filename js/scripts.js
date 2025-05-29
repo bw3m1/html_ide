@@ -555,20 +555,46 @@ ${tab.name}
     refreshExploreFileList();
   }
 
+  function markTabUnsaved(tabId, unsaved) {
+    const tab = getTabById(tabId);
+    if (tab) {
+      tab.unsaved = unsaved;
+      renderTabs();
+    }
+  }
+
+  function saveProjectFiles() {
+    try {
+      localStorage.setItem('projectFiles', JSON.stringify(state.files));
+      updateStatus('Project files saved');
+    } catch (error) {
+      showError('Failed to save project files: ' + error.message);
+    }
+  }
+
   // File Explorer Functions
   function toggleFileExplorer() {
-    state.fileExplorerOpen = !state.fileExplorerOpen;
-    localStorage.setItem('fileExplorerOpen', state.fileExplorerOpen);
+    try {
+      state.fileExplorerOpen = !state.fileExplorerOpen;
+      localStorage.setItem('fileExplorerOpen', state.fileExplorerOpen);
 
-    if (state.fileExplorerOpen) {
-      fileExplorer.classList.add('open');
-      document.body.classList.add('file-explorer-open');
-    } else {
-      fileExplorer.classList.remove('open');
-      document.body.classList.remove('file-explorer-open');
+      const fileExplorer = document.getElementById('file-explorer');
+      if (!fileExplorer) {
+        throw new Error('File explorer element not found');
+      }
+
+      if (state.fileExplorerOpen) {
+        fileExplorer.classList.add('open');
+        document.body.classList.add('file-explorer-open');
+      } else {
+        fileExplorer.classList.remove('open');
+        document.body.classList.remove('file-explorer-open');
+      }
+
+      updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
+    } catch (error) {
+      showError(`Failed to toggle file explorer: ${error.message}`);
     }
-
-    updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
   }
 
   function renderFileExplorer() {
@@ -2050,11 +2076,10 @@ document.addEventListener('click', function (e) {
     } catch (error) {
       showError(`Open failed: ${error.message}`);
     }
- }
   }
 
   // Returns the icon path for a given file or folder
-  ,function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
+  function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
     if (theme === 'light') {
       if (isFolder) return isOpen ? 'icons/open_folder_icon_light.svg' : 'icons/closed_folder_icon_light.svg';
     } else {
@@ -2090,7 +2115,7 @@ document.addEventListener('click', function (e) {
     }
   }
 
-  ,async function deleteFile(path) {
+  async function deleteFile(path) {
     if (!path) {
       const selectedItem = document.querySelector('.context-menu').dataset.path;
       if (!selectedItem) return;
@@ -2130,7 +2155,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Improved addFile implementation with validation
-  ,function addFile() {
+  function addFile() {
     const currentPath = state.fileExplorerPath || '';
     let fileName = prompt('Enter file name with extension:');
     if (!fileName) return;
@@ -2173,7 +2198,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Provide default content for new files based on extension
-  ,function getDefaultContent(fileName) {
+  function getDefaultContent(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
     switch (ext) {
       case 'html':
@@ -2192,7 +2217,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Fixed addFolder implementation with validation
-  ,function addFolder() {
+  function addFolder() {
     const currentPath = state.fileExplorerPath || '';
     let folderName = prompt('Enter folder name:');
     if (!folderName) return;
@@ -2235,7 +2260,7 @@ document.addEventListener('click', function (e) {
   }
 
   // Set up menu event listeners
-  ,document.querySelectorAll('.menu-item').forEach(menu => {
+  document.querySelectorAll('.menu-item').forEach(menu => {
     menu.addEventListener('mouseenter', () => {
       document.querySelectorAll('.dropdown').forEach(dropdown => {
         if (dropdown !== menu.querySelector('.dropdown')) {
@@ -2252,7 +2277,7 @@ document.addEventListener('click', function (e) {
         if (dropdown) dropdown.style.display = 'none';
       }
     });
-  }));
+  });
 
   // Special handling for sub-menus
   document.querySelectorAll('.sub-menus').forEach(subMenu => {
@@ -2398,7 +2423,7 @@ document.addEventListener('click', function (e) {
 
   init();
 
-  // Add this helper near other file explorer helpers
+  // Helper for finding file entries
   function findFileEntry(path, files) {
     if (!path) return null;
     const parts = path.split('/').filter(Boolean);
@@ -2411,5 +2436,7 @@ document.addEventListener('click', function (e) {
         current = entry.children;
       }
     }
-    return entry;
-  }
+      return entry;
+    }
+  
+  });
