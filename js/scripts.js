@@ -549,6 +549,22 @@ ${tab.name}
     }
   }
 
+  // Helper for finding file entries
+  function findFileEntry(path, files) {
+    if (!path) return null;
+    const parts = path.split('/').filter(Boolean);
+    let current = files;
+    let entry = null;
+    for (const part of parts) {
+      entry = current.find(item => item.name === part);
+      if (!entry) return null;
+      if (entry.type === 'folder') {
+        current = entry.children;
+      }
+    }
+      return entry;
+  }
+
   function saveTabsToStorage() {
     const sanitizedTabs = state.tabs.map(tab => ({
       ...tab,
@@ -671,8 +687,87 @@ ${tab.name}
     // --- End Open Editors Section ---
   }
 
+// Keyboard Navigation
+function setupFileExplorerKeyboardNav() {
+  const fileList = document.getElementById('file-list');
+  fileList.addEventListener('keydown', (e) => {
+    const currentItem = document.activeElement;
+    if (!currentItem.classList.contains('file-item')) return;
 
+    switch(e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        (currentItem.nextElementSibling || currentItem).focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        (currentItem.previousElementSibling || currentItem).focus();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        const path = currentItem.dataset.path;
+        if (currentItem.classList.contains('folder')) {
+          toggleFolder(path);
+        } else {
+          openFileFromExplorer(path);
+        }
+        break;
+      case 'Delete':
+        e.preventDefault();
+        if (confirm(`Delete ${currentItem.dataset.path}?`)) {
+          deleteFile(currentItem.dataset.path);
+        }
+        break;
+    }
+  });
+}
+
+// Add file upload via drag and drop
+function setupFileDragAndDrop() {
+  const fileExplorer = document.getElementById('file-explorer');
   
+  fileExplorer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileExplorer.classList.add('drag-over');
+  });
+
+  fileExplorer.addEventListener('dragleave', () => {
+    fileExplorer.classList.remove('drag-over');
+  });
+
+  fileExplorer.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileExplorer.classList.remove('drag-over');
+
+    const files = Array.from(e.dataTransfer.files);
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        showError(`File ${file.name} is too large (max ${MAX_FILE_SIZE/1024/1024}MB)`);
+        continue;
+      }
+      
+      try {
+        const content = await file.text();
+        state.files.push({
+          name: file.name,
+          type: 'file',
+          content: content
+        });
+      } catch (error) {
+        showError(`Failed to load ${file.name}: ${error.message}`);
+      }
+    }
+    saveProjectFiles();
+    renderFileExplorer();
+  });
+}
+
+// Initialize file explorer enhancements
+setupFileExplorerKeyboardNav();
+setupFileDragAndDrop();
+
   // Auto-refresh file list when tabs change
   function refreshExploreFileList() {
     renderFileExplorer();
@@ -2462,21 +2557,5 @@ document.addEventListener('click', function (e) {
   }
 
   init();
-
-  // Helper for finding file entries
-  function findFileEntry(path, files) {
-    if (!path) return null;
-    const parts = path.split('/').filter(Boolean);
-    let current = files;
-    let entry = null;
-    for (const part of parts) {
-      entry = current.find(item => item.name === part);
-      if (!entry) return null;
-      if (entry.type === 'folder') {
-        current = entry.children;
-      }
-    }
-      return entry;
-    }
   
   });
