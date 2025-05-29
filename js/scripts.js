@@ -1008,7 +1008,7 @@ document.addEventListener('click', function (e) {
     let zoom = 1, panX = 0, panY = 0;
     let isPanning = false, startX = 0, startY = 0;
     const zoomLabel = controls.querySelector('#imgPrevZoomLabel');
-    const ZOOM_MIN = 0.01, ZOOM_MAX = 8;
+    const ZOOM_MIN = 0.2, ZOOM_MAX = 20;
 
     function resizeCanvas() {
       // Fit to overlay size
