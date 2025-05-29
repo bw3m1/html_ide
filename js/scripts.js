@@ -30,7 +30,15 @@ const FILE_TYPES = {
   css: { mime: 'text/css', ext: '.css' },
   js: { mime: 'text/javascript', ext: '.js' },
   json: { mime: 'application/json', ext: '.json' },
-  txt: { mime: 'text/plain', ext: '.txt' }
+  txt: { mime: 'text/plain', ext: '.txt' },
+  md: { mime: 'text/markdown', ext: '.md' },
+  py: { mime: 'text/x-python', ext: '.py' },
+  java: { mime: 'text/x-java', ext: '.java' },
+  c: { mime: 'text/x-c', ext: '.c' },
+  cpp: { mime: 'text/x-c++', ext: '.cpp' },
+  rs: { mime: 'text/x-rust', ext: '.rs' },
+  go: { mime: 'text/x-go', ext: '.go' },
+  ide: { mime: 'application/x-ide-project', ext: '.ide' }
 };
 
 // State management
@@ -53,7 +61,9 @@ const state = {
     { name: 'styles.css', type: 'file' },
     { name: 'scripts.js', type: 'file' },
     { name: 'assets', type: 'folder', children: [] }
-  ]
+  ],
+  autosaveEnabled: localStorage.getItem('autosaveEnabled') === 'true',
+  fileChangeNotificationsEnabled: localStorage.getItem('fileChangeNotificationsEnabled') === 'true'
 };
 
 // Configure Monaco Editor loader with language support paths
@@ -1738,6 +1748,23 @@ document.addEventListener('click', function (e) {
     });
   }
 
+  // Autosave functionality
+  let autosaveInterval;
+  function setupAutosave(enabled = true, interval = 30000) {
+    if (autosaveInterval) {
+      clearInterval(autosaveInterval);
+    }
+    if (enabled) {
+      autosaveInterval = setInterval(async () => {
+        const currentTab = getCurrentTab();
+        if (currentTab && currentTab.unsaved) {
+          await saveFile();
+        }
+      }, interval);
+      updateStatus("Autosave enabled");
+    }
+  }
+
   // Status management
   function updateStatus(message, isError = false) {
     statusMessage.textContent = message;
@@ -1875,6 +1902,8 @@ document.addEventListener('click', function (e) {
         case 'save-as-js': await saveJS(); break;
         case 'save-as-json': await saveJSON(); break;
         case 'save-as-zip': await saveZip(); break;
+        case 'export-ide': await exportIdeProject(); break;
+        case 'import-ide': await importIdeProject(); break;
         case 'rename': nameFile(); break;
         case 'clear': clearFile(); break;
         case 'undo': editor.trigger('', 'undo'); break;
@@ -2024,6 +2053,17 @@ document.addEventListener('click', function (e) {
         case 'about':
           alert('html IDE\n\nVersion:                  0.4.2.1\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveuped by Bryson J G.');
           updateStatus("About dialog shown");
+          break;
+        case 'toggle-autosave':
+          state.autosaveEnabled = !state.autosaveEnabled;
+          localStorage.setItem('autosaveEnabled', state.autosaveEnabled);
+          setupAutosave(state.autosaveEnabled);
+          updateStatus(`Autosave ${state.autosaveEnabled ? 'enabled' : 'disabled'}`);
+          break;
+        case 'file-change-notifications':
+          state.fileChangeNotificationsEnabled = !state.fileChangeNotificationsEnabled;
+          localStorage.setItem('fileChangeNotificationsEnabled', state.fileChangeNotificationsEnabled);
+          updateStatus(`File change notifications ${state.fileChangeNotificationsEnabled ? 'enabled' : 'disabled'}`);
           break;
       }
     } catch (error) {
