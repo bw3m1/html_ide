@@ -727,6 +727,7 @@ ${tab.name}
       updateStatus('Project files saved');
     } catch (error) {
       showError('Failed to save project files: ' + error.message);
+      showAlert(`Failed to save project files:\n ${error.message}`, 'ERR', 'Save Error', 'ERR');
     }
   }
 
@@ -752,6 +753,7 @@ ${tab.name}
       updateStatus(`File explorer ${state.fileExplorerOpen ? 'opened' : 'closed'}`);
     } catch (error) {
       showError(`Failed to toggle file explorer: ${error.message}`);
+      showAlert(`Failed to toggle file explorer:\n ${error.message}`, 'ERR', 'Toggle Explorer Error', 'ERR');
     }
   }
 
@@ -877,6 +879,7 @@ function setupFileDragAndDrop() {
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
         showError(`File ${file.name} is too large (max ${MAX_FILE_SIZE/1024/1024}MB)`);
+        showAlert(`Failed to add file "${file.name}" to project:\n${error.message}`, 'ERR', 'File Upload Error', 'ERR');
         continue;
       }
       
@@ -889,6 +892,7 @@ function setupFileDragAndDrop() {
         });
       } catch (error) {
         showError(`Failed to load ${file.name}: ${error.message}`);
+        showAlert(`Failed to load file "${file.name}":\n${error.message}`, 'ERR', 'File Load Error', 'ERR');
       }
     }
     saveProjectFiles();
@@ -1433,6 +1437,7 @@ document.addEventListener('click', function (e) {
       }
     } catch (error) {
       showError(`Preview error: ${error.message}`);
+      showAlert(`Failed to update preview:\n${error.message}`, 'ERR', 'Preview Error', 'ERR');
     }
   }
 
@@ -1591,6 +1596,7 @@ document.addEventListener('click', function (e) {
       return true;
     } catch (error) {
       showError(`Save failed: ${error.message}`);
+      showAlert(`Failed to save file "${currentTab.name}":\n${error.message}`, 'ERR', 'Save Error', 'ERR');
       return false;
     }
   }
@@ -1628,6 +1634,7 @@ document.addEventListener('click', function (e) {
     } catch (error) {
       if (error.name !== 'AbortError') {
         showError(`Save failed: ${error.message}`);
+        showAlert(`Failed to save file as "${currentTab.name}":\n${error.message}`, 'ERR', 'Save As Error', 'ERR');
       }
       return false;
     }
@@ -1697,57 +1704,71 @@ document.addEventListener('click', function (e) {
       updateStatus(`Exported ${tabsToInclude.length} files as ${projectName}.zip`);
     } catch (error) {
       showError(`Error creating ZIP: ${error.message}`);
+      showAlert(`Failed to create ZIP file:\n${error.message}`, 'ERR', 'ZIP Export Error', 'ERR');
     }
   }
 
   async function openFile() {
     try {
+      // Show file picker with supported types
       const [handle] = await window.showOpenFilePicker({
         types: Object.values(FILE_TYPES).map(type => ({
           description: `${type.ext.toUpperCase()} Files`,
-          accept: { [type.mime]: [type.ext] }
-        }))
+          accept: { [type.mime]: [`.${type.ext}`] } // Added leading dot for better matching
+        })),
+        excludeAcceptAllOption: true // Force user to select from our supported types
       });
 
       const file = await handle.getFile();
+      
+      // Validate file size
       if (file.size > MAX_FILE_SIZE) {
-        throw new Error(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+        const maxMB = MAX_FILE_SIZE / 1024 / 1024;
+        throw new Error(`File exceeds ${maxMB}MB limit (${(file.size/1024/1024).toFixed(2)}MB)`);
       }
 
       const content = await file.text();
-      const fileType = handle.name.split('.').pop().toLowerCase();
-
-      // Create a new tab for the opened file
+      const extension = handle.name.split('.').pop()?.toLowerCase() || '';
+      
+      // Determine file type with fallback
+      const fileType = FILE_TYPES[extension] ? extension : 'html';
+      
+      // Prepare new tab data
       const tabId = generateTabId();
       const newTab = {
         id: tabId,
         name: handle.name,
-        type: Object.keys(FILE_TYPES).includes(fileType) ? fileType : 'html',
-        content: content,
-        handle: handle,
+        type: fileType,
+        content,
+        handle,
         active: true
       };
 
-      // Deactivate current tab
-      const currentTab = getCurrentTab();
-      if (currentTab) {
-        currentTab.active = false;
-      }
-
+      // Update tabs state
+      state.tabs.forEach(t => t.active = false);
       state.tabs.push(newTab);
       state.currentTabId = tabId;
 
+      // Update UI and state
       editor.setValue(content);
       renderTabs();
       updateStatus(`Opened ${handle.name}`);
       addToRecentFiles(newTab);
-      await detectLanguage();
       saveTabsToStorage();
       refreshExploreFileList();
+      
+      // Non-blocking language detection
+      detectLanguage().catch(e => console.error('Language detection failed', e));
 
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name === 'AbortError') return; // User canceled
+      if (error.name === 'NotFoundError') {
+        showError('File not found or access denied');
+        showAlert(`Failed to open file:\n${error.message}`, 'ERR', 'Open File Error', 'ERR');
+        
+      } else {
         showError(`Open failed: ${error.message}`);
+        showAlert(`Failed to open file:\n${error.message}`, 'ERR', 'Open File Error', 'ERR');
       }
     }
   }
@@ -1788,11 +1809,13 @@ document.addEventListener('click', function (e) {
         refreshExploreFileList();
       } else {
         showError("File not found. It may have been moved or deleted.");
+        showAlert(`Failed to open recent file "${fileName}":\nFile not found`, 'ERR', 'Open Recent File Error', 'ERR');
         state.recentFiles = state.recentFiles.filter(f => f.name !== fileName);
         updateRecentFilesMenu();
       }
     } catch (error) {
       showError(`Error opening recent file: ${error.message}`);
+      showAlert(`Failed to open recent file "${fileName}":\n${error.message}`, 'ERR', 'Open Recent File Error', 'ERR');
     }
   }
 
@@ -2140,12 +2163,18 @@ document.addEventListener('click', function (e) {
           const text = editor.getModel().getValueInRange(selection);
           navigator.clipboard.writeText(text).then(() => {
             editor.executeEdits("cut", [{ range: selection, text: "" }]);
-          }).catch(err => showError("Clipboard access denied"));
+          }).catch(err => {
+            showError("Clipboard access denied");
+            showAlert(`Failed to cut text:\n${err.message}`, 'ERR', 'Clipboard Access Denied Error', 'ERR');
+          });
           break;
         case 'copy':
           navigator.clipboard.writeText(
             editor.getModel().getValueInRange(editor.getSelection())
-          ).catch(err => showError("Clipboard access denied"));
+          ).catch(err => {
+            showError("Clipboard access denied");
+            showAlert(`Failed to copy text:\n${err.message}`, 'ERR', 'Clipboard Access Denied Error', 'ERR');
+          });
           break;
         case 'paste':
           navigator.clipboard.readText().then(text => {
@@ -2153,7 +2182,10 @@ document.addEventListener('click', function (e) {
               range: editor.getSelection(),
               text: text
             }]);
-          }).catch(err => showError("Clipboard access denied"));
+          }).catch(err => {
+            showError("Clipboard access denied");
+            showAlert(`Failed to paste text:\n${err.message}`, 'ERR', 'Clipboard Access Denied Error', 'ERR');
+          });
           break;
         case 'select-all': editor.setSelection(editor.getModel().getFullModelRange()); break;
         case 'find': editor.getAction('actions.find').run(); break;
@@ -2279,7 +2311,7 @@ document.addEventListener('click', function (e) {
         case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
             showAlert(
-                'html IDE\n\nVersion:                  0.4.3\nDate of Publish:   2025 / 05 / 12\nBrowsers:              all chromium (the open source browser project) based\n\nA feature-rich IDE for web development\n\nDeveloped by Bryson J G.',
+                'html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.4.3<br>Date of Publish:&nbsp;&nbsp;2025 / 05 / 29<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all chromium (the open source browser project) based<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.',
                 'INFO',
                 'About html IDE',
                 'INFO'
@@ -2300,6 +2332,7 @@ document.addEventListener('click', function (e) {
       }
     } catch (error) {
       showError(`Action failed: ${error.message}`);
+      showAlert(`Failed to perform action "${action}":\n${error.message}`, 'ERR', 'Action Error', 'ERR');
     }
   }
 
@@ -2347,6 +2380,7 @@ document.addEventListener('click', function (e) {
 
     } catch (error) {
       showError(`Open failed: ${error.message}`);
+      showAlert(`Failed to open file "${filePath}":\n${error.message}`, 'ERR', 'Open File Error', 'ERR');
     }
   }
 
@@ -2423,6 +2457,7 @@ document.addEventListener('click', function (e) {
       renderTabs();
     } catch (error) {
       showError(`Delete failed: ${error.message}`);
+      showAlert(`Failed to delete file "${path}":\n${error.message}`, 'ERR', 'Delete File Error', 'ERR');
     }
   }
 
@@ -2435,6 +2470,7 @@ document.addEventListener('click', function (e) {
     // Prevent empty, whitespace, or invalid file names
     if (!fileName || /[\\/:*?"<>|]/.test(fileName)) {
       showError('Invalid file name.');
+      showAlert('Invalid file name. Please avoid using special characters like \\ / : * ? " < > |.', 'ERR', 'Invalid File Name', 'ERR');
       return;
     }
 
@@ -2466,6 +2502,7 @@ document.addEventListener('click', function (e) {
       updateStatus(`Added ${currentPath}/${fileName}`);
     } catch (error) {
       showError(error.message);
+      showAlert(`Failed to add file "${fileName}":\n${error.message}`, 'ERR', 'Add File Error', 'ERR');
     }
   }
 
@@ -2497,6 +2534,7 @@ document.addEventListener('click', function (e) {
     // Prevent empty, whitespace, or invalid folder names
     if (!folderName || /[\\/:*?"<>|]/.test(folderName)) {
       showError('Invalid folder name.');
+      showAlert('Invalid folder name. Please avoid using special characters like \\ / : * ? " < > |.', 'ERR', 'Invalid Folder Name', 'ERR');
       return;
     }
 
@@ -2528,6 +2566,7 @@ document.addEventListener('click', function (e) {
       updateStatus(`Added folder ${currentPath}/${folderName}`);
     } catch (error) {
       showError(error.message);
+      showAlert(`Failed to add folder "${folderName}":\n${error.message}`, 'ERR', 'Add Folder Error', 'ERR');
     }
   }
 
@@ -2618,6 +2657,7 @@ document.addEventListener('click', function (e) {
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
         showError(`File too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+        showAlert(`File "${file.name}" exceeds the maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB. Please select a smaller file.`, 'ERR', 'File Size Error', 'ERR');
         return;
       }
 
