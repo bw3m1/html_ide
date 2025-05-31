@@ -13,7 +13,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
       /* Style Sheets goes here */
       
     </style>
-  </head>s
+  </head>
   <body>
     
     <!-- body -->
@@ -38,7 +38,8 @@ const FILE_TYPES = {
   cpp: { mime: 'text/x-c++', ext: '.cpp' },
   rs: { mime: 'text/x-rust', ext: '.rs' },
   go: { mime: 'text/x-go', ext: '.go' },
-  ide: { mime: 'application/x-ide-project', ext: '.ide' }
+  ide: { mime: 'application/x-ide-project', ext: '.ide' },
+  svg: { mime: 'image/svg+xml', ext: '.svg' }
 };
 
 // State management
@@ -1712,11 +1713,63 @@ document.addEventListener('click', function (e) {
     try {
       // Show file picker with supported types
       const [handle] = await window.showOpenFilePicker({
-        types: Object.values(FILE_TYPES).map(type => ({
-          description: `${type.ext.toUpperCase()} Files`,
-          accept: { [type.mime]: [`.${type.ext}`] } // Added leading dot for better matching
-        })),
-        excludeAcceptAllOption: true // Force user to select from our supported types
+        types: [
+          {
+        description: 'All Supported Formats',
+        accept: Object.fromEntries(
+          Object.values(FILE_TYPES).map(type => [type.mime, [type.ext]])
+        )
+          },
+          {
+        description: 'Web Dev Formats',
+        accept: Object.fromEntries(
+          Object.values({
+            html: { mime: 'text/html', ext: '.html' },
+            css: { mime: 'text/css', ext: '.css' },
+            js: { mime: 'text/javascript', ext: '.js' },
+            json: { mime: 'application/json', ext: '.json' },
+            txt: { mime: 'text/plain', ext: '.txt' },
+            md: { mime: 'text/markdown', ext: '.md' },
+            svg: { mime: 'image/svg+xml', ext: '.svg' }
+          }).map(type => [type.mime, [type.ext]])
+        )
+          },
+          {
+        description: 'not web Dev Formats',
+        accept: Object.fromEntries(
+          Object.values({
+            py: { mime: 'text/x-python', ext: '.py' },
+            java: { mime: 'text/x-java', ext: '.java' },
+            c: { mime: 'text/x-c', ext: '.c' },
+            cpp: { mime: 'text/x-c++', ext: '.cpp' },
+            rs: { mime: 'text/x-rust', ext: '.rs' },
+            go: { mime: 'text/x-go', ext: '.go' }
+          }).map(type => [type.mime, [type.ext]])
+        )
+          },
+          {
+        description: 'Text',
+        accept: Object.fromEntries(
+          Object.values({
+            txt: { mime: 'text/plain', ext: '.txt' },
+            md: { mime: 'text/markdown', ext: '.md' }
+          }).map(type => [type.mime, [type.ext]])
+        )
+          },
+          {
+        description: 'IDE Project Files',
+        accept: {
+          'application/x-ide-project': ['.ide']
+        }
+          },
+          {
+        description: 'SVG Images',
+        accept: {
+          'image/svg+xml': ['.svg']
+        }
+          }
+        ],
+        excludeAcceptAllOption: true
       });
 
       const file = await handle.getFile();
