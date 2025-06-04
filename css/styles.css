@@ -86,7 +86,7 @@ body, html {
   background-color: var(--menu-bg-dark);
   border: 1px solid var(--outline-dark);
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 1000;
+  z-index: 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
 }
 
 .menu-item:hover > .dropdown {
