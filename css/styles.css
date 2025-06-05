@@ -1,13 +1,13 @@
 :root {
   --bg-dark: #1e1e1e;
   --text-dark: #d4d4d4;
-  --menu-bg-dark: #2d2d2d;
-  --hover-dark: #444;
-  --outline-dark: #444;
+  --menu-bg-dark: #181818;
+  --hover-dark: #1e1e1e;
+  --outline-dark: #1e1e1e;
   --accent-color: #007acc;
   --error-red: #f44;
   --success-green: #4f4;
-  --file-explorer-width: 25%;
+  --file-explorer-width: 280px;
   --menu-text-hover: #4d4d4d;
 }
 
@@ -205,7 +205,7 @@ body, html {
 
 /* File Explorer */
 .file-explorer {
-  width: 280px;
+  width: var(--file-explorer-width);
   background-color: var(--menu-bg-dark);
   border-right: 1px solid var(--outline-dark);
   display: none;
@@ -217,7 +217,7 @@ body, html {
 }
 
 .file-item {
-  padding: 8px 16px 8px 32px;
+  padding: 4px 16px 4px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;

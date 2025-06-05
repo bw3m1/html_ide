@@ -2544,6 +2544,8 @@ ${tab.name}
     updatePreview();
     refreshExploreFileList();
     setTheme(localStorage.getItem('editorTheme') || 'automatic');
+    setLayout("editor-only");
+    toggleFileExplorer(); toggleFileExplorer();
     updateStatus("IDE Setup Ready");
     // watchFileChanges();
   }
