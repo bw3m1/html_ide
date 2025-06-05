@@ -1,5 +1,5 @@
-  const examples = {
-    'basic': `<!DOCTYPE html>
+const examples = {
+  'basic': `<!DOCTYPE html>
 <html>
   <head>
     <title>Basic Page</title>
@@ -9,7 +9,7 @@
     <p>This is a basic HTML page.</p>
   </body>
 </html>`,
-    'form': `<!DOCTYPE html>
+  'form': `<!DOCTYPE html>
 <html>
 <head>
   <title>Form Example</title>
@@ -55,7 +55,7 @@
   </form>
 </body>
 </html>`,
-    'grid': `<!DOCTYPE html>
+  'grid': `<!DOCTYPE html>
 <html>
 <head>
   <title>CSS Grid</title>
@@ -86,7 +86,7 @@
   </div>
 </body>
 </html>`,
-    'table': `<!DOCTYPE html>
+  'table': `<!DOCTYPE html>
 <html>
 <head>
   <title>Table Example</title>
@@ -134,7 +134,7 @@
   </table>
 </body>
 </html>`,
-    'responsive': `<!DOCTYPE html>
+  'responsive': `<!DOCTYPE html>
 <html>
 <head>
   <title>Responsive Example</title>
@@ -198,7 +198,7 @@
   </div>
 </body>
 </html>`,
-    'json-example': `{
+  'json-example': `{
   "name": "My Project",
   "version": "1.0.0",
   "description": "A sample JSON file",
@@ -211,4 +211,4 @@
     "build": "webpack"
   }
 }`
-  };
+};

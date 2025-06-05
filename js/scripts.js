@@ -111,156 +111,155 @@ require(['vs/editor/editor.main'], function () {
   // Editor functionality
   const statusMessage = document.getElementById('statusMessage');
   const lineInfo = document.getElementById('lineInfo');
-  const fileExplorer = document.getElementById('file-explorer');
   const fileList = document.getElementById('file-list');
   const tabsContainer = document.getElementById('tabsContainer');
   const preview = document.getElementById('preview');
 
-async function loadExampleContent(exampleName) {
-  const exampleContent = examples[exampleName];
-  if (!exampleContent) {
-    showAlert(`Example "${exampleName}" not found.`, 'ERR');
-    showError(`Example "${exampleName}" not found.`);
-    return;
-  }
+  async function loadExampleContent(exampleName) {
+    const exampleContent = examples[exampleName];
+    if (!exampleContent) {
+      showAlert(`Example "${exampleName}" not found.`, 'ERR');
+      showError(`Example "${exampleName}" not found.`);
+      return;
+    }
 
-  // Load the example content into the Monaco editor instance
-  if (window.monacoEditorInstance) {
-    window.monacoEditorInstance.setValue(exampleContent);
-    updateStatus(`Loaded example: ${exampleName}`);
-  } else {
-    showError('Monaco editor is not initialized.');
+    // Load the example content into the Monaco editor instance
+    if (window.monacoEditorInstance) {
+      window.monacoEditorInstance.setValue(exampleContent);
+      updateStatus(`Loaded example: ${exampleName}`);
+    } else {
+      showError('Monaco editor is not initialized.');
+    }
   }
-}
 
   function showAlert(message, type = 'ERR', title = 'Error Alert', icon = 'ERR') {
     const VALID_TYPES = ['ERR', 'INFO', 'QUERY', 'REQUEST', 'SUCCESS', 'WARNING', 'CONFIRM'];
-    
+
     return new Promise((resolve) => {
-        // Validate and sanitize parameters
-        type = VALID_TYPES.includes(type.toUpperCase()) ? type.toUpperCase() : 'ERR';
-        icon = VALID_TYPES.includes(icon.toUpperCase()) ? icon.toUpperCase() : type;
-        
-        // Remove any existing alerts
-        const existingAlerts = document.querySelectorAll('.alert-view');
-        existingAlerts.forEach(alert => alert.remove());
+      // Validate and sanitize parameters
+      type = VALID_TYPES.includes(type.toUpperCase()) ? type.toUpperCase() : 'ERR';
+      icon = VALID_TYPES.includes(icon.toUpperCase()) ? icon.toUpperCase() : type;
 
-        // Create alert container
-        const alertView = document.createElement('div');
-        alertView.className = `alert-view alert-${type.toLowerCase()}`;
-        alertView.setAttribute('role', 'alertdialog');
-        alertView.setAttribute('aria-modal', 'true');
-        alertView.setAttribute('aria-labelledby', 'alertTitle');
-        alertView.setAttribute('aria-describedby', 'alertMessage');
+      // Remove any existing alerts
+      const existingAlerts = document.querySelectorAll('.alert-view');
+      existingAlerts.forEach(alert => alert.remove());
 
-        // Create header with icon and title
-        const header = document.createElement('div');
-        header.className = 'alert-header';
-        
-        const iconElement = document.createElement('img');
-        iconElement.src = `icons/nodeifications/${icon.toLowerCase()}_icon.png`;
-        iconElement.className = 'alert-icon';
-        iconElement.alt = `${type} icon`;
-        
-        const titleElement = document.createElement('div');
-        titleElement.className = 'alert-title';
-        titleElement.id = 'alertTitle';
-        titleElement.textContent = title;
-        
-        header.appendChild(iconElement);
-        header.appendChild(titleElement);
-        alertView.appendChild(header);
+      // Create alert container
+      const alertView = document.createElement('div');
+      alertView.className = `alert-view alert-${type.toLowerCase()}`;
+      alertView.setAttribute('role', 'alertdialog');
+      alertView.setAttribute('aria-modal', 'true');
+      alertView.setAttribute('aria-labelledby', 'alertTitle');
+      alertView.setAttribute('aria-describedby', 'alertMessage');
 
-        // Create message and input if QUERY type
-        if (type === 'QUERY') {
-            const messageText = document.createElement('div');
-            messageText.className = 'alert-message';
-            messageText.id = 'alertMessage';
-            messageText.textContent = message;
-            
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'alert-input';
-            input.style.width = '100%';
-            input.style.padding = '8px';
-            input.style.marginTop = '10px';
-            input.style.marginBottom = '20px';
-            input.style.borderRadius = '4px';
-            input.style.border = '1px solid var(--outline-dark)';
-            input.style.background = 'var(--menu-bg-dark)';
-            input.style.color = 'var(--text-dark)';
-            
-            alertView.appendChild(messageText);
-            alertView.appendChild(input);
-            
-            // Focus input after a short delay
-            setTimeout(() => input.focus(), 50);
+      // Create header with icon and title
+      const header = document.createElement('div');
+      header.className = 'alert-header';
 
-            // Handle enter key
-            input.addEventListener('keyup', (e) => {
-                if (e.key === 'Enter') {
-                    resolve(input.value);
-                    alertView.remove();
-                }
-            });
-        } else {
-            const messageText = document.createElement('div');
-            messageText.className = 'alert-message';
-            messageText.id = 'alertMessage';
-            messageText.innerHTML = message.replace(/\n/g, '<br>');
-            alertView.appendChild(messageText);
-        }
+      const iconElement = document.createElement('img');
+      iconElement.src = `icons/nodeifications/${icon.toLowerCase()}_icon.png`;
+      iconElement.className = 'alert-icon';
+      iconElement.alt = `${type} icon`;
 
-        // Create buttons
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.gap = '10px';
-        buttonContainer.style.justifyContent = 'flex-end';
+      const titleElement = document.createElement('div');
+      titleElement.className = 'alert-title';
+      titleElement.id = 'alertTitle';
+      titleElement.textContent = title;
 
-        if (type === 'QUERY') {
-            const okButton = document.createElement('button');
-            okButton.className = 'alert-button';
-            okButton.textContent = 'OK';
-            okButton.onclick = () => {
-                resolve(alertView.querySelector('input').value);
-                alertView.remove();
-            };
+      header.appendChild(iconElement);
+      header.appendChild(titleElement);
+      alertView.appendChild(header);
 
-            const cancelButton = document.createElement('button');
-            cancelButton.className = 'alert-button alert-button-secondary';
-            cancelButton.textContent = 'Cancel';
-            cancelButton.onclick = () => {
-                resolve(null);
-                alertView.remove();
-            };
+      // Create message and input if QUERY type
+      if (type === 'QUERY') {
+        const messageText = document.createElement('div');
+        messageText.className = 'alert-message';
+        messageText.id = 'alertMessage';
+        messageText.textContent = message;
 
-            buttonContainer.appendChild(cancelButton);
-            buttonContainer.appendChild(okButton);
-        } else {
-            const okButton = document.createElement('button');
-            okButton.className = 'alert-button';
-            okButton.textContent = 'OK';
-            okButton.onclick = () => {
-                resolve();
-                alertView.remove();
-            };
-            buttonContainer.appendChild(okButton);
-        }
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'alert-input';
+        input.style.width = '100%';
+        input.style.padding = '8px';
+        input.style.marginTop = '10px';
+        input.style.marginBottom = '20px';
+        input.style.borderRadius = '4px';
+        input.style.border = '1px solid var(--outline-dark)';
+        input.style.background = 'var(--menu-bg-dark)';
+        input.style.color = 'var(--text-dark)';
 
-        alertView.appendChild(buttonContainer);
+        alertView.appendChild(messageText);
+        alertView.appendChild(input);
 
-        // Add to document
-        document.body.appendChild(alertView);
+        // Focus input after a short delay
+        setTimeout(() => input.focus(), 50);
 
-        // Handle escape key
-        const escapeHandler = (e) => {
-            if (e.key === 'Escape') {
-                resolve(null);
-                alertView.remove();
-                document.removeEventListener('keydown', escapeHandler);
-            }
+        // Handle enter key
+        input.addEventListener('keyup', (e) => {
+          if (e.key === 'Enter') {
+            resolve(input.value);
+            alertView.remove();
+          }
+        });
+      } else {
+        const messageText = document.createElement('div');
+        messageText.className = 'alert-message';
+        messageText.id = 'alertMessage';
+        messageText.innerHTML = message.replace(/\n/g, '<br>');
+        alertView.appendChild(messageText);
+      }
+
+      // Create buttons
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.gap = '10px';
+      buttonContainer.style.justifyContent = 'flex-end';
+
+      if (type === 'QUERY') {
+        const okButton = document.createElement('button');
+        okButton.className = 'alert-button';
+        okButton.textContent = 'OK';
+        okButton.onclick = () => {
+          resolve(alertView.querySelector('input').value);
+          alertView.remove();
         };
-        document.addEventListener('keydown', escapeHandler);
+
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'alert-button alert-button-secondary';
+        cancelButton.textContent = 'Cancel';
+        cancelButton.onclick = () => {
+          resolve(null);
+          alertView.remove();
+        };
+
+        buttonContainer.appendChild(cancelButton);
+        buttonContainer.appendChild(okButton);
+      } else {
+        const okButton = document.createElement('button');
+        okButton.className = 'alert-button';
+        okButton.textContent = 'OK';
+        okButton.onclick = () => {
+          resolve();
+          alertView.remove();
+        };
+        buttonContainer.appendChild(okButton);
+      }
+
+      alertView.appendChild(buttonContainer);
+
+      // Add to document
+      document.body.appendChild(alertView);
+
+      // Handle escape key
+      const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+          resolve(null);
+          alertView.remove();
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
     });
   }
 
@@ -309,7 +308,6 @@ async function loadExampleContent(exampleName) {
       tabElement.dataset.tabId = tab.id;
 
       // Add icon to tab
-      const fileType = tab.name.split('.').pop().toLowerCase();
       const iconPath = getIcon(tab.name, false, false, localStorage.getItem('editorTheme') === 'light' ? 'light' : 'dark');
 
       tabElement.innerHTML = `
@@ -495,7 +493,7 @@ ${tab.name}
         current = entry.children;
       }
     }
-      return entry;
+    return entry;
   }
 
   function saveTabsToStorage() {
@@ -622,171 +620,124 @@ ${tab.name}
     // --- End Open Editors Section ---
   }
 
-// Keyboard Navigation
-function setupFileExplorerKeyboardNav() {
-  const fileList = document.getElementById('file-list');
-  fileList.addEventListener('keydown', (e) => {
-    const currentItem = document.activeElement;
-    if (!currentItem.classList.contains('file-item')) return;
+  // Keyboard Navigation
+  function setupFileExplorerKeyboardNav() {
+    const fileList = document.getElementById('file-list');
+    fileList.addEventListener('keydown', (e) => {
+      const currentItem = document.activeElement;
+      if (!currentItem.classList.contains('file-item')) return;
 
-    switch(e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        (currentItem.nextElementSibling || currentItem).focus();
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        (currentItem.previousElementSibling || currentItem).focus();
-        break;
-      case 'Enter':
-        e.preventDefault();
-        const path = currentItem.dataset.path;
-        if (currentItem.classList.contains('folder')) {
-          toggleFolder(path);
-        } else {
-          openFileFromExplorer(path);
-        }
-        break;
-      case 'Delete':
-        e.preventDefault();
-        if (confirm(`Delete ${currentItem.dataset.path}?`)) {
-          deleteFile(currentItem.dataset.path);
-        }
-        break;
-    }
-  });
-}
-
-// Add file upload via drag and drop
-function setupFileDragAndDrop() {
-  const fileExplorer = document.getElementById('file-explorer');
-  
-  fileExplorer.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    fileExplorer.classList.add('drag-over');
-  });
-
-  fileExplorer.addEventListener('dragleave', () => {
-    fileExplorer.classList.remove('drag-over');
-  });
-
-  fileExplorer.addEventListener('drop', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    fileExplorer.classList.remove('drag-over');
-
-    const files = Array.from(e.dataTransfer.files);
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        showError(`File ${file.name} is too large (max ${MAX_FILE_SIZE/1024/1024}MB)`);
-        showAlert(`Failed to add file "${file.name}" to project:\n${error.message}`, 'ERR', 'File Upload Error', 'ERR');
-        continue;
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          (currentItem.nextElementSibling || currentItem).focus();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          (currentItem.previousElementSibling || currentItem).focus();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          const path = currentItem.dataset.path;
+          if (currentItem.classList.contains('folder')) {
+            toggleFolder(path);
+          } else {
+            openFileFromExplorer(path);
+          }
+          break;
+        case 'Delete':
+          e.preventDefault();
+          if (confirm(`Delete ${currentItem.dataset.path}?`)) {
+            deleteFile(currentItem.dataset.path);
+          }
+          break;
       }
-      
-      try {
-        const content = await file.text();
-        state.files.push({
-          name: file.name,
-          type: 'file',
-          content: content
-        });
-      } catch (error) {
-        showError(`Failed to load ${file.name}: ${error.message}`);
-        showAlert(`Failed to load file "${file.name}":\n${error.message}`, 'ERR', 'File Load Error', 'ERR');
-      }
-    }
-    saveProjectFiles();
-    renderFileExplorer();
-  });
-}
+    });
+  }
 
-// Initialize file explorer enhancements
-setupFileExplorerKeyboardNav();
-setupFileDragAndDrop();
+  // Add file upload via drag and drop
+  function setupFileDragAndDrop() {
+    const fileExplorer = document.getElementById('file-explorer');
+
+    fileExplorer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileExplorer.classList.add('drag-over');
+    });
+
+    fileExplorer.addEventListener('dragleave', () => {
+      fileExplorer.classList.remove('drag-over');
+    });
+
+    fileExplorer.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileExplorer.classList.remove('drag-over');
+
+      const files = Array.from(e.dataTransfer.files);
+      for (const file of files) {
+        if (file.size > MAX_FILE_SIZE) {
+          showError(`File ${file.name} is too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+          showAlert(`Failed to add file "${file.name}" to project:\n${error.message}`, 'ERR', 'File Upload Error', 'ERR');
+          continue;
+        }
+
+        try {
+          const content = await file.text();
+          state.files.push({
+            name: file.name,
+            type: 'file',
+            content: content
+          });
+        } catch (error) {
+          showError(`Failed to load ${file.name}: ${error.message}`);
+          showAlert(`Failed to load file "${file.name}":\n${error.message}`, 'ERR', 'File Load Error', 'ERR');
+        }
+      }
+      saveProjectFiles();
+      renderFileExplorer();
+    });
+  }
+
+  // Initialize file explorer enhancements
+  setupFileExplorerKeyboardNav();
+  setupFileDragAndDrop();
 
   // Auto-refresh file list when tabs change
   function refreshExploreFileList() {
     renderFileExplorer();
   }
 
-// Show open tabs in file explorer context menu
-document.addEventListener('click', function (e) {
-  const contextMenu = fileList.querySelector('.context-menu');
-  if (contextMenu && contextMenu.style.display === 'block') {
-    if (e.target.dataset.action === 'tabs') {
-      // Build a list of open tabs
-      let tabsHtml = '<div style="padding:4px 8px;font-weight:bold;">Open Tabs:         \/</div>';
-      if (state.tabs.length === 0) {
-        tabsHtml += '<div style="padding:4px 8px;">No open tabs</div>';
-      } else {
-        state.tabs.forEach(tab => {
-          tabsHtml += `<div class="dropdown-item" data-action="switch-tab" data-tab-id="${tab.id}">${tab.name}${tab.active ? ' <span style="color:var(--accent)">[active]</span>' : ''}</div>`;
-        });
-      }
-      contextMenu.innerHTML = tabsHtml +
-        `<div class="dropdown-item" data-action="close-tab-list">Close</div>`;
-    } else if (e.target.dataset.action === 'switch-tab') {
-      const tabId = e.target.dataset.tabId;
-      if (tabId) {
-        switchToTab(tabId);
+  // Show open tabs in file explorer context menu
+  document.addEventListener('click', function (e) {
+    const contextMenu = fileList.querySelector('.context-menu');
+    if (contextMenu && contextMenu.style.display === 'block') {
+      if (e.target.dataset.action === 'tabs') {
+        // Build a list of open tabs
+        let tabsHtml = '<div style="padding:4px 8px;font-weight:bold;">Open Tabs:         \/</div>';
+        if (state.tabs.length === 0) {
+          tabsHtml += '<div style="padding:4px 8px;">No open tabs</div>';
+        } else {
+          state.tabs.forEach(tab => {
+            tabsHtml += `<div class="dropdown-item" data-action="switch-tab" data-tab-id="${tab.id}">${tab.name}${tab.active ? ' <span style="color:var(--accent)">[active]</span>' : ''}</div>`;
+          });
+        }
+        contextMenu.innerHTML = tabsHtml +
+          `<div class="dropdown-item" data-action="close-tab-list">Close</div>`;
+      } else if (e.target.dataset.action === 'switch-tab') {
+        const tabId = e.target.dataset.tabId;
+        if (tabId) {
+          switchToTab(tabId);
+          contextMenu.style.display = 'none';
+        }
+      } else if (e.target.dataset.action === 'close-tab-list') {
         contextMenu.style.display = 'none';
       }
-    } else if (e.target.dataset.action === 'close-tab-list') {
-      contextMenu.style.display = 'none';
     }
-  }
-});
+  });
 
   let imageOverlay = null;
 
-  function showImageOverlay(src, alt) {
-    if (imageOverlay) {
-      imageOverlay.remove();
-    }
-    imageOverlay = document.createElement('div');
-    imageOverlay.style.position = 'fixed';
-    imageOverlay.style.top = '0';
-    imageOverlay.style.left = '0';
-    imageOverlay.style.width = '100vw';
-    imageOverlay.style.height = '100vh';
-    imageOverlay.style.background = 'rgba(0,0,0,0.95)';
-    imageOverlay.style.display = 'flex';
-    imageOverlay.style.alignItems = 'center';
-    imageOverlay.style.justifyContent = 'center';
-    imageOverlay.style.zIndex = '9999';
-    imageOverlay.style.cursor = 'zoom-out';
-
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = alt || '';
-    img.style.maxWidth = '90vw';
-    img.style.maxHeight = '90vh';
-    img.style.boxShadow = '0 0 32px #000';
-
-    // Optional: add a close button
-    const closeBtn = document.createElement('div');
-    closeBtn.textContent = '×';
-    closeBtn.style.position = 'absolute';
-    closeBtn.style.top = '24px';
-    closeBtn.style.right = '48px';
-    closeBtn.style.fontSize = '3rem';
-    closeBtn.style.color = '#fff';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.userSelect = 'none';
-
-    closeBtn.onclick = hideImageOverlay;
-    imageOverlay.onclick = hideImageOverlay;
-    img.onclick = (e) => e.stopPropagation(); // Prevent closing when clicking image
-
-    imageOverlay.appendChild(img);
-    imageOverlay.appendChild(closeBtn);
-    document.body.appendChild(imageOverlay);
-
-    // Hide editor and preview pane
-    document.querySelector('.editor-wrapper').style.display = 'none';
-    document.querySelector('.preview-pane').style.display = 'none';
-  }
 
   function hideImageOverlay() {
     if (imageOverlay) {
@@ -798,57 +749,6 @@ document.addEventListener('click', function (e) {
     document.querySelector('.preview-pane').style.display = '';
   }
 
-  function showImagePreviewInPane(src, alt, isSvg, svgContent) {
-    // Hide editor, show preview pane
-    document.querySelector('.editor-wrapper').style.display = 'none';
-    const previewPane = document.querySelector('.preview-pane');
-    previewPane.style.display = 'flex';
-    previewPane.style.justifyContent = 'center';
-    previewPane.style.alignItems = 'center';
-    previewPane.style.background = '#111';
-
-    // Clear preview and add image
-    preview.innerHTML = '';
-    if (isSvg) {
-      // Render SVG markup directly
-      const svgWrapper = document.createElement('div');
-      svgWrapper.innerHTML = svgContent;
-      svgWrapper.style.maxWidth = '100%';
-      svgWrapper.style.maxHeight = '100%';
-      svgWrapper.style.display = 'flex';
-      svgWrapper.style.alignItems = 'center';
-      svgWrapper.style.justifyContent = 'center';
-      svgWrapper.style.background = '#111';
-      svgWrapper.style.cursor = 'zoom-out';
-      svgWrapper.onclick = hideImagePreviewInPane;
-      preview.appendChild(svgWrapper);
-    } else {
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = alt || '';
-      img.style.maxWidth = '100%';
-      img.style.maxHeight = '100%';
-      img.style.objectFit = 'contain';
-      img.style.background = '#111';
-      img.style.cursor = 'zoom-out';
-      img.onclick = hideImagePreviewInPane;
-      preview.appendChild(img);
-    }
-
-    // Optional: add a hint
-    const hint = document.createElement('div');
-    hint.textContent = 'Click image to return to editor';
-    hint.style.position = 'absolute';
-    hint.style.bottom = '24px';
-    hint.style.left = '50%';
-    hint.style.transform = 'translateX(-50%)';
-    hint.style.color = '#fff';
-    hint.style.background = 'rgba(0,0,0,0.5)';
-    hint.style.padding = '4px 12px';
-    hint.style.borderRadius = '8px';
-    hint.style.fontSize = '0.9rem';
-    preview.appendChild(hint);
-  }
 
   function hideImagePreviewInPane() {
     document.querySelector('.editor-wrapper').style.display = '';
@@ -1298,42 +1198,6 @@ document.addEventListener('click', function (e) {
   });
 
   // Detect file changes in real-time
-  function watchFileChanges() {
-    const currentPath = state.fileExplorerPath || '';
-
-    // Polling interval (in milliseconds)
-    const interval = 1000;
-
-    setInterval(() => {
-      // For each file in the current directory
-      state.files.forEach(file => {
-        if (file.type === 'file' && file.path) {
-          // Check if the file has been modified
-          fetch(file.path, { method: 'HEAD' })
-            .then(response => {
-              const lastModified = new Date(response.headers.get('Last-Modified'));
-
-              // If the file was modified after it was last loaded
-              if (lastModified > new Date(file.lastLoaded)) {
-                // Update the file content and last loaded time
-                file.content = response.text();
-                file.lastLoaded = new Date().toISOString();
-
-                // If the file is currently open in a tab, update the editor content
-                const openTab = getTabById(file.id);
-                if (openTab) {
-                  openTab.content = file.content;
-                  if (openTab.active) {
-                    editor.setValue(file.content);
-                  }
-                }
-              }
-            })
-            .catch(err => console.error(`Error checking file ${file.name}:`, err));
-        }
-      });
-    }, interval);
-  }
 
   // Shortcuts manager
   // !!
@@ -1515,77 +1379,77 @@ document.addEventListener('click', function (e) {
       const [handle] = await window.showOpenFilePicker({
         types: [
           {
-        description: 'All Supported Formats',
-        accept: Object.fromEntries(
-          Object.values(FILE_TYPES).map(type => [type.mime, [type.ext]])
-        )
+            description: 'All Supported Formats',
+            accept: Object.fromEntries(
+              Object.values(FILE_TYPES).map(type => [type.mime, [type.ext]])
+            )
           },
           {
-        description: 'Web Dev Formats',
-        accept: Object.fromEntries(
-          Object.values({
-            html: { mime: 'text/html', ext: '.html' },
-            css: { mime: 'text/css', ext: '.css' },
-            js: { mime: 'text/javascript', ext: '.js' },
-            json: { mime: 'application/json', ext: '.json' },
-            txt: { mime: 'text/plain', ext: '.txt' },
-            md: { mime: 'text/markdown', ext: '.md' },
-            svg: { mime: 'image/svg+xml', ext: '.svg' }
-          }).map(type => [type.mime, [type.ext]])
-        )
+            description: 'Web Dev Formats',
+            accept: Object.fromEntries(
+              Object.values({
+                html: { mime: 'text/html', ext: '.html' },
+                css: { mime: 'text/css', ext: '.css' },
+                js: { mime: 'text/javascript', ext: '.js' },
+                json: { mime: 'application/json', ext: '.json' },
+                txt: { mime: 'text/plain', ext: '.txt' },
+                md: { mime: 'text/markdown', ext: '.md' },
+                svg: { mime: 'image/svg+xml', ext: '.svg' }
+              }).map(type => [type.mime, [type.ext]])
+            )
           },
           {
-        description: 'not web Dev Formats',
-        accept: Object.fromEntries(
-          Object.values({
-            py: { mime: 'text/x-python', ext: '.py' },
-            java: { mime: 'text/x-java', ext: '.java' },
-            c: { mime: 'text/x-c', ext: '.c' },
-            cpp: { mime: 'text/x-c++', ext: '.cpp' },
-            rs: { mime: 'text/x-rust', ext: '.rs' },
-            go: { mime: 'text/x-go', ext: '.go' }
-          }).map(type => [type.mime, [type.ext]])
-        )
+            description: 'not web Dev Formats',
+            accept: Object.fromEntries(
+              Object.values({
+                py: { mime: 'text/x-python', ext: '.py' },
+                java: { mime: 'text/x-java', ext: '.java' },
+                c: { mime: 'text/x-c', ext: '.c' },
+                cpp: { mime: 'text/x-c++', ext: '.cpp' },
+                rs: { mime: 'text/x-rust', ext: '.rs' },
+                go: { mime: 'text/x-go', ext: '.go' }
+              }).map(type => [type.mime, [type.ext]])
+            )
           },
           {
-        description: 'Text',
-        accept: Object.fromEntries(
-          Object.values({
-            txt: { mime: 'text/plain', ext: '.txt' },
-            md: { mime: 'text/markdown', ext: '.md' }
-          }).map(type => [type.mime, [type.ext]])
-        )
+            description: 'Text',
+            accept: Object.fromEntries(
+              Object.values({
+                txt: { mime: 'text/plain', ext: '.txt' },
+                md: { mime: 'text/markdown', ext: '.md' }
+              }).map(type => [type.mime, [type.ext]])
+            )
           },
           {
-        description: 'IDE Project Files',
-        accept: {
-          'application/x-ide-project': ['.ide']
-        }
+            description: 'IDE Project Files',
+            accept: {
+              'application/x-ide-project': ['.ide']
+            }
           },
           {
-        description: 'SVG Images',
-        accept: {
-          'image/svg+xml': ['.svg']
-        }
+            description: 'SVG Images',
+            accept: {
+              'image/svg+xml': ['.svg']
+            }
           }
         ],
         excludeAcceptAllOption: true
       });
 
       const file = await handle.getFile();
-      
+
       // Validate file size
       if (file.size > MAX_FILE_SIZE) {
         const maxMB = MAX_FILE_SIZE / 1024 / 1024;
-        throw new Error(`File exceeds ${maxMB}MB limit (${(file.size/1024/1024).toFixed(2)}MB)`);
+        throw new Error(`File exceeds ${maxMB}MB limit (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
       }
 
       const content = await file.text();
       const extension = handle.name.split('.').pop()?.toLowerCase() || '';
-      
+
       // Determine file type with fallback
       const fileType = FILE_TYPES[extension] ? extension : 'html';
-      
+
       // Prepare new tab data
       const tabId = generateTabId();
       const newTab = {
@@ -1609,7 +1473,7 @@ document.addEventListener('click', function (e) {
       addToRecentFiles(newTab);
       saveTabsToStorage();
       refreshExploreFileList();
-      
+
       // Non-blocking language detection
       detectLanguage().catch(e => console.error('Language detection failed', e));
 
@@ -1618,7 +1482,7 @@ document.addEventListener('click', function (e) {
       if (error.name === 'NotFoundError') {
         showError('File not found or access denied');
         showAlert(`Failed to open file:\n${error.message}`, 'ERR', 'Open File Error', 'ERR');
-        
+
       } else {
         showError(`Open failed: ${error.message}`);
         showAlert(`Failed to open file:\n${error.message}`, 'ERR', 'Open File Error', 'ERR');
@@ -1672,6 +1536,103 @@ document.addEventListener('click', function (e) {
     }
   }
 
+  async function openFolder() {
+    try {
+      // Request folder access
+      const directoryHandle = await window.showDirectoryPicker({
+        mode: 'readwrite'
+      });
+
+      // Clear current state
+      state.files = [];
+      state.tabs.forEach(tab => tab.active = false);
+
+      // Recursively read folder contents
+      async function readDirectory(directoryHandle, path = '') {
+        const entries = [];
+        for await (const [name, handle] of directoryHandle.entries()) {
+          const entryPath = path ? `${path}/${name}` : name;
+          if (handle.kind === 'file') {
+            // Skip files larger than our max size
+            const file = await handle.getFile();
+            if (file.size > MAX_FILE_SIZE) {
+              showError(`Skipped ${entryPath} (file too large)`);
+              continue;
+            }
+
+            // Read file content
+            const content = await file.text();
+            entries.push({
+              name,
+              type: 'file',
+              content,
+              handle,
+              path: entryPath
+            });
+          } else if (handle.kind === 'directory') {
+            entries.push({
+              name,
+              type: 'folder',
+              children: await readDirectory(handle, entryPath),
+              expanded: false,
+              path: entryPath
+            });
+          }
+        }
+        return entries;
+      }
+
+      // Read the folder structure
+      state.files = await readDirectory(directoryHandle);
+
+      // Update UI
+      saveProjectFiles();
+      renderFileExplorer();
+      updateStatus(`Opened folder: ${directoryHandle.name}`);
+
+      // Find and open the first HTML file if found
+      async function findAndOpenFirstHtmlFile(entries) {
+        for (const entry of entries) {
+          if (entry.type === 'file' && entry.name.endsWith('.html')) {
+            // Create a new tab for the HTML file
+            const tabId = generateTabId();
+            const newTab = {
+              id: tabId,
+              name: entry.name,
+              type: 'html',
+              content: entry.content,
+              handle: entry.handle,
+              active: true
+            };
+
+            state.tabs.push(newTab);
+            state.currentTabId = tabId;
+            editor.setValue(entry.content);
+            renderTabs();
+            addToRecentFiles(newTab);
+            await detectLanguage();
+            return true;
+          } else if (entry.type === 'folder' && entry.children) {
+            if (await findAndOpenFirstHtmlFile(entry.children)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      await findAndOpenFirstHtmlFile(state.files);
+
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        showError(`Failed to open folder: ${error.message}`);
+        showAlert(`Failed to open folder:\n${error.message}`, 'ERR', 'Open Folder Error', 'ERR');
+      }
+    }
+  }
+
+  // Helper function to find first file by extension
+
   async function findFileHandle(fileName) {
     try {
       const directoryHandle = await window.showDirectoryPicker();
@@ -1724,11 +1685,11 @@ document.addEventListener('click', function (e) {
     const currentTab = getCurrentTab();
     const name = await showAlert('Enter new file name (without extension):', 'QUERY', 'Rename File', 'QUERY');
     if (name) {
-        currentTab.name = `${name}${FILE_TYPES[currentTab.type].ext}`;
-        renderTabs();
-        updateStatus(`Renamed to ${currentTab.name}`);
-        saveTabsToStorage();
-        refreshExploreFileList();
+      currentTab.name = `${name}${FILE_TYPES[currentTab.type].ext}`;
+      renderTabs();
+      updateStatus(`Renamed to ${currentTab.name}`);
+      saveTabsToStorage();
+      refreshExploreFileList();
     }
   }
 
@@ -1915,7 +1876,7 @@ document.addEventListener('click', function (e) {
       }
       // Listen for changes in system theme
       if (!setTheme._autoListener) {
-        setTheme._autoListener = (e) => setTheme('automatic');
+        setTheme._autoListener = () => setTheme('automatic');
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
       }
     }
@@ -1998,6 +1959,7 @@ document.addEventListener('click', function (e) {
         case 'close-tab': closeTab(data.tabId); break;
         case 'open': await openFile(); break;
         case 'open-recent': await openRecentFile(data.file); break;
+        case 'open-folder': await openFolder(); break;
         case 'save': await saveFile(); break;
         case 'save-as-html': await saveFileAs('html'); break;
         case 'save-as-txt': await saveText(); break;
@@ -2163,14 +2125,14 @@ document.addEventListener('click', function (e) {
         case 'file-2-rust': setFileType('rs'); detectLanguage(); break;
         case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
-            showAlert(
-                'html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.4.3<br>Date of Publish:&nbsp;&nbsp;2025 / 05 / 29<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all chromium (the open source browser project) based<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.',
-                'INFO',
-                'About html IDE',
-                'INFO'
-            );
-            updateStatus("About dialog shown");
-            break;
+          showAlert(
+            'html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.4.3<br>Date of Publish:&nbsp;&nbsp;2025 / 05 / 29<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all chromium (the open source browser project) based<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.',
+            'INFO',
+            'About html IDE',
+            'INFO'
+          );
+          updateStatus("About dialog shown");
+          break;
         case 'toggle-autosave':
           state.autosaveEnabled = !state.autosaveEnabled;
           localStorage.setItem('autosaveEnabled', state.autosaveEnabled);
@@ -2264,7 +2226,7 @@ document.addEventListener('click', function (e) {
         case 'cpp': return 'icons/Cpp_icon.png';
         case 'cs': return 'icons/Csharp_icon.png';
         case 'py': return 'icons/python_icon.png';
-        case 'java': return 'icons/java_icon.png'; 
+        case 'java': return 'icons/java_icon.png';
         case 'rs': return 'icons/rust_icon.png';
         case 'go': return 'icons/golang_icon.png';
         case 'jsx': return 'icons/react_icon.png';
@@ -2482,7 +2444,7 @@ document.addEventListener('click', function (e) {
   const resizer = document.getElementById('resizer');
   let isResizing = false;
 
-  resizer.addEventListener('mousedown', (e) => {
+  resizer.addEventListener('mousedown', () => {
     isResizing = true;
     document.body.style.cursor = 'col-resize';
     document.addEventListener('mousemove', resize);
