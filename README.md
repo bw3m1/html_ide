@@ -1,6 +1,10 @@
 # HTML IDE
 
-A lightweight, in-browser HTML editor and live previewer. This project provides a clean, responsive interface to write, edit, and preview HTML/CSS/JavaScript code directly in your browser. It includes features like tabbed editing, file management, themes, and a real-time preview pane.
+A lightweight, in-browser HTML editor and live previewer. This project provides a clean, responsive interface to write, edit, and preview HTML / CSS / JavaScript code directly in your browser. It includes features like tabbed editing, file management, themes, and a real-time preview pane.
+
+## Goles as an IDE
+ - **ofline** - It must work with no internet
+ - **Browser Only** - It must work completle in the browser 
 
 ## Features
 

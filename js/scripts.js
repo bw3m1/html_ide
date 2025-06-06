@@ -25,6 +25,14 @@ const INIT_CONTENTS = `<!DOCTYPE html>
     </script>
   </body>
 </html>`;
+
+
+// things the about
+    DATE_MODED = "6 / 6 / 2025 at 4:00 PM"
+    VERTION = "0 . 4 . 4"
+    BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
+
+
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
   css: { mime: 'text/css', ext: '.css' },
@@ -2126,7 +2134,7 @@ ${tab.name}
         case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
           showAlert(
-            'html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.4.3<br>Date of Publish:&nbsp;&nbsp;2025 / 05 / 29<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all chromium (the open source browser project) based<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.',
+            `html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${VERTION}<br>Date of Publish:&nbsp;&nbsp;${DATE_MODED}<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BROWSERS}<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.`,
             'INFO',
             'About html IDE',
             'INFO'

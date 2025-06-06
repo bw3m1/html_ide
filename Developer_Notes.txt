@@ -1,0 +1,10 @@
+fix:
+  svg tab err
+  tab close restore err
+  zip desplay err
+
+add:
+  js.Terminal
+  md desplay
+  png preveiw
+  svg text edit
