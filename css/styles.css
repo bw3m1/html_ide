@@ -3,7 +3,7 @@
   --text-dark: #d4d4d4;
   --menu-bg-dark: #181818;
   --hover-dark: #1e1e1e;
-  --outline-dark: #1e1e1e;
+  --outline-dark: #2b2b2b;
   --accent-color: #007acc;
   --error-red: #f44;
   --success-green: #4f4;
@@ -24,9 +24,9 @@
 .contrast-dark-theme {
   --bg-dark: #000;
   --text-dark: #fff;
-  --menu-bg-dark: #151515;
-  --hover-dark: #f38518;
-  --outline-dark: #1e1e1e;
+  --menu-bg-dark: #0c0c0c;
+  --hover-dark: #c15900;
+  --outline-dark: #333;
   --accent-color: #007acc;
   --error-red: #f22;
   --success-green: #0f0;
