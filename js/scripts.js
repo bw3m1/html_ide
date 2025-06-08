@@ -2022,8 +2022,6 @@ ${tab.name}
         case 'theme-contrast-dark': setTheme('contrast-dark'); break;
         case 'theme-contrast-light': setTheme('contrast-light'); break;
         case 'toggle-explorer': toggleFileExplorer(); break;
-        case 'add-file': addFile(); break;
-        case 'add-folder': addFolder(); break;
         case 'delete-file':
           if (data.path) {
             deleteFile(data.path);
@@ -2284,51 +2282,6 @@ ${tab.name}
     }
   }
 
-  // Improved addFile implementation with validation
-  function addFile() {
-    const currentPath = state.fileExplorerPath || '';
-    let fileName = prompt('Enter file name with extension:');
-    if (!fileName) return;
-    fileName = fileName.trim();
-    // Prevent empty, whitespace, or invalid file names
-    if (!fileName || /[\\/:*?"<>|]/.test(fileName)) {
-      showError('Invalid file name.');
-      showAlert('Invalid file name. Please avoid using special characters like \\ / : * ? " < > |.', 'ERR', 'Invalid File Name', 'ERR');
-      return;
-    }
-
-    try {
-      let targetLocation = state.files;
-      const pathParts = currentPath.split('/').filter(p => p);
-
-      for (const part of pathParts) {
-        const folder = targetLocation.find(item =>
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        targetLocation = folder.children;
-      }
-
-      if (targetLocation.some(item => item.name === fileName)) {
-        throw new Error(`"${fileName}" already exists`);
-      }
-
-      const newFile = {
-        name: fileName,
-        type: 'file',
-        content: getDefaultContent(fileName)
-      };
-
-      targetLocation.push(newFile);
-      saveProjectFiles();
-      renderFileExplorer();
-      updateStatus(`Added ${currentPath}/${fileName}`);
-    } catch (error) {
-      showError(error.message);
-      showAlert(`Failed to add file "${fileName}":\n${error.message}`, 'ERR', 'Add File Error', 'ERR');
-    }
-  }
-
   // Provide default content for new files based on extension
   function getDefaultContent(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
@@ -2345,51 +2298,6 @@ ${tab.name}
         return '';
       default:
         return '';
-    }
-  }
-
-  // Fixed addFolder implementation with validation
-  function addFolder() {
-    const currentPath = state.fileExplorerPath || '';
-    let folderName = prompt('Enter folder name:');
-    if (!folderName) return;
-    folderName = folderName.trim();
-    // Prevent empty, whitespace, or invalid folder names
-    if (!folderName || /[\\/:*?"<>|]/.test(folderName)) {
-      showError('Invalid folder name.');
-      showAlert('Invalid folder name. Please avoid using special characters like \\ / : * ? " < > |.', 'ERR', 'Invalid Folder Name', 'ERR');
-      return;
-    }
-
-    try {
-      let targetLocation = state.files;
-      const pathParts = currentPath.split('/').filter(p => p);
-
-      for (const part of pathParts) {
-        const folder = targetLocation.find(item =>
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        targetLocation = folder.children;
-      }
-
-      if (targetLocation.some(item => item.name === folderName)) {
-        throw new Error(`"${folderName}" already exists`);
-      }
-
-      targetLocation.push({
-        name: folderName,
-        type: 'folder',
-        children: [],
-        expanded: true
-      });
-
-      saveProjectFiles();
-      renderFileExplorer();
-      updateStatus(`Added folder ${currentPath}/${folderName}`);
-    } catch (error) {
-      showError(error.message);
-      showAlert(`Failed to add folder "${folderName}":\n${error.message}`, 'ERR', 'Add Folder Error', 'ERR');
     }
   }
 
