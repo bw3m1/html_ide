@@ -26,7 +26,6 @@ const INIT_CONTENTS = `<!DOCTYPE html>
   </body>
 </html>`;
 
-
 // things the about
 DATE_MODED = "6 / 8 / 2025 at 5:51 PM"
 VERTION = "0 . 4 . 4 ( patch 31 )"
