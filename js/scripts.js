@@ -29,7 +29,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 
 // things the about
 DATE_MODED = "6 / 8 / 2025 at 5:51 PM"
-VERTION = "0 . 4 . 4 ( patch 28 )"
+VERTION = "0 . 4 . 4 ( patch 31 )"
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
 
 
@@ -1942,7 +1942,6 @@ ${tab.name}
             }
             .err-title { color: ${colors.error}; font-weight: bold; font-size: 1.2em; }
             .err-msg   { color: ${colors.accent}; margin: 0.5rem 0; }
-            .err-line  { color: #0ff; }
             .err-stack { color: #ccc; font-size: 0.9em; }
             input.inline-input {
               background: ${colors.bg};
@@ -1971,7 +1970,6 @@ ${tab.name}
                 container.innerHTML = \`
                   <div class="err-title">\${err.name}</div>
                   <div class="err-msg">\${err.message}</div>
-                  <div class="err-line">Note: Line numbers may be inaccurate</div>
                   <pre class="err-stack">\${err.stack}</pre>
                 \`;
                 document.body.appendChild(container);
@@ -2012,7 +2010,7 @@ ${tab.name}
 
         newWindow.document.write(html);
         newWindow.document.close();
-        updateStatus("Ran JS in new tab");
+        updateStatus("Ran JS in new tab with styled output");
       } else {
         newWindow.document.write(content);
         newWindow.document.close();
