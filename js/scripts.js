@@ -28,9 +28,9 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 
 
 // things the about
-    DATE_MODED = "6 / 8 / 2025 at 5:51 PM"
-    VERTION = "0 . 4 . 4 ( patch 19 )"
-    BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
+DATE_MODED = "6 / 8 / 2025 at 5:51 PM"
+VERTION = "0 . 4 . 4 ( patch 28 )"
+BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
 
 
 const FILE_TYPES = {
@@ -1900,10 +1900,123 @@ ${tab.name}
   // Run code
   function runCode(newTab) {
     const content = editor.getValue();
+    const currentTab = getCurrentTab();
+    const isJS = currentTab.name.endsWith('.js');
+
     if (newTab) {
       const newWindow = window.open();
-      newWindow.document.write(content);
-      updateStatus("Opened in new tab");
+      if (!newWindow) {
+        showAlert("Popup blocked. Please allow popups for this site.", 'ERR');
+        return;
+      }
+
+      if (isJS) {
+        const theme = localStorage.getItem('editorTheme') || 'dark';
+        const colors = {
+          dark: { bg: '#111', text: '#eee', log: '#0f0', error: '#f55', accent: '#ffa500' },
+          light: { bg: '#fff', text: '#111', log: '#080', error: '#c00', accent: '#d2691e' },
+          'contrast-dark': { bg: '#000', text: '#fff', log: '#0ff', error: '#f00', accent: '#ff0' },
+          'contrast-light': { bg: '#fff', text: '#000', log: '#00f', error: '#900', accent: '#a52a2a' }
+        }[theme] || colors.dark;
+
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${currentTab.name}</title>
+          <style>
+            body {
+              font-family: monospace;
+              background: ${colors.bg};
+              color: ${colors.text};
+              padding: 1rem;
+              white-space: pre-wrap;
+            }
+            .log { color: ${colors.log}; margin-bottom: 0.5rem; }
+            .error-block {
+              border-left: 4px solid ${colors.error};
+              background: rgba(255, 0, 0, 0.1);
+              padding: 1rem;
+              margin: 1rem 0;
+              font-family: monospace;
+            }
+            .err-title { color: ${colors.error}; font-weight: bold; font-size: 1.2em; }
+            .err-msg   { color: ${colors.accent}; margin: 0.5rem 0; }
+            .err-line  { color: #0ff; }
+            .err-stack { color: #ccc; font-size: 0.9em; }
+            input.inline-input {
+              background: ${colors.bg};
+              color: ${colors.text};
+              border: 1px solid #666;
+              padding: 4px;
+              font-family: monospace;
+              width: 80%;
+              margin-top: 0.2rem;
+            }
+          </style>
+        </head>
+        <body>
+          <script>
+            (async function() {
+              const log = (...args) => {
+                const div = document.createElement('div');
+                div.className = 'log';
+                div.textContent = args.map(a => String(a)).join(' ');
+                document.body.appendChild(div);
+              };
+
+              const showError = (err) => {
+                const container = document.createElement('div');
+                container.className = 'error-block';
+                container.innerHTML = \`
+                  <div class="err-title">\${err.name}</div>
+                  <div class="err-msg">\${err.message}</div>
+                  <div class="err-line">Note: Line numbers may be inaccurate</div>
+                  <pre class="err-stack">\${err.stack}</pre>
+                \`;
+                document.body.appendChild(container);
+              };
+
+              console.log = log;
+
+              window.prompt = function(message, _default = '') {
+                return new Promise(resolve => {
+                  const wrapper = document.createElement('div');
+                  wrapper.innerHTML = \`
+                    <div>\${message}</div>
+                    <pre>> <input class="inline-input" type="text"></pre>
+                  \`;
+                  const input = wrapper.querySelector('input');
+                  input.value = _default;
+                  input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                      input.disabled = true;
+                      resolve(input.value);
+                    }
+                  });
+                  document.body.appendChild(wrapper);
+                  input.focus();
+                });
+              };
+
+              try {
+                ${content}
+              } catch (err) {
+                showError(err);
+              }
+            })();
+          <\/script>
+        </body>
+        </html>
+      `;
+
+        newWindow.document.write(html);
+        newWindow.document.close();
+        updateStatus("Ran JS in new tab");
+      } else {
+        newWindow.document.write(content);
+        newWindow.document.close();
+      }
     } else {
       updatePreview();
     }

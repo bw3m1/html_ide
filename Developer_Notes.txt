@@ -1,10 +1,10 @@
 fix:
+  js run new tab error desplay line misinformatin
   svg tab err
   tab close restore err
   zip desplay err
 
 add:
-  js.Terminal
   md desplay
   png preveiw
   svg text edit
