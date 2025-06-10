@@ -184,38 +184,46 @@
         </div>
 
         <script>
-      // File system data structure
-        const fileSystem = JSON.parse(localStorage.getItem('projectFiles')) || [
+        // File system data structure
+        let fileSystem = JSON.parse(localStorage.getItem('projectFiles')) || [
           { 
-            name: "src", 
-                type: "folder",
-                expanded: true,
-                children: [
-                    { name: "index.html", type: "file" },
-                    { name: "styles.css", type: "file" },
-                    { name: "scripts.js", type: "file" },
-                    { 
-                        name: "components", 
-                        type: "folder",
-                        expanded: false,
-                        children: [
-                            { name: "Button.jsx", type: "file" },
-                            { name: "Card.jsx", type: "file" }
-                        ]
-                    }
-                ]
-            },
-            { name: "package.json", type: "file" },
-            { name: "README.md", type: "file" }
+            name: "main", 
+            type: "folder",
+            expanded: true,
+            children: [
+                { name: "index.html", type: "file" },
+                { name: "styles.css", type: "file" },
+                { name: "scripts.js", type: "file" },
+                { 
+                    name: "assets", 
+                    type: "folder",
+                    expanded: false,
+                    children: [
+                        { name: "Button.jsx", type: "file" },
+                        { name: "Card.jsx", type: "file" }
+                    ]
+                }
+            ]
+          },
+          { name: "package.json", type: "file" },
+          { name: "README.md", type: "file" }
         ];
         
         // Tabs state
-        const tabs = JSON.parse(localStorage.getItem('editorTabs')) || [
+        let tabs = JSON.parse(localStorage.getItem('editorTabs')) || [
             { id: 'tab1', name: 'index.html', active: true },
             { id: 'tab2', name: 'styles.css', active: false },
             { id: 'tab3', name: 'scripts.js', active: false }
         ];
         
+        // Current context menu state
+        let currentContext = {
+            type: null,
+            element: null,
+            path: null,
+            tabId: null
+        };
+
         // Render file explorer
         function renderFileExplorer() {
             const fileList = document.getElementById('fileList');
@@ -238,15 +246,19 @@
                         <span class="name">${item.name}</span>
                     `;
                     
+                    // Folder toggle functionality
                     if (isFolder) {
-                        div.addEventListener('click', (e) => {
-                            if (!e.target.classList.contains('toggle')) return;
+                        const toggle = div.querySelector('.toggle');
+                        const nameSpan = div.querySelector('.name');
+                        
+                        toggle.addEventListener('click', (e) => {
+                            e.stopPropagation();
                             item.expanded = !item.expanded;
                             renderFileExplorer();
                         });
                         
-                        const nameSpan = div.querySelector('.name');
-                        nameSpan.addEventListener('click', () => {
+                        nameSpan.addEventListener('click', (e) => {
+                            e.stopPropagation();
                             item.expanded = !item.expanded;
                             renderFileExplorer();
                         });
@@ -255,6 +267,17 @@
                             openFileFromExplorer(itemPath);
                         });
                     }
+                    
+                    // Context menu for file/folder
+                    div.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        currentContext = {
+                            type: isFolder ? 'folder' : 'file',
+                            element: item,
+                            path: itemPath
+                        };
+                        showContextMenu(e.clientX, e.clientY, isFolder ? 'folder' : 'file');
+                    });
                     
                     fragment.appendChild(div);
                     
@@ -296,7 +319,30 @@
                     }
                 });
                 
+                // Context menu for open tabs
+                tabDiv.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    currentContext = {
+                        type: 'tab',
+                        element: tab,
+                        tabId: tab.id
+                    };
+                    showContextMenu(e.clientX, e.clientY, 'tab');
+                });
+                
                 openEditorsSection.appendChild(tabDiv);
+            });
+            
+            // Context menu for background
+            fileList.addEventListener('contextmenu', (e) => {
+                if (!e.target.closest('.file-item') && !e.target.closest('.open-editor-item')) {
+                    e.preventDefault();
+                    currentContext = {
+                        type: 'background',
+                        element: null
+                    };
+                    showContextMenu(e.clientX, e.clientY, 'background');
+                }
             });
             
             fileList.appendChild(openEditorsSection);
@@ -432,6 +478,141 @@
             });
         }
         
+        // Context menu functions
+        function showContextMenu(x, y, type) {
+            const contextMenu = document.querySelector('.context-menu');
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+            
+            let menuHTML = '';
+            
+            switch(type) {
+                case 'file':
+                    menuHTML = `
+                        <div class="context-menu-item" data-action="open">Open</div>
+                        <div class="context-menu-divider"></div>
+                        <div class="context-menu-item" data-action="rename">Rename</div>
+                        <div class="context-menu-item" data-action="delete">Delete</div>
+                        <div class="context-menu-divider"></div>
+                        <div class="context-menu-item" data-action="properties">Properties</div>
+                    `;
+                    break;
+                case 'folder':
+                    menuHTML = `
+                        <div class="context-menu-item" data-action="open">Open</div>
+                        <div class="context-menu-divider"></div>
+                        <div class="context-menu-item" data-action="rename">Rename</div>
+                        <div class="context-menu-item" data-action="delete">Delete</div>
+                        <div class="context-menu-divider"></div>
+                        <div class="context-menu-item" data-action="properties">Properties</div>
+                    `;
+                    break;
+                case 'tab':
+                    menuHTML = `
+                        <div class="context-menu-item" data-action="close">Close</div>
+                        <div class="context-menu-item" data-action="closeOthers">Close Others</div>
+                        <div class="context-menu-item" data-action="closeAll">Close All</div>
+                        <div class="context-menu-divider"></div>
+                        <div class="context-menu-item" data-action="properties">Properties</div>
+                    `;
+                    break;
+                case 'background':
+                    menuHTML = `
+                        <div class="context-menu-item" data-action="collapseAll">Collapse All</div>
+                        <div class="context-menu-item" data-action="refresh">Refresh</div>
+                    `;
+                    break;
+            }
+            
+            contextMenu.innerHTML = menuHTML;
+            
+            // Add event listeners to menu items
+            contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    handleContextMenuAction(item.dataset.action);
+                    contextMenu.style.display = 'none';
+                });
+            });
+        }
+        
+        function handleContextMenuAction(action) {
+            switch(action) {
+                case 'open':
+                    if (currentContext.type === 'file' || currentContext.type === 'folder') {
+                        openFileFromExplorer(currentContext.path);
+                    }
+                    break;
+                case 'close':
+                    if (currentContext.type === 'tab') {
+                        closeTab(currentContext.tabId);
+                    }
+                    break;
+                case 'closeOthers':
+                    if (currentContext.type === 'tab') {
+                        // Keep only the current tab
+                        tabs = tabs.filter(tab => tab.id === currentContext.tabId);
+                        tabs[0].active = true;
+                        localStorage.setItem('editorTabs', JSON.stringify(tabs));
+                        renderFileExplorer();
+                    }
+                    break;
+                case 'closeAll':
+                    if (currentContext.type === 'tab') {
+                        tabs = [];
+                        localStorage.setItem('editorTabs', JSON.stringify(tabs));
+                        renderFileExplorer();
+                    }
+                    break;
+                case 'rename':
+                    if (currentContext.type === 'file' || currentContext.type === 'folder') {
+                        const newName = prompt('Enter new name:', currentContext.element.name);
+                        if (newName && newName.trim() !== '') {
+                            currentContext.element.name = newName;
+                            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                            renderFileExplorer();
+                        }
+                    }
+                    break;
+                case 'delete':
+                    if (currentContext.type === 'file' || currentContext.type === 'folder') {
+                        if (confirm(`Are you sure you want to delete "${currentContext.element.name}"?`)) {
+                            deleteFileOrFolder(currentContext.element, fileSystem);
+                            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                            renderFileExplorer();
+                        }
+                    }
+                    break;
+                case 'collapseAll':
+                    collapseAllFolders(fileSystem);
+                    renderFileExplorer();
+                    break;
+                case 'refresh':
+                    renderFileExplorer();
+                    break;
+                case 'properties':
+                    alert(`Properties for ${currentContext.element?.name || 'background'}`);
+                    break;
+            }
+        }
+        
+        function deleteFileOrFolder(item, items) {
+            const index = items.indexOf(item);
+            if (index !== -1) {
+                items.splice(index, 1);
+            } else {
+                for (const parentItem of items) {
+                    if (parentItem.children && parentItem.children.includes(item)) {
+                        const childIndex = parentItem.children.indexOf(item);
+                        parentItem.children.splice(childIndex, 1);
+                        break;
+                    } else if (parentItem.children) {
+                        deleteFileOrFolder(item, parentItem.children);
+                    }
+                }
+            }
+        }
+        
         // Listen for messages from parent window
         window.addEventListener('message', (event) => {
             if (event.data.type === 'updateFileExplorer') {
@@ -445,5 +626,6 @@
             }
         });
     </script>
+    <div class="context-menu"></div>
     </body>
 </html>
