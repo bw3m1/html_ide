@@ -27,8 +27,8 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things the about
-DATE_MODED = "6 / 8 / 2025 at 5:51 PM"
-VERTION = "0 . 4 . 4 ( patch 31 )"
+DATE_MODED = "6 / 9 / 2025 at 5:29 PM"
+VERTION = "0 . 4 . 4   ptch . 33"
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
 
 
