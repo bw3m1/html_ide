@@ -5,174 +5,178 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>File Explorer</title>
         <style>
-        /* VS Code-inspired styling */
-        :root {
-            --vscode-sideBar-background: #252526;
-            --vscode-list-activeSelectionBackground: #094771;
-            --vscode-list-hoverBackground: #2a2d2e;
-            --vscode-foreground: #cccccc;
-            --vscode-icon-foreground: #c5c5c5;
-            --vscode-menu-border: #454545;
-        }
-        
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--vscode-sideBar-background);
-            color: var(--vscode-foreground);
-            height: 100vh;
-            overflow: hidden;
-            font-size: 13px;
-        }
-        
-        .file-explorer {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        
-        .explorer-header {
-            padding: 12px 16px;
-            font-weight: 600;
-            border-bottom: 1px solid var(--vscode-menu-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(30, 30, 30, 0.5);
-        }
-        
-        .explorer-actions button {
-            background: transparent;
-            border: none;
-            color: var(--vscode-foreground);
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .file-list-container {
-            flex: 1;
-            overflow: auto;
-            padding: 8px 0;
-        }
-        
-        .file-item, .open-editor-item {
-            padding: 4px 8px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 3px;
-            margin: 1px 8px;
-            user-select: none;
-        }
-        
-        .file-item:hover, .open-editor-item:hover {
-            background: var(--vscode-list-hoverBackground);
-        }
-        
-        .file-item.selected, .open-editor-item.active {
-            background: var(--vscode-list-activeSelectionBackground);
-        }
-        
-        .file-icon {
-            width: 16px;
-            height: 16px;
-            margin-right: 6px;
-        }
-        
-        .children {
-            padding-left: 16px;
-            display: none;
-        }
-        
-        .expanded > .children {
-            display: block;
-        }
-        
-        .toggle {
-            width: 16px;
-            height: 16px;
-            margin-right: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            transform: rotate(0deg);
-            transition: transform 0.2s;
-        }
-        
-        .expanded > .toggle {
-            transform: rotate(90deg);
-        }
-        
-        .open-editors-section {
-            margin-top: 16px;
-            padding-top: 8px;
-            border-top: 1px solid var(--vscode-menu-border);
-        }
-        
-        .open-editors-title {
-            font-weight: bold;
-            padding: 4px 16px;
-            margin-bottom: 4px;
-        }
-        
-        .open-editor-item {
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .open-editor-item::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #888;
-        }
-        
-        .open-editor-item.active::before {
-            background: #0078d4;
-        }
-        
-        .open-editor-close {
-            margin-left: 8px;
-            color: #888;
-            cursor: pointer;
-        }
-        
-        .context-menu {
-            position: absolute;
-            background: #333;
-            border: 1px solid #555;
-            border-radius: 4px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            min-width: 180px;
-            display: none;
-        }
-        
-        .context-menu-item {
-            padding: 8px 16px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        
-        .context-menu-item:hover {
-            background: var(--vscode-list-activeSelectionBackground);
-        }
-        
-        .context-menu-divider {
-            height: 1px;
-            background: #555;
-            margin: 4px 0;
-        }
-    </style>
+            /* VS Code-inspired styling */
+            :root {
+                --vscode-sideBar-background: #252526;
+                --vscode-list-activeSelectionBackground: #094771;
+                --vscode-list-hoverBackground: #2a2d2e;
+                --vscode-foreground: #cccccc;
+                --vscode-icon-foreground: #c5c5c5;
+                --vscode-menu-border: #454545;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                background: var(--vscode-sideBar-background);
+                color: var(--vscode-foreground);
+                height: 100vh;
+                overflow: hidden;
+                font-size: 13px;
+            }
+
+            .file-explorer {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+
+            .explorer-header {
+                padding: 12px 16px;
+                font-weight: 600;
+                border-bottom: 1px solid var(--vscode-menu-border);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: rgba(30, 30, 30, 0.5);
+            }
+
+            .explorer-actions button {
+                background: transparent;
+                border: none;
+                color: var(--vscode-foreground);
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            .file-list-container {
+                flex: 1;
+                overflow: auto;
+                padding: 8px 0;
+            }
+
+            .file-item,
+            .open-editor-item {
+                padding: 4px 8px;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                border-radius: 3px;
+                margin: 1px 8px;
+                user-select: none;
+            }
+
+            .file-item:hover,
+            .open-editor-item:hover {
+                background: var(--vscode-list-hoverBackground);
+            }
+
+            .file-item.selected,
+            .open-editor-item.active {
+                background: var(--vscode-list-activeSelectionBackground);
+            }
+
+            .file-icon {
+                width: 16px;
+                height: 16px;
+                margin-right: 6px;
+            }
+
+            .children {
+                padding-left: 16px;
+                display: none;
+            }
+
+            .expanded>.children {
+                display: block;
+            }
+
+            .toggle {
+                width: 16px;
+                height: 16px;
+                margin-right: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 10px;
+                transform: rotate(0deg);
+                transition: transform 0.2s;
+            }
+
+            .expanded>.toggle {
+                transform: rotate(90deg);
+            }
+
+            .open-editors-section {
+                margin-top: 16px;
+                padding-top: 8px;
+                border-top: 1px solid var(--vscode-menu-border);
+            }
+
+            .open-editors-title {
+                font-weight: bold;
+                padding: 4px 16px;
+                margin-bottom: 4px;
+            }
+
+            .open-editor-item {
+                padding-left: 20px;
+                position: relative;
+            }
+
+            .open-editor-item::before {
+                content: '';
+                position: absolute;
+                left: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #888;
+            }
+
+            .open-editor-item.active::before {
+                background: #0078d4;
+            }
+
+            .open-editor-close {
+                margin-left: 8px;
+                color: #888;
+                cursor: pointer;
+            }
+
+            .context-menu {
+                position: absolute;
+                background: #333;
+                border: 1px solid #555;
+                border-radius: 4px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                min-width: 180px;
+                display: none;
+            }
+
+            .context-menu-item {
+                padding: 8px 16px;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+            .context-menu-item:hover {
+                background: var(--vscode-list-activeSelectionBackground);
+            }
+
+            .context-menu-divider {
+                height: 1px;
+                background: #555;
+                margin: 4px 0;
+            }
+        </style>
     </head>
     <body>
+
         <div class="file-explorer">
             <div class="explorer-header">
                 <span>EXPLORER: PROJECT FILES</span>
@@ -186,36 +190,36 @@
         <script>
         // File system data structure
         let fileSystem = JSON.parse(localStorage.getItem('projectFiles')) || [
-          { 
-            name: "main", 
-            type: "folder",
-            expanded: true,
-            children: [
-                { name: "index.html", type: "file" },
-                { name: "styles.css", type: "file" },
-                { name: "scripts.js", type: "file" },
-                { 
-                    name: "assets", 
-                    type: "folder",
-                    expanded: false,
-                    children: [
-                        { name: "Button.jsx", type: "file" },
-                        { name: "Card.jsx", type: "file" }
-                    ]
-                }
-            ]
-          },
-          { name: "package.json", type: "file" },
-          { name: "README.md", type: "file" }
+            {
+                name: "main",
+                type: "folder",
+                expanded: true,
+                children: [
+                    { name: "index.html", type: "file" },
+                    { name: "styles.css", type: "file" },
+                    { name: "scripts.js", type: "file" },
+                    {
+                        name: "assets",
+                        type: "folder",
+                        expanded: false,
+                        children: [
+                            { name: "Button.jsx", type: "file" },
+                            { name: "Card.jsx", type: "file" }
+                        ]
+                    }
+                ]
+            },
+            { name: "package.json", type: "file" },
+            { name: "README.md", type: "file" }
         ];
-        
+
         // Tabs state
         let tabs = JSON.parse(localStorage.getItem('editorTabs')) || [
             { id: 'tab1', name: 'index.html', active: true },
             { id: 'tab2', name: 'styles.css', active: false },
             { id: 'tab3', name: 'scripts.js', active: false }
         ];
-        
+
         // Current context menu state
         let currentContext = {
             type: null,
@@ -228,35 +232,35 @@
         function renderFileExplorer() {
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '';
-            
+
             // Helper to recursively render files/folders
             function renderItems(items, parentPath = '') {
                 const fragment = document.createDocumentFragment();
-                
+
                 items.forEach(item => {
                     const itemPath = parentPath ? `${parentPath}/${item.name}` : item.name;
                     const isFolder = item.type === 'folder';
                     const div = document.createElement('div');
                     div.className = `file-item${isFolder ? ' folder' : ''}${item.expanded ? ' expanded' : ''}`;
                     div.dataset.path = itemPath;
-                    
+
                     div.innerHTML = `
                         <div class="toggle" style="${isFolder ? '' : 'visibility: hidden;'}">▶</div>
                         <img src="${getIcon(item.name, isFolder, item.expanded, 'dark')}" class="file-icon">
                         <span class="name">${item.name}</span>
                     `;
-                    
+
                     // Folder toggle functionality
                     if (isFolder) {
                         const toggle = div.querySelector('.toggle');
                         const nameSpan = div.querySelector('.name');
-                        
+
                         toggle.addEventListener('click', (e) => {
                             e.stopPropagation();
                             item.expanded = !item.expanded;
                             renderFileExplorer();
                         });
-                        
+
                         nameSpan.addEventListener('click', (e) => {
                             e.stopPropagation();
                             item.expanded = !item.expanded;
@@ -267,7 +271,7 @@
                             openFileFromExplorer(itemPath);
                         });
                     }
-                    
+
                     // Context menu for file/folder
                     div.addEventListener('contextmenu', (e) => {
                         e.preventDefault();
@@ -278,9 +282,9 @@
                         };
                         showContextMenu(e.clientX, e.clientY, isFolder ? 'folder' : 'file');
                     });
-                    
+
                     fragment.appendChild(div);
-                    
+
                     if (isFolder && item.expanded && item.children) {
                         const children = document.createElement('div');
                         children.className = 'children';
@@ -288,17 +292,17 @@
                         fragment.appendChild(children);
                     }
                 });
-                
+
                 return fragment;
             }
-            
+
             fileList.appendChild(renderItems(fileSystem));
-            
+
             // Open Editors Section
             const openEditorsSection = document.createElement('div');
             openEditorsSection.className = 'open-editors-section';
             openEditorsSection.innerHTML = `<div class="open-editors-title">OPEN EDITORS</div>`;
-            
+
             tabs.forEach(tab => {
                 const tabDiv = document.createElement('div');
                 tabDiv.className = `open-editor-item${tab.active ? ' active' : ''}`;
@@ -307,18 +311,18 @@
                     <span style="flex:1">${tab.name}</span>
                     <span class="open-editor-close" title="Close">×</span>
                 `;
-                
+
                 tabDiv.querySelector('.open-editor-close').addEventListener('click', (e) => {
                     e.stopPropagation();
                     closeTab(tab.id);
                 });
-                
+
                 tabDiv.addEventListener('click', (e) => {
                     if (!e.target.classList.contains('open-editor-close')) {
                         switchToTab(tab.id);
                     }
                 });
-                
+
                 // Context menu for open tabs
                 tabDiv.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
@@ -329,10 +333,10 @@
                     };
                     showContextMenu(e.clientX, e.clientY, 'tab');
                 });
-                
+
                 openEditorsSection.appendChild(tabDiv);
             });
-            
+
             // Context menu for background
             fileList.addEventListener('contextmenu', (e) => {
                 if (!e.target.closest('.file-item') && !e.target.closest('.open-editor-item')) {
@@ -344,10 +348,10 @@
                     showContextMenu(e.clientX, e.clientY, 'background');
                 }
             });
-            
+
             fileList.appendChild(openEditorsSection);
         }
-        
+
         // Tab management
         function switchToTab(tabId) {
             tabs.forEach(tab => {
@@ -355,7 +359,7 @@
             });
             localStorage.setItem('editorTabs', JSON.stringify(tabs));
             renderFileExplorer();
-            
+
             // Notify parent window
             const tab = tabs.find(t => t.id === tabId);
             if (tab) {
@@ -366,12 +370,12 @@
                 }, '*');
             }
         }
-        
+
         function closeTab(tabId) {
             const tabIndex = tabs.findIndex(tab => tab.id === tabId);
             if (tabIndex !== -1) {
                 tabs.splice(tabIndex, 1);
-                
+
                 if (tabs.length > 0) {
                     const newIndex = Math.min(tabIndex, tabs.length - 1);
                     switchToTab(tabs[newIndex].id);
@@ -381,18 +385,18 @@
                 }
             }
         }
-        
+
         function openFileFromExplorer(filePath) {
             // Extract filename from path
             const fileName = filePath.split('/').pop();
-            
+
             // Check if tab already open
             const existingTab = tabs.find(tab => tab.name === fileName);
             if (existingTab) {
                 switchToTab(existingTab.id);
                 return;
             }
-            
+
             // Create new tab
             const tabId = 'tab_' + Date.now();
             const newTab = {
@@ -400,13 +404,13 @@
                 name: fileName,
                 active: true
             };
-            
+
             tabs.forEach(tab => tab.active = false);
             tabs.push(newTab);
-            
+
             localStorage.setItem('editorTabs', JSON.stringify(tabs));
             renderFileExplorer();
-            
+
             // Notify parent window
             window.parent.postMessage({
                 type: 'fileExplorerFileOpen',
@@ -414,7 +418,7 @@
                 filePath: filePath
             }, '*');
         }
-        
+
         // File icon function
         function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
             if (theme === 'light') {
@@ -422,9 +426,9 @@
             } else {
                 if (isFolder) return isOpen ? '../icons/open_folder_icon_dark.svg' : '../icons/closed_folder_icon_dark.svg';
             }
-            
+
             if (!fileName) return '../icons/text_icon.png';
-            
+
             if (!isFolder && fileName && fileName.includes('.')) {
                 const ext = fileName.split('.').pop().toLowerCase();
                 switch (ext) {
@@ -452,21 +456,21 @@
                     default: return '../icons/text_icon.png';
                 }
             }
-            
+
             return '../icons/text_icon.png';
         }
-        
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderFileExplorer();
-            
+
             // Add collapse all button functionality
             document.querySelector('.explorer-actions button').addEventListener('click', () => {
                 collapseAllFolders(fileSystem);
                 renderFileExplorer();
             });
         });
-        
+
         function collapseAllFolders(items) {
             items.forEach(item => {
                 if (item.type === 'folder') {
@@ -477,17 +481,17 @@
                 }
             });
         }
-        
+
         // Context menu functions
         function showContextMenu(x, y, type) {
             const contextMenu = document.querySelector('.context-menu');
             contextMenu.style.display = 'block';
             contextMenu.style.left = `${x}px`;
             contextMenu.style.top = `${y}px`;
-            
+
             let menuHTML = '';
-            
-            switch(type) {
+
+            switch (type) {
                 case 'file':
                     menuHTML = `
                         <div class="context-menu-item" data-action="open">Open</div>
@@ -524,9 +528,9 @@
                     `;
                     break;
             }
-            
+
             contextMenu.innerHTML = menuHTML;
-            
+
             // Add event listeners to menu items
             contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
                 item.addEventListener('click', () => {
@@ -535,9 +539,9 @@
                 });
             });
         }
-        
+
         function handleContextMenuAction(action) {
-            switch(action) {
+            switch (action) {
                 case 'open':
                     if (currentContext.type === 'file' || currentContext.type === 'folder') {
                         openFileFromExplorer(currentContext.path);
@@ -595,7 +599,7 @@
                     break;
             }
         }
-        
+
         function deleteFileOrFolder(item, items) {
             const index = items.indexOf(item);
             if (index !== -1) {
@@ -612,7 +616,7 @@
                 }
             }
         }
-        
+
         // Listen for messages from parent window
         window.addEventListener('message', (event) => {
             if (event.data.type === 'updateFileExplorer') {
@@ -626,6 +630,7 @@
             }
         });
     </script>
-    <div class="context-menu"></div>
+        <div class="context-menu"></div>
     </body>
+
 </html>
