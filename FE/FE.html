@@ -181,7 +181,7 @@
             <div class="explorer-header">
                 <span>EXPLORER: PROJECT FILES</span>
                 <div class="explorer-actions">
-                    <button title="Collapse All">≡</button>
+                    <button title="Close File Explorer">X</button>
                 </div>
             </div>
             <div class="file-list-container" id="fileList"></div>
@@ -225,8 +225,28 @@
             type: null,
             element: null,
             path: null,
-            tabId: null
+            tabId: null,
+            parentFolder: null
         };
+
+        // Initialize context menu closing
+        function initContextMenu() {
+            const contextMenu = document.querySelector('.context-menu');
+            
+            // Close context menu when clicking anywhere else
+            document.addEventListener('click', (e) => {
+                if (!contextMenu.contains(e.target)) {
+                    contextMenu.style.display = 'none';
+                }
+            });
+            
+            // Also close when pressing Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    contextMenu.style.display = 'none';
+                }
+            });
+        }
 
         // Render file explorer
         function renderFileExplorer() {
@@ -234,7 +254,7 @@
             fileList.innerHTML = '';
 
             // Helper to recursively render files/folders
-            function renderItems(items, parentPath = '') {
+            function renderItems(items, parentPath = '', parentFolder = null) {
                 const fragment = document.createDocumentFragment();
 
                 items.forEach(item => {
@@ -278,7 +298,8 @@
                         currentContext = {
                             type: isFolder ? 'folder' : 'file',
                             element: item,
-                            path: itemPath
+                            path: itemPath,
+                            parentFolder: parentFolder || fileSystem
                         };
                         showContextMenu(e.clientX, e.clientY, isFolder ? 'folder' : 'file');
                     });
@@ -288,7 +309,7 @@
                     if (isFolder && item.expanded && item.children) {
                         const children = document.createElement('div');
                         children.className = 'children';
-                        children.appendChild(renderItems(item.children, itemPath));
+                        children.appendChild(renderItems(item.children, itemPath, item));
                         fragment.appendChild(children);
                     }
                 });
@@ -343,7 +364,8 @@
                     e.preventDefault();
                     currentContext = {
                         type: 'background',
-                        element: null
+                        element: null,
+                        parentFolder: fileSystem
                     };
                     showContextMenu(e.clientX, e.clientY, 'background');
                 }
@@ -462,6 +484,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            initContextMenu();
             renderFileExplorer();
 
             // Add collapse all button functionality
@@ -506,6 +529,9 @@
                     menuHTML = `
                         <div class="context-menu-item" data-action="open">Open</div>
                         <div class="context-menu-divider"></div>
+                        <div class="context-menu-item" data-action="newFile">New File</div>
+                        <div class="context-menu-item" data-action="newFolder">New Folder</div>
+                        <div class="context-menu-divider"></div>
                         <div class="context-menu-item" data-action="rename">Rename</div>
                         <div class="context-menu-item" data-action="delete">Delete</div>
                         <div class="context-menu-divider"></div>
@@ -523,6 +549,9 @@
                     break;
                 case 'background':
                     menuHTML = `
+                        <div class="context-menu-item" data-action="newFile">New File</div>
+                        <div class="context-menu-item" data-action="newFolder">New Folder</div>
+                        <div class="context-menu-divider"></div>
                         <div class="context-menu-item" data-action="collapseAll">Collapse All</div>
                         <div class="context-menu-item" data-action="refresh">Refresh</div>
                     `;
@@ -533,7 +562,8 @@
 
             // Add event listeners to menu items
             contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
-                item.addEventListener('click', () => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     handleContextMenuAction(item.dataset.action);
                     contextMenu.style.display = 'none';
                 });
@@ -587,6 +617,12 @@
                         }
                     }
                     break;
+                case 'newFile':
+                    createNewFile();
+                    break;
+                case 'newFolder':
+                    createNewFolder();
+                    break;
                 case 'collapseAll':
                     collapseAllFolders(fileSystem);
                     renderFileExplorer();
@@ -598,6 +634,54 @@
                     alert(`Properties for ${currentContext.element?.name || 'background'}`);
                     break;
             }
+        }
+
+        function createNewFile() {
+            const fileName = prompt('Enter file name:', 'new-file.txt');
+            if (!fileName) return;
+            
+            const newFile = {
+                name: fileName,
+                type: 'file'
+            };
+            
+            // Add to current folder or root
+            if (currentContext.type === 'folder') {
+                if (!currentContext.element.children) {
+                    currentContext.element.children = [];
+                }
+                currentContext.element.children.push(newFile);
+            } else {
+                fileSystem.push(newFile);
+            }
+            
+            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+            renderFileExplorer();
+        }
+
+        function createNewFolder() {
+            const folderName = prompt('Enter folder name:', 'new-folder');
+            if (!folderName) return;
+            
+            const newFolder = {
+                name: folderName,
+                type: 'folder',
+                expanded: false,
+                children: []
+            };
+            
+            // Add to current folder or root
+            if (currentContext.type === 'folder') {
+                if (!currentContext.element.children) {
+                    currentContext.element.children = [];
+                }
+                currentContext.element.children.push(newFolder);
+            } else {
+                fileSystem.push(newFolder);
+            }
+            
+            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+            renderFileExplorer();
         }
 
         function deleteFileOrFolder(item, items) {
