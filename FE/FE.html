@@ -274,7 +274,6 @@
                     // Folder toggle functionality
                     if (isFolder) {
                         const toggle = div.querySelector('.toggle');
-                        const nameSpan = div.querySelector('.name');
 
                         // Toggle expansion when clicking the arrow
                         toggle.addEventListener('click', (e) => {
@@ -283,16 +282,9 @@
                             renderFileExplorer();
                         });
 
-                        // Toggle expansion when clicking the folder name
-                        nameSpan.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            item.expanded = !item.expanded;
-                            renderFileExplorer();
-                        });
-
-                        // Open folder when clicking anywhere else in the row
+                        // Toggle expansion when clicking the row
                         div.addEventListener('click', (e) => {
-                            if (e.target !== toggle && e.target !== nameSpan) {
+                            if (e.target !== toggle) {
                                 item.expanded = !item.expanded;
                                 renderFileExplorer();
                             }
