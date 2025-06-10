@@ -88,7 +88,7 @@
                 display: none;
             }
 
-            .expanded>.children {
+            .expanded > .children {
                 display: block;
             }
 
@@ -102,9 +102,10 @@
                 font-size: 10px;
                 transform: rotate(0deg);
                 transition: transform 0.2s;
+                cursor: pointer;
             }
 
-            .expanded>.toggle {
+            .expanded > .toggle {
                 transform: rotate(90deg);
             }
 
@@ -181,7 +182,7 @@
             <div class="explorer-header">
                 <span>EXPLORER: PROJECT FILES</span>
                 <div class="explorer-actions">
-                    <button title="Close File Explorer">X</button>
+                    <button title="Collapse All">≡</button>
                 </div>
             </div>
             <div class="file-list-container" id="fileList"></div>
@@ -235,7 +236,7 @@
             
             // Close context menu when clicking anywhere else
             document.addEventListener('click', (e) => {
-                if (!contextMenu.contains(e.target)) {
+                if (contextMenu && !contextMenu.contains(e.target)) {
                     contextMenu.style.display = 'none';
                 }
             });
@@ -275,18 +276,29 @@
                         const toggle = div.querySelector('.toggle');
                         const nameSpan = div.querySelector('.name');
 
+                        // Toggle expansion when clicking the arrow
                         toggle.addEventListener('click', (e) => {
                             e.stopPropagation();
                             item.expanded = !item.expanded;
                             renderFileExplorer();
                         });
 
+                        // Toggle expansion when clicking the folder name
                         nameSpan.addEventListener('click', (e) => {
                             e.stopPropagation();
                             item.expanded = !item.expanded;
                             renderFileExplorer();
                         });
+
+                        // Open folder when clicking anywhere else in the row
+                        div.addEventListener('click', (e) => {
+                            if (e.target !== toggle && e.target !== nameSpan) {
+                                item.expanded = !item.expanded;
+                                renderFileExplorer();
+                            }
+                        });
                     } else {
+                        // File click opens the file
                         div.addEventListener('click', () => {
                             openFileFromExplorer(itemPath);
                         });
