@@ -88,7 +88,8 @@
                 display: none;
             }
 
-            .expanded > .children {
+            /* FIXED CSS SELECTOR */
+            .file-item.expanded + .children {
                 display: block;
             }
 
@@ -310,7 +311,7 @@
 
                     fragment.appendChild(div);
 
-                    if (isFolder && item.expanded && item.children) {
+                    if (isFolder && item.children) {
                         const children = document.createElement('div');
                         children.className = 'children';
                         children.appendChild(renderItems(item.children, itemPath, item));
