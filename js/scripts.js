@@ -1687,40 +1687,49 @@ ${tab.name}
 
     // Apply selected theme
     if (theme === 'light') {
-      document.body.classList.add('light-theme');
-      monaco.editor.setTheme('vs');
+        document.body.classList.add('light-theme');
+        monaco.editor.setTheme('vs');
     }
     else if (theme === 'contrast-dark') {
-      document.body.classList.add('contrast-dark-theme');
-      monaco.editor.setTheme('hc-black');
+        document.body.classList.add('contrast-dark-theme');
+        monaco.editor.setTheme('hc-black');
     }
     else if (theme === 'contrast-light') {
-      document.body.classList.add('contrast-light-theme');
-      monaco.editor.setTheme('hc-light');
+        document.body.classList.add('contrast-light-theme');
+        monaco.editor.setTheme('hc-light');
     }
     else if (theme === 'automatic') {
-      // Detect system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        monaco.editor.setTheme('vs-dark');
-        document.body.classList.remove('light-theme');
-        document.body.classList.remove('contrast-light-theme');
-        document.body.classList.remove('contrast-dark-theme');
-      } else {
-        monaco.editor.setTheme('vs');
-        document.body.classList.add('light-theme');
-        document.body.classList.remove('contrast-light-theme');
-        document.body.classList.remove('contrast-dark-theme');
-      }
-      // Listen for changes in system theme
-      if (!setTheme._autoListener) {
-        setTheme._autoListener = () => setTheme('automatic');
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
-      }
+        // Detect system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+            monaco.editor.setTheme('vs-dark');
+            document.body.classList.remove('light-theme');
+            document.body.classList.remove('contrast-light-theme');
+            document.body.classList.remove('contrast-dark-theme');
+        } else {
+            monaco.editor.setTheme('vs');
+            document.body.classList.add('light-theme');
+            document.body.classList.remove('contrast-light-theme');
+            document.body.classList.remove('contrast-dark-theme');
+        }
+        // Listen for changes in system theme
+        if (!setTheme._autoListener) {
+            setTheme._autoListener = () => setTheme('automatic');
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
+        }
     }
     else {
-      // Default dark theme
-      monaco.editor.setTheme('vs-dark');
+        // Default dark theme
+        monaco.editor.setTheme('vs-dark');
+    }
+
+    // Notify File Explorer iframe about theme change
+    const fileExplorer = document.querySelector('#file-explorer iframe');
+    if (fileExplorer && fileExplorer.contentWindow) {
+        fileExplorer.contentWindow.postMessage({
+            type: 'themeChange',
+            theme: theme
+        }, '*');
     }
 
     localStorage.setItem('editorTheme', theme);

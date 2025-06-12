@@ -5,22 +5,60 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>File Explorer</title>
         <style>
-            /* VS Code-inspired styling */
+            /* Theme variables */
             :root {
-                --vscode-sideBar-background: #252526;
-                --vscode-list-activeSelectionBackground: #094771;
-                --vscode-list-hoverBackground: #2a2d2e;
-                --vscode-foreground: #cccccc;
-                --vscode-icon-foreground: #c5c5c5;
-                --vscode-menu-border: #454545;
+                --background: #252526;
+                --list-open-active: #094771;
+                --list-open-active-bullet: #0078d4;
+                --list-hoverBackground: #2a2d2e;
+                --foreground: #cccccc;
+                --icon-foreground: #c5c5c5;
+                --menu-border: #454545;
+                --explorer-header-background: #1e1e1e;
+            }
+
+            /* Light theme */
+            body.light-theme {
+                --background: #f3f3f3;
+                --list-open-active: #0078d4;
+                --list-open-active-bullet: #80c8ff;
+                --list-hoverBackground: #e8e8e8;
+                --foreground: #333333;
+                --icon-foreground: #424242;
+                --menu-border: #e0e0e0;
+                --explorer-header-background: #f0f0f0;
+            }
+
+            /* High Contrast Dark theme */
+            body.contrast-dark-theme {
+                --background: #000000;
+                --list-open-active: #c15900;
+                --list-open-active-bullet: #ff8c00;
+                --list-hoverBackground: #333333;
+                --foreground: #ffffff;
+                --icon-foreground: #ffffff;
+                --menu-border: #6b6b6b;
+                --explorer-header-background: #0c0c0c;
+            }
+
+            /* High Contrast Light theme */
+            body.contrast-light-theme {
+                --background: #ffffff;
+                --list-open-active: #007acc;
+                --list-open-active-bullet: #ffffff;
+                --list-hoverBackground: #d4d4d4;
+                --foreground: #000000;
+                --icon-foreground: #000000;
+                --menu-border: #000000;
+                --explorer-header-background: #f0f0f0;
             }
 
             body {
                 margin: 0;
                 padding: 0;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                background: var(--vscode-sideBar-background);
-                color: var(--vscode-foreground);
+                background: var(--background);
+                color: var(--foreground);
                 height: 100vh;
                 overflow: hidden;
                 font-size: 13px;
@@ -35,17 +73,17 @@
             .explorer-header {
                 padding: 12px 16px;
                 font-weight: 600;
-                border-bottom: 1px solid var(--vscode-menu-border);
+                border-bottom: 1px solid var(--menu-border);
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                background: rgba(30, 30, 30, 0.5);
+                background: var(--explorer-header-background);
             }
 
             .explorer-actions button {
                 background: transparent;
                 border: none;
-                color: var(--vscode-foreground);
+                color: var(--foreground);
                 cursor: pointer;
                 font-size: 16px;
             }
@@ -69,12 +107,12 @@
 
             .file-item:hover,
             .open-editor-item:hover {
-                background: var(--vscode-list-hoverBackground);
+                background: var(--list-hoverBackground);
             }
 
             .file-item.selected,
             .open-editor-item.active {
-                background: var(--vscode-list-activeSelectionBackground);
+                background: var(--list-open-active);
             }
 
             .file-icon {
@@ -113,7 +151,7 @@
             .open-editors-section {
                 margin-top: 16px;
                 padding-top: 8px;
-                border-top: 1px solid var(--vscode-menu-border);
+                border-top: 1px solid var(--menu-border);
             }
 
             .open-editors-title {
@@ -140,18 +178,34 @@
             }
 
             .open-editor-item.active::before {
-                background: #0078d4;
+                background: var(--list-open-active-bullet);
             }
 
             .open-editor-close {
-                margin-left: 8px;
-                color: #888;
-                cursor: pointer;
+                background: #0000;
+                color: #fff;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .open-editor-close:hover {
+                background: #b71513;
+                color: #fff;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .context-menu {
                 position: absolute;
-                background: #333;
+                background: var(--background);
                 border: 1px solid #555;
                 border-radius: 4px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -167,7 +221,7 @@
             }
 
             .context-menu-item:hover {
-                background: var(--vscode-list-activeSelectionBackground);
+                background: var(--list-open-active);
             }
 
             .context-menu-divider {
@@ -182,8 +236,20 @@
             }
 
             .file-item.drag-over {
-                background: var(--vscode-list-activeSelectionBackground);
+                background: var(--list-open-active);
                 opacity: 0.7;
+            }
+
+            .rename-input {
+                background: var(--background);
+                color: var(--foreground);
+                border: 1px solid var(--list-open-active);
+                outline: none;
+                padding: 2px 4px;
+                margin: -3px 0;
+                width: calc(100% - 30px);
+                font-size: 13px;
+                font-family: inherit;
             }
         </style>
     </head>
@@ -507,6 +573,20 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Get initial theme from parent window if available
+            try {
+                const parentTheme = window.parent.localStorage.getItem('editorTheme') || 'dark';
+                if (parentTheme === 'light') {
+                    document.body.classList.add('light-theme');
+                } else if (parentTheme === 'contrast-dark') {
+                    document.body.classList.add('contrast-dark-theme');
+                } else if (parentTheme === 'contrast-light') {
+                    document.body.classList.add('contrast-light-theme');
+                }
+            } catch (e) {
+                console.warn('Could not get initial theme from parent window');
+            }
+
             initContextMenu();
             renderFileExplorer();
 
@@ -623,12 +703,29 @@
                     break;
                 case 'rename':
                     if (currentContext.type === 'file' || currentContext.type === 'folder') {
-                        const newName = prompt('Enter new name:', currentContext.element.name);
-                        if (newName && newName.trim() !== '') {
-                            currentContext.element.name = newName;
-                            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                        const element = document.querySelector(`[data-path="${currentContext.path}"]`);
+                        const nameSpan = element.querySelector('.name');
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'rename-input';
+                        input.value = currentContext.element.name;
+                        nameSpan.replaceWith(input);
+                        input.select();
+
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                const newName = input.value.trim();
+                                if (newName) {
+                                    currentContext.element.name = newName;
+                                    localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                            }
+                            renderFileExplorer();
+                        } else if (e.key === 'Escape') {
                             renderFileExplorer();
                         }
+                        });
+
+                        input.addEventListener('blur', () => renderFileExplorer());
                     }
                     break;
                 case 'delete':
@@ -660,51 +757,102 @@
         }
 
         function createNewFile() {
-            const fileName = prompt('Enter file name:', 'new-file.txt');
-            if (!fileName) return;
-            
-            const newFile = {
-                name: fileName,
-                type: 'file'
-            };
-            
-            // Add to current folder or root
-            if (currentContext.type === 'folder') {
-                if (!currentContext.element.children) {
-                    currentContext.element.children = [];
+            const parentElement = currentContext.type === 'folder' ? 
+                document.querySelector(`[data-path="${currentContext.path}"] + .children`) :
+                document.getElementById('fileList');
+
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <div class="toggle" style="visibility: hidden;">▶</div>
+                <img src="${getIcon('untitled.txt', false)}" class="file-icon">
+                <input type="text" class="rename-input" value="untitled.txt">
+            `;
+            parentElement.appendChild(div);
+
+            const input = div.querySelector('.rename-input');
+            input.select();
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const fullPath = input.value.trim();
+                    if (fullPath) {
+                        const pathParts = fullPath.split('/');
+                        const fileName = pathParts.pop();
+                        let currentLocation = currentContext.type === 'folder' ? currentContext.element : { children: fileSystem };
+
+                        // Create folders if needed
+                        for (const folderName of pathParts) {
+                            let folder = currentLocation.children.find(item => item.name === folderName && item.type === 'folder');
+                            if (!folder) {
+                                folder = {
+                                    name: folderName,
+                                    type: 'folder',
+                                    expanded: true,
+                                    children: []
+                                };
+                                currentLocation.children.push(folder);
+                            }
+                            currentLocation = folder;
+                        }
+
+                        // Create the file in the final location
+                        const newFile = { name: fileName, type: 'file' };
+                        if (!currentLocation.children) currentLocation.children = [];
+                        currentLocation.children.push(newFile);
+                        localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                    }
+                    renderFileExplorer();
+                } else if (e.key === 'Escape') {
+                    renderFileExplorer();
                 }
-                currentContext.element.children.push(newFile);
-            } else {
-                fileSystem.push(newFile);
-            }
-            
-            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
-            renderFileExplorer();
+            });
+
+            input.addEventListener('blur', () => renderFileExplorer());
         }
 
         function createNewFolder() {
-            const folderName = prompt('Enter folder name:', 'new-folder');
-            if (!folderName) return;
-            
-            const newFolder = {
-                name: folderName,
-                type: 'folder',
-                expanded: false,
-                children: []
-            };
-            
-            // Add to current folder or root
-            if (currentContext.type === 'folder') {
-                if (!currentContext.element.children) {
-                    currentContext.element.children = [];
+            const parentElement = currentContext.type === 'folder' ? 
+                document.querySelector(`[data-path="${currentContext.path}"] + .children`) :
+                document.getElementById('fileList');
+
+            const div = document.createElement('div');
+            div.className = 'file-item folder';
+            div.innerHTML = `
+                <div class="toggle">▶</div>
+                <img src="${getIcon('', true)}" class="file-icon">
+                <input type="text" class="rename-input" value="New Folder">
+            `;
+            parentElement.appendChild(div);
+
+            const input = div.querySelector('.rename-input');
+            input.select();
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const folderName = input.value.trim();
+                    if (folderName) {
+                        const newFolder = {
+                            name: folderName,
+                            type: 'folder',
+                            expanded: false,
+                            children: []
+                        };
+                        if (currentContext.type === 'folder') {
+                            if (!currentContext.element.children) currentContext.element.children = [];
+                            currentContext.element.children.push(newFolder);
+                        } else {
+                            fileSystem.push(newFolder);
+                        }
+                        localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                    }
+                    renderFileExplorer();
+                } else if (e.key === 'Escape') {
+                    renderFileExplorer();
                 }
-                currentContext.element.children.push(newFolder);
-            } else {
-                fileSystem.push(newFolder);
-            }
-            
-            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
-            renderFileExplorer();
+            });
+
+            input.addEventListener('blur', () => renderFileExplorer());
         }
 
         function deleteFileOrFolder(item, items) {
@@ -726,7 +874,35 @@
 
         // Listen for messages from parent window
         window.addEventListener('message', (event) => {
-            if (event.data.type === 'updateFileExplorer') {
+            if (event.data.type === 'themeChange') {
+                // Remove existing theme classes
+                document.body.classList.remove('light-theme', 'contrast-dark-theme', 'contrast-light-theme');
+                
+                // Apply new theme
+                switch (event.data.theme) {
+                    case 'light':
+                        document.body.classList.add('light-theme');
+                        break;
+                    case 'contrast-dark':
+                        document.body.classList.add('contrast-dark-theme');
+                        break;
+                    case 'contrast-light':
+                        document.body.classList.add('contrast-light-theme');
+                        break;
+                    case 'automatic':
+                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        if (prefersDark) {
+                            // Default dark theme
+                        } else {
+                            document.body.classList.add('light-theme');
+                        }
+                        break;
+                }
+                
+                // Re-render to update icons with new theme
+                renderFileExplorer();
+            }
+            else if (event.data.type === 'updateFileExplorer') {
                 if (event.data.files) {
                     fileSystem = event.data.files;
                 }
@@ -771,6 +947,15 @@
 
             // Don't allow dropping into non-folders or into own subdirectory
             if (targetItem.type !== 'folder' || targetPath.startsWith(draggedPath + '/')) return;
+
+            // Check if the dragged item is a file and is already in any folder
+            const isInFolder = draggedPath.includes('/');
+            const isFile = draggedItem.type === 'file';
+
+            // If it's a file in root and trying to move to root, prevent it
+            if (isFile && !isInFolder && targetPath === '') {
+                return;
+            }
 
             // Remove item from old location
             deleteFileOrFolder(draggedItem, fileSystem);
