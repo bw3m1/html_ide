@@ -28,7 +28,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 
 // things in the about
 DATE_MODED = "6 / 10 / 2025 at 9:33 AM"
-VERTION = "0 . 4 . 4   PTCH.36"
+VERTION = "0 . 4 . 5"
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
 
 const FILE_TYPES = {
@@ -2039,6 +2039,18 @@ ${tab.name}
         case 'shortcuts-lux':
           window.open('shortcuts/linux.html', '_blank');
           updateStatus("Opening Linux shortcuts");
+          break;
+        case 'docs-html':
+          window.open('https://devdocs.io/html', '_blank');
+          updateStatus("Opening documentation for HTML");
+          break;
+        case 'docs-css':
+          window.open('https://devdocs.io/css', '_blank');
+          updateStatus("Opening documentation for CSS");
+          break;
+        case 'docs-js':
+          window.open('https://devdocs.io/javascript/', '_blank');
+          updateStatus("Opening documentation for JavaScript");
           break;
         case 'file-2-html': setFileType('html'); detectLanguage(); break;
         case 'file-2-css': setFileType('css'); detectLanguage(); break;
