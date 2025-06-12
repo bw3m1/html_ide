@@ -595,20 +595,6 @@ ${tab.name}
     }
   });
 
-  let imageOverlay = null;
-
-
-  function hideImageOverlay() {
-    if (imageOverlay) {
-      imageOverlay.remove();
-      imageOverlay = null;
-    }
-    // Restore editor and preview pane
-    document.querySelector('.editor-wrapper').style.display = '';
-    document.querySelector('.preview-pane').style.display = '';
-  }
-
-
   function hideImagePreviewInPane() {
     document.querySelector('.editor-wrapper').style.display = '';
     const previewPane = document.querySelector('.preview-pane');
@@ -1930,8 +1916,6 @@ ${tab.name}
         case 'save-as-js': await saveJS(); break;
         case 'save-as-json': await saveJSON(); break;
         case 'save-as-zip': await saveZip(); break;
-        case 'export-ide': await exportIdeProject(); break;
-        case 'import-ide': await importIdeProject(); break;
         case 'rename': await nameFile(); break;
         case 'clear': clearFile(); break;
         case 'undo': editor.trigger('', 'undo'); break;
@@ -2026,7 +2010,6 @@ ${tab.name}
         case 'example-grid': await loadExampleContent('grid'); break;
         case 'example-table': await loadExampleContent('table'); break;
         case 'example-responsive': await loadExampleContent('responsive'); break;
-        case 'example-json': await loadExampleContent('json-example'); break;
         case 'documentation':
           const docUrl = new URL('IDE_docmtn.html', window.location.href).href;
           window.open(docUrl, '_blank');
@@ -2048,35 +2031,11 @@ ${tab.name}
           window.open('shortcuts/linux.html', '_blank');
           updateStatus("Opening Linux shortcuts");
           break;
-        case 'docmt-css':
-          window.open('https://devdocs.io/css/', '_blank');
-          updateStatus("Opening CSS documentation");
-          break;
-        case 'docmt-js':
-          window.open('https://devdocs.io/javascript/', '_blank');
-          updateStatus("Opening JavaScript documentation");
-          break;
-        case 'docmt-html':
-          window.open('https://devdocs.io/html/', '_blank');
-          updateStatus("Opening HTML documentation");
-          break;
-        case 'docmt-json':
-          window.open('https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON', '_blank');
-          updateStatus("Opening JSON documentation");
-          break;
         case 'file-2-html': setFileType('html'); detectLanguage(); break;
         case 'file-2-css': setFileType('css'); detectLanguage(); break;
         case 'file-2-js': setFileType('js'); detectLanguage(); break;
         case 'file-2-txt': setFileType('txt'); detectLanguage(); break;
-        case 'file-2-md': setFileType('md'); detectLanguage(); break;
         case 'file-2-json': setFileType('json'); detectLanguage(); break;
-        case 'file-2-c': setFileType('c'); detectLanguage(); break;
-        case 'file-2-cpp': setFileType('cpp'); detectLanguage(); break;
-        case 'file-2-cs': setFileType('cs'); detectLanguage(); break;
-        case 'file-2-py': setFileType('py'); detectLanguage(); break;
-        case 'file-2-java': setFileType('java'); detectLanguage(); break;
-        case 'file-2-rust': setFileType('rs'); detectLanguage(); break;
-        case 'file-2-go': setFileType('go'); detectLanguage(); break;
         case 'about':
           showAlert(
             `html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${VERTION}<br>Date of Publish:&nbsp;&nbsp;${DATE_MODED}<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BROWSERS}<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.`,
