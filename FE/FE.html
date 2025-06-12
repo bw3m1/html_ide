@@ -175,6 +175,16 @@
                 background: #555;
                 margin: 4px 0;
             }
+
+            /* Add these new styles */
+            .file-item.dragging {
+                opacity: 0.5;
+            }
+
+            .file-item.drag-over {
+                background: var(--vscode-list-activeSelectionBackground);
+                opacity: 0.7;
+            }
         </style>
     </head>
     <body>
@@ -265,6 +275,14 @@
                     const div = document.createElement('div');
                     div.className = `file-item${isFolder ? ' folder' : ''}${item.expanded ? ' expanded' : ''}`;
                     div.dataset.path = itemPath;
+                    div.draggable = true;  // Make items draggable
+
+                    // Add drag and drop event listeners
+                    div.addEventListener('dragstart', (e) => handleDragStart(e, item, itemPath));
+                    div.addEventListener('dragover', handleDragOver);
+                    div.addEventListener('dragleave', handleDragLeave);
+                    div.addEventListener('drop', (e) => handleDrop(e, item, itemPath));
+                    div.addEventListener('dragend', handleDragEnd);
 
                     div.innerHTML = `
                         <div class="toggle" style="${isFolder ? '' : 'visibility: hidden;'}">▶</div>
@@ -478,7 +496,7 @@
                     case 'java': return '../icons/java_icon.png';
                     case 'rs': return '../icons/rust_icon.png';
                     case 'go': return '../icons/golang_icon.png';
-                    case 'jsx': return '../icons/react_icon.png';
+                    case 'jsx': return '../icons/react_icon.svg';
                     case 'mp3': return '../icons/mp3_audio_icon.png';
                     default: return '../icons/text_icon.png';
                 }
@@ -718,6 +736,56 @@
                 renderFileExplorer();
             }
         });
+
+        let draggedItem = null;
+        let draggedPath = null;
+
+        function handleDragStart(e, item, path) {
+            draggedItem = item;
+            draggedPath = path;
+            e.currentTarget.classList.add('dragging');
+            e.stopPropagation();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        function handleDrop(e, targetItem, targetPath) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (!draggedItem || draggedItem === targetItem) return;
+
+            // Don't allow dropping into non-folders or into own subdirectory
+            if (targetItem.type !== 'folder' || targetPath.startsWith(draggedPath + '/')) return;
+
+            // Remove item from old location
+            deleteFileOrFolder(draggedItem, fileSystem);
+
+            // Add to new location
+            if (!targetItem.children) targetItem.children = [];
+            targetItem.children.push(draggedItem);
+
+            // Expand the target folder
+            targetItem.expanded = true;
+
+            // Update storage and UI
+            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+            renderFileExplorer();
+        }
     </script>
         <div class="context-menu"></div>
     </body>

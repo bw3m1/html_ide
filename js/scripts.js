@@ -562,69 +562,7 @@ ${tab.name}
     }
   }
 
-  function renderFileExplorer() {
-    // Helper to recursively render files/folders
-    function renderItems(items, parentPath = '') {
-      const fragment = document.createDocumentFragment();
-      items.forEach(item => {
-        const itemPath = parentPath ? `${parentPath}/${item.name}` : item.name;
-        const isFolder = item.type === 'folder';
-        const div = document.createElement('div');
-        div.className = `file-item${isFolder ? ' folder' : ''}`;
-        div.dataset.path = itemPath;
-        div.setAttribute('tabindex', '0'); // Accessibility
-        div.innerHTML = `<img src="${getIcon(item.name, isFolder, item.expanded, localStorage.getItem('editorTheme') === 'light' ? 'light' : 'dark')}" class="file-icon" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;">${item.name}`;
-        if (isFolder) {
-          div.addEventListener('click', () => {
-            item.expanded = !item.expanded;
-            renderFileExplorer();
-          });
-        } else {
-          div.addEventListener('click', () => openFileFromExplorer(itemPath));
-        }
-        fragment.appendChild(div);
-        if (isFolder && item.expanded && item.children) {
-          const children = renderItems(item.children, itemPath);
-          children.style.marginLeft = '16px';
-          fragment.appendChild(children);
-        }
-      });
-      const container = document.createElement('div');
-      container.appendChild(fragment);
-      return container;
-    }
-    fileList.innerHTML = '';
-    fileList.appendChild(renderItems(state.files));
-
-    // --- Open Editors Section ---
-    const openEditorsSection = document.createElement('div');
-    openEditorsSection.className = 'open-editors-section';
-    openEditorsSection.innerHTML = `<div class="open-editors-title" style="font-weight:bold;margin:8px 0 4px 0;">Open Editors</div>`;
-    state.tabs.forEach(tab => {
-      const tabDiv = document.createElement('div');
-      tabDiv.className = `open-editor-item${tab.active ? ' active' : ''}`;
-      tabDiv.style.display = 'flex';
-      tabDiv.style.alignItems = 'center';
-      tabDiv.style.cursor = 'pointer';
-      tabDiv.style.padding = '2px 0 2px 20px';
-      tabDiv.dataset.tabId = tab.id;
-      tabDiv.innerHTML = `
-        <span style="flex:1">${tab.name}${tab.unsaved ? ' <span style="color:var(--accent)">*</span>' : ''}${tab.active ? ' <span style="color:var(--accent)">[active]</span>' : ''}</span>
-        <span class="open-editor-close" title="Close" style="margin-left:8px;color:#888;cursor:pointer;">&#10005;</span>
-      `;
-      tabDiv.addEventListener('click', (e) => {
-        if (e.target.classList.contains('open-editor-close')) {
-          closeTab(tab.id);
-          e.stopPropagation();
-        } else {
-          switchToTab(tab.id);
-        }
-      });
-      openEditorsSection.appendChild(tabDiv);
-    });
-    fileList.appendChild(openEditorsSection);
-    // --- End Open Editors Section ---
-  }
+  function renderFileExplorer() {}
 
   // Keyboard Navigation
   function setupFileExplorerKeyboardNav() {
@@ -2346,7 +2284,7 @@ ${tab.name}
         case 'java': return 'icons/java_icon.png';
         case 'rs': return 'icons/rust_icon.png';
         case 'go': return 'icons/golang_icon.png';
-        case 'jsx': return 'icons/react_icon.png';
+        case 'jsx': return 'icons/react_icon.svg';
         case 'mp3': return 'icons/mp3_audio_icon.png';
         default: return 'icons/text_icon.png';
       }
