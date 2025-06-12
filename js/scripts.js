@@ -562,94 +562,9 @@ ${tab.name}
     }
   }
 
-  function renderFileExplorer() {}
-
-  // Keyboard Navigation
-  function setupFileExplorerKeyboardNav() {
-    const fileList = document.getElementById('file-list');
-    fileList.addEventListener('keydown', (e) => {
-      const currentItem = document.activeElement;
-      if (!currentItem.classList.contains('file-item')) return;
-
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          (currentItem.nextElementSibling || currentItem).focus();
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          (currentItem.previousElementSibling || currentItem).focus();
-          break;
-        case 'Enter':
-          e.preventDefault();
-          const path = currentItem.dataset.path;
-          if (currentItem.classList.contains('folder')) {
-            toggleFolder(path);
-          } else {
-            openFileFromExplorer(path);
-          }
-          break;
-        case 'Delete':
-          e.preventDefault();
-          if (confirm(`Delete ${currentItem.dataset.path}?`)) {
-            deleteFile(currentItem.dataset.path);
-          }
-          break;
-      }
-    });
-  }
-
-  // Add file upload via drag and drop
-  function setupFileDragAndDrop() {
-    const fileExplorer = document.getElementById('file-explorer');
-
-    fileExplorer.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      fileExplorer.classList.add('drag-over');
-    });
-
-    fileExplorer.addEventListener('dragleave', () => {
-      fileExplorer.classList.remove('drag-over');
-    });
-
-    fileExplorer.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      fileExplorer.classList.remove('drag-over');
-
-      const files = Array.from(e.dataTransfer.files);
-      for (const file of files) {
-        if (file.size > MAX_FILE_SIZE) {
-          showError(`File ${file.name} is too large (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
-          showAlert(`Failed to add file "${file.name}" to project:\n${error.message}`, 'ERR', 'File Upload Error', 'ERR');
-          continue;
-        }
-
-        try {
-          const content = await file.text();
-          state.files.push({
-            name: file.name,
-            type: 'file',
-            content: content
-          });
-        } catch (error) {
-          showError(`Failed to load ${file.name}: ${error.message}`);
-          showAlert(`Failed to load file "${file.name}":\n${error.message}`, 'ERR', 'File Load Error', 'ERR');
-        }
-      }
-      saveProjectFiles();
-      renderFileExplorer();
-    });
-  }
-
-  // Initialize file explorer enhancements
-  setupFileExplorerKeyboardNav();
-  setupFileDragAndDrop();
-
   // Auto-refresh file list when tabs change
   function refreshExploreFileList() {
-    renderFileExplorer();
+    // !!
   }
 
   // Show open tabs in file explorer context menu
@@ -1135,16 +1050,10 @@ ${tab.name}
       // Handle file/folder move logic
       const sourcePath = draggedItem.dataset.path;
       const targetPath = target.dataset.path;
-      // Implement your move logic here
-      updateStatus(`Moved ${sourcePath} to ${targetPath}`);
-      renderFileExplorer();
     }
   });
 
-  // Detect file changes in real-time
-
   // Shortcuts manager
-  // !!
   const shortcuts = {
     'Ctrl+S': async (e) => { e.preventDefault(); await saveFile(); },
     'Ctrl+Shift+S': async (e) => { e.preventDefault(); await saveFileAs(); },
@@ -1531,7 +1440,6 @@ ${tab.name}
 
       // Update UI
       saveProjectFiles();
-      renderFileExplorer();
       updateStatus(`Opened folder: ${directoryHandle.name}`);
 
       // Find and open the first HTML file if found
@@ -2069,16 +1977,6 @@ ${tab.name}
         case 'theme-contrast-dark': setTheme('contrast-dark'); break;
         case 'theme-contrast-light': setTheme('contrast-light'); break;
         case 'toggle-explorer': toggleFileExplorer(); break;
-        case 'add-file': addFile(); break;
-        case 'add-folder': addFolder(); break;
-        case 'delete-file':
-          if (data.path) {
-            deleteFile(data.path);
-          } else {
-            const contextPath = document.querySelector('.context-menu').dataset.path;
-            deleteFile(contextPath);
-          }
-          break;
         case 'open-file': openFileFromExplorer(data.path); break;
         case 'number-lines':
           const currentLineNumbers = editor.getRawOptions().lineNumbers;
@@ -2291,91 +2189,6 @@ ${tab.name}
     }
   }
 
-  async function deleteFile(path) {
-    if (!path) {
-      const selectedItem = document.querySelector('.context-menu').dataset.path;
-      if (!selectedItem) return;
-      path = selectedItem;
-    }
-
-    if (!confirm(`Are you sure you want to delete "${path}"?`)) return;
-
-    try {
-      const pathParts = path.split('/');
-      const fileName = pathParts.pop();
-      let currentLevel = state.files;
-
-      for (const part of pathParts) {
-        const folder = currentLevel.find(item =>
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        currentLevel = folder.children;
-      }
-
-      const index = currentLevel.findIndex(item => item.name === fileName);
-      if (index === -1) throw new Error('File not found');
-
-      currentLevel.splice(index, 1);
-      saveProjectFiles();
-      renderFileExplorer();
-      updateStatus(`Deleted ${path}`);
-
-      // Close any open tab with this file name
-      state.tabs = state.tabs.filter(tab => tab.name !== fileName);
-      saveTabsToStorage();
-      renderTabs();
-    } catch (error) {
-      showError(`Delete failed: ${error.message}`);
-      showAlert(`Failed to delete file "${path}":\n${error.message}`, 'ERR', 'Delete File Error', 'ERR');
-    }
-  }
-
-  // Improved addFile implementation with validation
-  function addFile() {
-    const currentPath = state.fileExplorerPath || '';
-    let fileName = prompt('Enter file name with extension:');
-    if (!fileName) return;
-    fileName = fileName.trim();
-    // Prevent empty, whitespace, or invalid file names
-    if (!fileName || /[\\/:*?"<>|]/.test(fileName)) {
-      showError('Invalid file name.');
-      showAlert('Invalid file name. Please avoid using special characters like \\ / : * ? " < > |.', 'ERR', 'Invalid File Name', 'ERR');
-      return;
-    }
-
-    try {
-      let targetLocation = state.files;
-      const pathParts = currentPath.split('/').filter(p => p);
-
-      for (const part of pathParts) {
-        const folder = targetLocation.find(item =>
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        targetLocation = folder.children;
-      }
-
-      if (targetLocation.some(item => item.name === fileName)) {
-        throw new Error(`"${fileName}" already exists`);
-      }
-
-      const newFile = {
-        name: fileName,
-        type: 'file',
-        content: getDefaultContent(fileName)
-      };
-
-      targetLocation.push(newFile);
-      saveProjectFiles();
-      renderFileExplorer();
-      updateStatus(`Added ${currentPath}/${fileName}`);
-    } catch (error) {
-      showError(error.message);
-      showAlert(`Failed to add file "${fileName}":\n${error.message}`, 'ERR', 'Add File Error', 'ERR');
-    }
-  }
-
   // Provide default content for new files based on extension
   function getDefaultContent(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
@@ -2392,51 +2205,6 @@ ${tab.name}
         return '';
       default:
         return '';
-    }
-  }
-
-  // Fixed addFolder implementation with validation
-  function addFolder() {
-    const currentPath = state.fileExplorerPath || '';
-    let folderName = prompt('Enter folder name:');
-    if (!folderName) return;
-    folderName = folderName.trim();
-    // Prevent empty, whitespace, or invalid folder names
-    if (!folderName || /[\\/:*?"<>|]/.test(folderName)) {
-      showError('Invalid folder name.');
-      showAlert('Invalid folder name. Please avoid using special characters like \\ / : * ? " < > |.', 'ERR', 'Invalid Folder Name', 'ERR');
-      return;
-    }
-
-    try {
-      let targetLocation = state.files;
-      const pathParts = currentPath.split('/').filter(p => p);
-
-      for (const part of pathParts) {
-        const folder = targetLocation.find(item =>
-          item.name === part && item.type === 'folder'
-        );
-        if (!folder) throw new Error(`Folder not found: ${part}`);
-        targetLocation = folder.children;
-      }
-
-      if (targetLocation.some(item => item.name === folderName)) {
-        throw new Error(`"${folderName}" already exists`);
-      }
-
-      targetLocation.push({
-        name: folderName,
-        type: 'folder',
-        children: [],
-        expanded: true
-      });
-
-      saveProjectFiles();
-      renderFileExplorer();
-      updateStatus(`Added folder ${currentPath}/${folderName}`);
-    } catch (error) {
-      showError(error.message);
-      showAlert(`Failed to add folder "${folderName}":\n${error.message}`, 'ERR', 'Add Folder Error', 'ERR');
     }
   }
 
@@ -2567,7 +2335,6 @@ ${tab.name}
     // Always ensure at least one tab exists
     getCurrentTab();
     renderTabs();
-    renderFileExplorer();
     refreshExploreFileList();
 
     // Set empty state on load if needed
