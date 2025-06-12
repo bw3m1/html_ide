@@ -27,9 +27,9 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODED = "6 / 10 / 2025 at 9:33 AM"
+DATE_MODED = "6 / 12 / 2025 at 12:37 AM"
 VERTION = "0 . 4 . 5"
-BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera,  Brave"
+BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More."
 
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
