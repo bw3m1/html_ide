@@ -27,7 +27,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODED = "6 / 12 / 2025 at 7:20 PM"
+DATE_MODED = "6 / 12 / 2025 at 9:12 PM MDT ( rounder up for technical reasons )";
 VERTION = "0 . 4 . 5"
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More."
 
