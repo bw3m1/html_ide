@@ -1206,58 +1206,6 @@ ${tab.name}
     await saveFileAs('json');
   }
 
-  async function saveZip() {
-    try {
-      const zip = new JSZip();
-      const projectName = prompt("Enter project name for ZIP file:", "my_project") || "my_project";
-      const tabsToInclude = state.tabs.filter(tab =>
-        confirm(`Include "${tab.name}" in the ZIP file?`)
-      );
-      if (tabsToInclude.length === 0 &&
-        !confirm("No tabs selected. Continue with empty project?")) {
-        updateStatus("ZIP export canceled", true);
-        return;
-      }
-      tabsToInclude.forEach(tab => {
-        zip.file(tab.name, tab.content);
-      });
-      if (confirm("Include files from file explorer in ZIP?")) {
-        function addFilesToZip(items, zipFolder, path = '') {
-          items.forEach(item => {
-            const itemPath = path ? `${path}/${item.name}` : item.name;
-            if (item.type === 'file') {
-              zipFolder.file(itemPath, `Content for ${item.name}`);
-            } else if (item.type === 'folder' && item.children) {
-              const newFolder = zipFolder.folder(item.name);
-              addFilesToZip(item.children, newFolder, itemPath);
-            }
-          });
-        }
-        addFilesToZip(state.files, zip);
-      }
-      const content = await zip.generateAsync({
-        type: "blob",
-        compression: "DEFLATE",
-        compressionOptions: { level: 6 }
-      });
-      const url = URL.createObjectURL(content);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${projectName}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-      updateStatus(`Exported ${tabsToInclude.length} files as ${projectName}.zip`);
-    } catch (error) {
-      showError(`Error creating ZIP: ${error.message}`);
-      showAlert(`Failed to create ZIP file:\n${error.message}`, 'ERR', 'ZIP Export Error', 'ERR');
-    }
-  }
-
   async function openFile() {
     try {
       // Show file picker with supported types
@@ -1970,7 +1918,6 @@ ${tab.name}
         case 'save-as-css': await saveCSS(); break;
         case 'save-as-js': await saveJS(); break;
         case 'save-as-json': await saveJSON(); break;
-        case 'save-as-zip': await saveZip(); break;
         case 'rename': await nameFile(); break;
         case 'clear': clearFile(); break;
         case 'undo': editor.trigger('', 'undo'); break;

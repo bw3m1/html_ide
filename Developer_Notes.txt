@@ -1,10 +1,10 @@
 fix:
-  js run new tab error desplay line misinformatin
-  tab removle close img err
-  zip desplay err
+  js run new tab error display line misinformation
+  tab removal close img err
+  zip display err
 
 add:
-  md desplay
-  png preveiw
+  md display
+  png img preveiw
   svg text edit
   run in new tab - tab cludering prevention
