@@ -27,8 +27,8 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODED = "6 / 12 / 2025 at 9:12 PM MDT ( rounder up for technical reasons )";
-VERTION = "0 . 4 . 5"
+DATE_MODED = "6 / 12 / 2025 at 9:12 PM MDT";
+VERSION = "0 . 4 . 5"
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More."
 
 const FILE_TYPES = {
@@ -2105,7 +2105,7 @@ ${tab.name}
         case 'file-2-json': setFileType('json'); detectLanguage(); break;
         case 'about':
           showAlert(
-            `html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${VERTION}<br>Date of Publish:&nbsp;&nbsp;${DATE_MODED}<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BROWSERS}<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.`,
+            `html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${VERSION}<br>Date of Publish:&nbsp;&nbsp;${DATE_MODED}<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BROWSERS}<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.`,
             'INFO',
             'About html IDE',
             'INFO'
