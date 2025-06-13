@@ -9,19 +9,19 @@ const INIT_CONTENTS = `<!DOCTYPE html>
     <title>New Document</title>
     <link rel="icon" type="image/png" href="example_image.png">
     <style>
-      
+
       /* Style Sheets goes here */
-      
+
     </style>
   </head>
   <body>
-    
+
     <!-- body -->
-    
+
     <script>
-      
+
       // JS goes here
-      
+
     </script>
   </body>
 </html>`;
@@ -2342,7 +2342,6 @@ ${tab.name}
     setLayout("editor-only");
     toggleFileExplorer(); toggleFileExplorer();
     updateStatus("IDE Setup Ready");
-    // watchFileChanges();
   }
 
   init();
