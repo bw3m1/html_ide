@@ -27,7 +27,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODED = "6 / 12 / 2025 at 12:37 AM"
+DATE_MODED = "6 / 12 / 2025 at 7:20 PM"
 VERTION = "0 . 4 . 5"
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More."
 
@@ -468,6 +468,15 @@ ${tab.name}
       }
     }
 
+    // Notify file explorer of tab changes
+    const fileExplorer = document.querySelector('#file-explorer iframe');
+    if (fileExplorer && fileExplorer.contentWindow) {
+      fileExplorer.contentWindow.postMessage({
+        type: 'updateFileExplorer',
+        tabs: state.tabs
+      }, '*');
+    }
+
     // Update UI and state
     renderTabs();
     saveTabsToStorage();
@@ -561,6 +570,43 @@ ${tab.name}
       showAlert(`Failed to toggle file explorer:\n ${error.message}`, 'ERR', 'Toggle Explorer Error', 'ERR');
     }
   }
+
+  function refreshExploreFileList() {
+    const fileExplorer = document.querySelector('#file-explorer iframe');
+    if (fileExplorer && fileExplorer.contentWindow) {
+      fileExplorer.contentWindow.postMessage({
+        type: 'updateFileExplorer',
+        files: state.files,
+        tabs: state.tabs
+      }, '*');
+    }
+  }
+
+  // Add message handler
+  window.addEventListener('message', (event) => {
+    if (event.data.type === 'switchTab') {
+      const tabId = event.data.tabId;
+      if (tabId) {
+        switchToTab(tabId);
+      }
+    }
+    else if (event.data.type === 'openFile') {
+      const filePath = event.data.filePath;
+      if (filePath) {
+        openFileFromExplorer(filePath);
+      }
+    }
+    else if (event.data.type === 'updateFiles') {
+      state.files = event.data.files;
+      localStorage.setItem('projectFiles', JSON.stringify(state.files));
+      refreshExploreFileList();
+    }
+    else if (event.data.type === 'updateTabs') {
+      state.tabs = event.data.tabs;
+      localStorage.setItem('editorTabs', JSON.stringify(state.tabs));
+      renderTabs();
+    }
+  });
 
   // Auto-refresh file list when tabs change
   function refreshExploreFileList() {

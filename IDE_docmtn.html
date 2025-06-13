@@ -230,20 +230,21 @@
 
     <div class="content-wrapper">
       <h1>HTML IDE Documentation</h1>
-      <p>Version 0.4.3 | Last updated: May 12th 2025<br>
+      <p>Version 0.4.5 | Last updated: 6 / 12 / 2025 at 7:20 PM<br>
       Press the "C" key to toggle the Table of Contents</p>
 
       <section id="getting-started">
         <h2>Getting Started</h2>
         <div class="feature-card">
-          <p>Welcome to the HTML IDE, your lightweight but powerful web development environment.<br> This editor gives you professional coding features with instant previews, all in your browser.
+          <p>Welcome to the HTML IDE, your lightweight but powerful web development environment.<br> This editor gives you professional coding features with instant previews, image viewing capabilities, and a robust file management system, all in your browser.
           </p>
           <p>Built on Monaco Editor (the same tech that powers VS Code), you get:</p>
           <ul>
-            <li>Real-time HTML/CSS/JS editing with tab support</li>
-            <li>Instant visual feedback</li>
-            <li>All the essential tools without the bloat</li>
-            <li>Full VS Code keyboard shortcuts</li>
+            <li>Real-time HTML/CSS/JS editing with advanced tab management</li>
+            <li>Built-in image viewer with zoom and pan capabilities</li>
+            <li>Full project file management</li>
+            <li>VS Code keyboard shortcuts and features</li>
+            <li>High contrast and automatic theme options</li>
           </ul>
         </div>
       </section>
@@ -432,6 +433,23 @@
           </ul>
           <p><b>How to:</b> Run menu or keyboard shortcuts</p>
         </div>
+
+        <div class="feature-card">
+          <h3>Preview Features</h3>
+          <p>Enhanced preview capabilities:</p>
+          <ul>
+            <li><b>Image Preview:</b> Built-in image viewer for PNG, JPG, and SVG files
+              <ul>
+                <li>Zoom and pan controls</li>
+                <li>Background grid for transparency</li>
+                <li>Reset and close options</li>
+              </ul>
+            </li>
+            <li><b>HTML Preview:</b> Live preview with automatic updates</li>
+            <li><b>JavaScript Preview:</b> Console output and execution results</li>
+            <li><b>SVG Preview:</b> Vector graphics with zoom support</li>
+          </ul>
+        </div>
       </section>
 
       <section id="file-explorer">
@@ -443,9 +461,35 @@
           <ul>
             <li><b>Add Files/Folders:</b> Use the + buttons in the explorer toolbar</li>
             <li><b>Delete Items:</b> Click the × that appears when you hover</li>
-            <li><b>Toggle Visibility:</b> File → Toggle Explorer or <code>Ctrl+B</code></li>
+            <li><b>Toggle Visibility:</b> File → Toggle Explorer or <code>Ctrl+B</code> or <code>Ctrl+Shift+E</code></li>
             <li><b>Drag and Drop:</b> Reorganize files by dragging</li>
             <li><b>Open in New Tab:</b> Ctrl+Click files to open in new tab</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h3>Enhanced File Management</h3>
+          <p>Full project file management capabilities:</p>
+          <ul>
+            <li><b>Context Menus:</b> Right-click for file/folder operations</li>
+            <li><b>Drag and Drop:</b> Reorganize files and folders</li>
+            <li><b>File Operations:</b>
+              <ul>
+                <li>Create new files/folders</li>
+                <li>Rename items</li>
+                <li>Delete files/folders</li>
+                <li>Move items between folders</li>
+                <li>Export project as ZIP</li>
+              </ul>
+            </li>
+            <li><b>File Types:</b> Support for multiple formats
+              <ul>
+                <li>Web: HTML, CSS, JS, SVG</li>
+                <li>Images: PNG, JPG, JPEG with viewer</li>
+                <li>Text: TXT, MD, JSON</li>
+                <li>Code: Python, Java, C++, etc.</li>
+              </ul>
+            </li>
           </ul>
         </div>
       </section>
@@ -454,9 +498,28 @@
         <h2>Appearance</h2>
 
         <div class="feature-card">
-          <h3>Themes</h3>
-          <p>Switch between light and dark modes to match your environment.</p>
-          <p><b>How to:</b> Settings → Theme or command palette (<code>F1</code> then type "theme")</p>
+          <h3>Theme Options</h3>
+          <p>Multiple theme options to match your preference and accessibility needs:</p>
+          <ul>
+            <li><b>Dark Theme:</b> Default dark mode with blue accents</li>
+            <li><b>Light Theme:</b> High visibility light mode with neutral colors</li>
+            <li><b>High Contrast Dark:</b> Maximum contrast dark theme for accessibility</li>
+            <li><b>High Contrast Light:</b> Maximum contrast light theme for accessibility</li>
+            <li><b>Automatic:</b> Follows your system preferences and updates dynamically</li>
+          </ul>
+          <p><b>Note:</b> Theme changes affect all UI elements including file explorer, previews and context menus</p>
+          <p><b>How to:</b> Settings → Theme or use command palette</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Recent Files</h3>
+          <p>Quick access to your recently opened files:</p>
+          <ul>
+            <li>Up to 10 most recent files remembered</li>
+            <li>Access via File → Open Recent</li>
+            <li>Automatically updates when opening files</li>
+            <li>Persists between sessions</li>
+          </ul>
         </div>
 
         <div class="feature-card">
@@ -508,11 +571,11 @@
           <h3>VS Code Shortcuts Which Have Been Included</h3>
           <p>This IDE includes all standard VS Code shortcuts for your Operating System:</p>
           <ul>
-            <li><a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf" class="external-link"
+            <li><a rel="noopener" href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf" class="external-link"
                 target="_blank">Windows Shortcuts Reference</a></li>
-            <li><a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf" class="external-link"
+            <li><a rel="noopener" href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf" class="external-link"
                 target="_blank">Mac Shortcuts Reference</a></li>
-            <li><a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf" class="external-link"
+            <li><a rel="noopener" href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf" class="external-link"
                 target="_blank">Linux Shortcuts Reference</a></li>
           </ul>
           <p><b>Note for Chrome OS Users:</b> Use the Linux shortcuts reference sheet because... reasons ok.</p>

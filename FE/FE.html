@@ -102,6 +102,7 @@
                 cursor: pointer;
                 border-radius: 3px;
                 margin: 1px 8px;
+                -webkit-user-select: none;
                 user-select: none;
             }
 
@@ -472,14 +473,10 @@
             renderFileExplorer();
 
             // Notify parent window
-            const tab = tabs.find(t => t.id === tabId);
-            if (tab) {
-                window.parent.postMessage({
-                    type: 'fileExplorerTabSwitch',
-                    tabId: tab.id,
-                    fileName: tab.name
-                }, '*');
-            }
+            window.parent.postMessage({
+                type: 'switchTab',
+                tabId: tabId
+            }, '*');
         }
 
         function closeTab(tabId) {
@@ -495,6 +492,7 @@
                     renderFileExplorer();
                 }
             }
+            updateTabs(); // Add this after tab changes
         }
 
         function openFileFromExplorer(filePath) {
@@ -524,8 +522,7 @@
 
             // Notify parent window
             window.parent.postMessage({
-                type: 'fileExplorerFileOpen',
-                fileName: fileName,
+                type: 'openFile',
                 filePath: filePath
             }, '*');
         }
@@ -732,7 +729,7 @@
                     if (currentContext.type === 'file' || currentContext.type === 'folder') {
                         if (confirm(`Are you sure you want to delete "${currentContext.element.name}"?`)) {
                             deleteFileOrFolder(currentContext.element, fileSystem);
-                            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+                            updateFiles(); // Add this
                             renderFileExplorer();
                         }
                     }
@@ -754,6 +751,24 @@
                     alert(`Properties for ${currentContext.element?.name || 'background'}`);
                     break;
             }
+        }
+
+        // Update localStorage and notify parent when files change
+        function updateFiles() {
+            localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+            window.parent.postMessage({
+                type: 'updateFiles',
+                files: fileSystem
+            }, '*');
+        }
+
+        // Update localStorage and notify parent when tabs change  
+        function updateTabs() {
+            localStorage.setItem('editorTabs', JSON.stringify(tabs));
+            window.parent.postMessage({
+                type: 'updateTabs', 
+                tabs: tabs
+            }, '*');
         }
 
         function createNewFile() {
@@ -905,11 +920,21 @@
             else if (event.data.type === 'updateFileExplorer') {
                 if (event.data.files) {
                     fileSystem = event.data.files;
+                    localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
                 }
                 if (event.data.tabs) {
                     tabs = event.data.tabs;
+                    localStorage.setItem('editorTabs', JSON.stringify(tabs));
                 }
                 renderFileExplorer();
+            }
+            else if (event.data.type === 'fileExplorerTabSwitch') {
+                const { tabId } = event.data;
+                switchToTab(tabId);
+            }
+            else if (event.data.type === 'fileExplorerFileOpen') {
+                const { fileName, filePath } = event.data;
+                openFileFromExplorer(filePath);
             }
         });
 
@@ -969,6 +994,7 @@
 
             // Update storage and UI
             localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
+            updateFiles(); // Add this after file system changes
             renderFileExplorer();
         }
     </script>

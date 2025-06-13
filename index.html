@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>html IDE</title>
-  <meta name="theme-color" content="#1e1e1e">
+  <meta name="color-scheme" content="dark light">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" type="image/png" href="icons/html_editor_icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/html_editor_icon.png">
   <script>
     var require = {
       paths: {
@@ -252,7 +253,7 @@
   <div class="split-container" id="mainContainer">
     <div id="file-explorer" class="file-explorer">
       <div class="file-explorer-list" id="file-list"></div>
-      <iframe src="FE/FE.html" style="height: 100%; width: 100%; border: none;"></iframe>
+      <iframe src="FE/FE.html" class="fe-iframe" title="File Explorer"></iframe>
     </div>
     <div class="editor-wrapper">
       <div id="editor"></div>
@@ -271,7 +272,8 @@
     <div class="new-tab-button" data-action="new">+</div>
   </div>
 
-  <input type="file" class="hidden-file-input" id="fileInput" />
+  <label for="fileInput" class="visually-hidden">Open file</label>
+  <input type="file" class="hidden-file-input" id="fileInput" title="Open file" />
 
   <!-- Scripts -->
   <script src="js/JSZIP.js"></script>
