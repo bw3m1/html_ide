@@ -2014,7 +2014,7 @@ ${tab.name}
         case 'example-table': await loadExampleContent('table'); break;
         case 'example-responsive': await loadExampleContent('responsive'); break;
         case 'documentation':
-          const docUrl = new URL('documentation/IDE_docmtn.html', window.location.href).href;
+          const docUrl = new URL('documentation/IDE_documentation.html', window.location.href).href;
           window.open(docUrl, '_blank');
           updateStatus("Opening IDE documentation");
           break;
