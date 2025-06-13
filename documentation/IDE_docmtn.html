@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation</title>
+    <link rel="icon" type="image/png" href="../icons/html_editor_icon.png">
+    <link rel="stylesheet" href="ide_docmtn.css">
+  </head>
+
+  <body>
+    <div class="main-container">
+      <div class="toc-container" id="tocContainer">
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <a href="#getting-started">Getting Started</a>
+          <a href="#file-operations">File Operations</a>
+          <a href="#editing-features">Editing Features</a>
+          <ul>
+            <li><a href="#vscode-features">VS Code Features</a></li>
+            <li><a href="#command-palette">Command Palette</a></li>
+            <li><a href="#code-navigation">Code Navigation</a></li>
+            <li><a href="#tab-system">Tab System</a></li>
+          </ul>
+          <a href="#preview">Preview Options</a>
+          <a href="#file-explorer">File Explorer</a>
+          <a href="#appearance">Appearance</a>
+          <a href="#examples">Built-in Examples</a>
+          <a href="#shortcuts">Keyboard Shortcuts</a>
+        </div>
+      </div>
+
+      <div class="content-wrapper">
+        <h1>HTML IDE Documentation</h1>
+        <p>Version 0.4.5 | Last updated: 6 / 12 / 2025 at 7:20 PM<br>
+        Press the "C" key to toggle the Table of Contents</p>
+
+        <section id="getting-started">
+          <h2>Getting Started</h2>
+          <div class="feature-card">
+            <p>Welcome to the HTML IDE, your lightweight but powerful web development environment.<br> This editor gives you professional coding features with instant previews, image viewing capabilities, and a robust file management system, all in your browser.
+            </p>
+            <p>Built on Monaco Editor (the same tech that powers VS Code), you get:</p>
+            <ul>
+              <li>Real-time HTML/CSS/JS editing with advanced tab management</li>
+              <li>Built-in image viewer with zoom and pan capabilities</li>
+              <li>Full project file management</li>
+              <li>VS Code keyboard shortcuts and features</li>
+              <li>High contrast and automatic theme options</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="file-operations">
+          <h2>File Operations</h2>
+
+          <div class="feature-card">
+            <h3>New File</h3>
+            <p>Start fresh with a clean HTML template including basic structure and CSS reset.</p>
+            <p><b>How to:</b> File → New or <code>Ctrl+N</code> (creates in current tab)<br>
+              <b>New Tab:</b> Click the + button in tab bar or <code>Ctrl+T</code>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Open File</h3>
+            <p>Work with existing files in these formats:</p>
+            <ul>
+              <li>HTML (.html)</li>
+              <li>CSS (.css)</li>
+              <li>JavaScript (.js)</li>
+              <li>Plain Text (.txt)</li>
+            </ul>
+            <p><b>Note:</b> Opening a file will create a new tab if there are unsaved changes in current tab</p>
+            <p><b>How to:</b> File → Open or <code>Ctrl+O</code></p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Save Options</h3>
+            <p>Save your work without hassle:</p>
+            <ul>
+              <li><b>Save:</b> Quick save to current file (<code>Ctrl+S</code>)<br>
+                <b>Note:</b> Silently saves and overwrites existing files. If nothing happens when you click it, that
+                means it worked!
+              </li>
+              <li><b>Save As:</b> Choose format and location (<code>Ctrl+Shift+S</code>)</li>
+              <li><b>Export ZIP:</b> Package your entire project</li>
+            </ul>
+            <p>All operations affect the currently active tab</p>
+            <p>All options under File → Save menu</p>
+          </div>
+        </section>
+
+        <section id="editing-features">
+          <h2>Editing Features</h2>
+
+          <div class="feature-card">
+            <h3>Smart Editor Basics</h3>
+            <p>The editor understands your code and helps with:</p>
+            <ul>
+              <li>Automatic indentation</li>
+              <li>Bracket matching</li>
+              <li>Syntax highlighting</li>
+              <li>Multiple cursors (<code>Alt+Click</code>)</li>
+              <li>Line operations (copy, move, delete)</li>
+            </ul>
+          </div>
+
+          <section id="vscode-features">
+            <h3>VS Code Power Features</h3>
+
+            <div class="vscode-feature">
+              <h4>IntelliSense</h4>
+              <p>Smart code completions that suggest HTML tags, CSS properties, and JS functions as you type.</p>
+              <p>Press <code>Ctrl+Space</code> to trigger manually.</p>
+            </div>
+
+            <div class="vscode-feature">
+              <h4>Error Checking</h4>
+              <p>Red squiggles under problems with hover explanations.</p>
+              <p>Works for HTML, CSS, and JavaScript syntax errors.</p>
+            </div>
+
+            <div class="vscode-feature">
+              <h4>Code Folding</h4>
+              <p>Collapse sections by clicking gutter arrows (left of line numbers).</p>
+              <p>Use <code>Ctrl+Shift+[</code> and <code>Ctrl+Shift+]</code> to fold/unfold.</p>
+            </div>
+          </section>
+
+          <section id="command-palette">
+            <h3>Command Palette</h3>
+            <div class="feature-card">
+              <p>Press <code>F1</code> to open the command palette - search for any VS Code action.</p>
+              <p>Special prefixes for quick access:</p>
+              <ul>
+                <li><code>></code> - Run commands (default)</li>
+                <li><code>:</code> - Go to line number (<code>Ctrl+G</code> shortcut)</li>
+                <li><code>@</code> - Jump to symbols (functions, classes, etc.)</li>
+                <li><code>#</code> - Search across files</li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="code-navigation">
+            <h3>Code Navigation</h3>
+            <div class="feature-card">
+              <p>Move through code efficiently with these essential shortcuts:</p>
+              <div class="shortcut">
+                <span><code>Ctrl+G</code></span>
+                <span>Go to Line</span>
+                <span><code>Ctrl+F</code></span>
+                <span>Find</span>
+                <span><code>Ctrl+H</code></span>
+                <span>Replace</span>
+                <span><code>Ctrl+D</code></span>
+                <span>Select Next Match</span>
+                <span><code>Ctrl+Shift+K</code></span>
+                <span>Delete Line</span>
+                <span><code>Shift+Alt+↓</code></span>
+                <span>Copy Line Down</span>
+                <span><code>Shift+Alt+↑</code></span>
+                <span>Copy Line Up</span>
+                <span><code>Ctrl+/</code></span>
+                <span>Toggle Comment</span>
+              </div>
+            </div>
+          </section>
+
+          <section id="tab-system">
+            <h3>Tab System</h3>
+
+            <div class="feature-card">
+              <h4>Working with Multiple Files</h4>
+              <p>The tab system allows you to work with multiple files simultaneously:</p>
+              <ul>
+                <li><b>New Tab:</b> Open a fresh editor tab (<code>Ctrl+T</code>)</li>
+                <li><b>Switch Tabs:</b> Click any tab or use <code>Ctrl+Tab</code> to cycle forward and
+                  <code>Ctrl+Shift+Tab</code> to cycle backward</li>
+                <li><b>Close Tab:</b> Click the × on the tab or use <code>Ctrl+W</code></li>
+                <li><b>Tab Persistence:</b> Open tabs are automatically saved and restored when you return</li>
+                <li><b>File Operations:</b> All file operations (save, open, etc.) work with the currently active tab</li>
+              </ul>
+            </div>
+
+            <div class="feature-card">
+              <h4>Tab Features</h4>
+              <p>Each tab maintains its own:</p>
+              <ul>
+                <li>File content and unsaved changes</li>
+                <li>File name and type</li>
+                <li>Cursor position and scroll location</li>
+                <li>Language mode (HTML/CSS/JS/etc.)</li>
+              </ul>
+              <p><b>Tip:</b> You can have different layout modes (horizontal/vertical split) for different tabs</p>
+            </div>
+          </section>
+        </section>
+
+        <section id="preview">
+          <h2>Preview Options</h2>
+
+          <div class="feature-card">
+            <h3>Live Preview</h3>
+            <p>See changes as you type with automatic updates (500ms delay to prevent flashing).</p>
+            <p>The preview automatically refreshes when you:</p>
+            <ul>
+              <li>Save the file (<code>Ctrl+S</code>)</li>
+              <li>Stop typing for half a second</li>
+              <li>Click the refresh button</li>
+              <li>Switch tabs</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <h3>Layout Modes</h3>
+            <p>Choose what works for your screen:</p>
+            <ul>
+              <li><b>Horizontal Split:</b> Editor on left, preview on right</li>
+              <li><b>Vertical Split:</b> Editor above, preview below</li>
+              <li><b>Editor Only:</b> Maximize code space</li>
+              <li><b>Preview Only:</b> Full output view</li>
+            </ul>
+            <p><b>Note:</b> Layout settings are remembered per tab</p>
+            <p><b>How to:</b> View → Layout or use the command palette (<code>F1</code>)</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Run Options</h3>
+            <p>Test your code different ways:</p>
+            <ul>
+              <li><b>Current Tab:</b> Update built-in preview (<code>Ctrl+Enter</code>)</li>
+              <li><b>New Tab:</b> Open in browser tab (<code>Ctrl+Shift+Enter</code>)</li>
+              <li><b>Refresh:</b> Manually reload preview</li>
+            </ul>
+            <p><b>How to:</b> Run menu or keyboard shortcuts</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Preview Features</h3>
+            <p>Enhanced preview capabilities:</p>
+            <ul>
+              <li><b>Image Preview:</b> Built-in image viewer for PNG, JPG, and SVG files
+                <ul>
+                  <li>Zoom and pan controls</li>
+                  <li>Background grid for transparency</li>
+                  <li>Reset and close options</li>
+                </ul>
+              </li>
+              <li><b>HTML Preview:</b> Live preview with automatic updates</li>
+              <li><b>JavaScript Preview:</b> Console output and execution results</li>
+              <li><b>SVG Preview:</b> Vector graphics with zoom support</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="file-explorer">
+          <h2>File Explorer</h2>
+
+          <div class="feature-card">
+            <h3>Project Management</h3>
+            <p>Organize files without leaving the editor:</p>
+            <ul>
+              <li><b>Add Files/Folders:</b> Use the + buttons in the explorer toolbar</li>
+              <li><b>Delete Items:</b> Click the × that appears when you hover</li>
+              <li><b>Toggle Visibility:</b> File → Toggle Explorer or <code>Ctrl+B</code> or <code>Ctrl+Shift+E</code></li>
+              <li><b>Drag and Drop:</b> Reorganize files by dragging</li>
+              <li><b>Open in New Tab:</b> Ctrl+Click files to open in new tab</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <h3>Enhanced File Management</h3>
+            <p>Full project file management capabilities:</p>
+            <ul>
+              <li><b>Context Menus:</b> Right-click for file/folder operations</li>
+              <li><b>Drag and Drop:</b> Reorganize files and folders</li>
+              <li><b>File Operations:</b>
+                <ul>
+                  <li>Create new files/folders</li>
+                  <li>Rename items</li>
+                  <li>Delete files/folders</li>
+                  <li>Move items between folders</li>
+                  <li>Export project as ZIP</li>
+                </ul>
+              </li>
+              <li><b>File Types:</b> Support for multiple formats
+                <ul>
+                  <li>Web: HTML, CSS, JS, SVG</li>
+                  <li>Images: PNG, JPG, JPEG with viewer</li>
+                  <li>Text: TXT, MD, JSON</li>
+                  <li>Code: Python, Java, C++, etc.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="appearance">
+          <h2>Appearance</h2>
+
+          <div class="feature-card">
+            <h3>Theme Options</h3>
+            <p>Multiple theme options to match your preference and accessibility needs:</p>
+            <ul>
+              <li><b>Dark Theme (Default):</b>
+                <ul>
+                  <li>Background: #1e1e1e</li>
+                  <li>Text: #d4d4d4</li>
+                  <li>Menu Background: #181818</li>
+                  <li>Hover: #1e1e1e</li>
+                  <li>Outline: #2b2b2b</li>
+                </ul>
+              </li>
+              <li><b>Light Theme:</b>
+                <ul>
+                  <li>Background: White</li>
+                  <li>Text: #333</li>
+                  <li>Menu Background: #f0f0f0</li>
+                  <li>Hover: #e0e0e0</li>
+                  <li>Outline: #e0e0e0</li>
+                </ul>
+              </li>
+              <li><b>High Contrast Dark:</b>
+                <ul>
+                  <li>Background: Black</li>
+                  <li>Text: White</li>
+                  <li>Menu Background: #0c0c0c</li>
+                  <li>Hover: #c15900</li>
+                  <li>Outline: #333</li>
+                  <li>Menu Text Hover: #007acc</li>
+                </ul>
+              </li>
+              <li><b>High Contrast Light:</b>
+                <ul>
+                  <li>Background: White</li>
+                  <li>Text: Black</li>
+                  <li>Menu Background: #f0f0f0</li>
+                  <li>Hover: #007acc</li>
+                  <li>Outline: #1e1e1e</li>
+                  <li>Menu Text Hover: Black</li>
+                </ul>
+              </li>
+            </ul>
+            <p><b>Common Theme Elements:</b></p>
+            <ul>
+              <li>Accent Color: #007acc</li>
+              <li>Error Red: #f44/#f22</li>
+              <li>Success Green: #4f4/#0f0</li>
+            </ul>
+            <p><b>How to change:</b> View → Theme or use command palette (<code>F1</code> then type "theme")</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Recent Files</h3>
+            <p>Quick access to your recently opened files:</p>
+            <ul>
+              <li>Up to 10 most recent files remembered</li>
+              <li>Access via File → Open Recent</li>
+              <li>Automatically updates when opening files</li>
+              <li>Persists between sessions</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <h3>Editor Customization</h3>
+            <p>Make the editor comfortable for you:</p>
+            <ul>
+              <li><b>Fonts:</b>
+                <ul>
+                  <li>Monospace (default)</li>
+                  <li>Arial (clean sans-serif)</li>
+                  <li>Courier (classic terminal style)</li>
+                </ul>
+              </li>
+              <li><b>Sizes:</b>
+                <ul>
+                  <li>Small (12px) - more code on screen</li>
+                  <li>Medium (16px) - balanced size</li>
+                  <li>Large (20px) - easier reading</li>
+                </ul>
+              </li>
+              <li><b>Zoom:</b> Adjust with <code>Ctrl+=</code>/<code>Ctrl+-</code></li>
+              <li><b>Line Numbers:</b> Toggle on/off via View menu</li>
+              <li><b>Tab Bar:</b> Always visible at top of editor</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="examples">
+          <h2>Built-in Examples</h2>
+
+          <div class="feature-card">
+            <p>Quick-start templates for common web patterns:</p>
+            <ul>
+              <li><b>Basic HTML:</b> Minimal page skeleton with proper doctype and meta tags</li>
+              <li><b>Form Example:</b> Complete styled form with all input types</li>
+              <li><b>CSS Grid:</b> Modern layout demo with responsive grid</li>
+              <li><b>Table Example:</b> Proper data table with zebra striping</li>
+              <li><b>Responsive Design:</b> Mobile-first starter with media queries</li>
+            </ul>
+            <p><b>How to:</b> Help → Examples</p>
+            <p><b>Tip:</b> Examples open in new tabs so you don't lose your current work</p>
+          </div>
+        </section>
+
+        <section id="shortcuts">
+          <h2>Keyboard Shortcuts</h2>
+
+          <div class="feature-card">
+            <h3>VS Code Shortcuts Which Have Been Included</h3>
+            <p>This IDE includes all standard VS Code shortcuts for your Operating System:</p>
+            <ul>
+              <li><a rel="noopener" href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf" class="external-link"
+                  target="_blank">Windows Shortcuts Reference</a></li>
+              <li><a rel="noopener" href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf" class="external-link"
+                  target="_blank">Mac Shortcuts Reference</a></li>
+              <li><a rel="noopener" href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf" class="external-link"
+                  target="_blank">Linux Shortcuts Reference</a></li>
+            </ul>
+            <p><b>Note for Chrome OS Users:</b> Use the Linux shortcuts reference sheet because... reasons ok.</p>
+            <p><b>How to access:</b> Help → Shortcuts or <code>F1</code> then "keyboard shortcuts"</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>IDE-Specific Shortcuts</h3>
+            <div class="shortcut">
+              <span><code>Ctrl+B</code></span>
+              <span>Toggle File Explorer</span>
+              <span><code>Ctrl+Enter</code></span>
+              <span>Run in new Tab</span>
+              <span><code>Ctrl+Alt+Space</code></span>
+              <span>Cycle Layout</span>
+              <span><code>Ctrl+Alt+Backspace</code></span>
+              <span>Backcycle Layout</span>
+              <span><code>Ctrl+Shift+Space</code></span>
+              <span>Save File</span>
+              <span><code>Ctrl+Shift+C</code></span>
+              <span>Clear</span>
+              <span><code>Ctrl+Shift+N</code></span>
+              <span>Rename File</span>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <h3>Tab Shortcuts</h3>
+            <div class="shortcut">
+              <span><code>Ctrl+ALt+T</code></span>
+              <span>New Tab</span>
+              <span><code>Ctrl+Alt+W</code></span>
+              <span>Close Tab</span>
+              <span><code>Ctrl+Alt+Tab</code></span>
+              <span>Next Tab</span>
+              <span><code>Ctrl+Shift+Alt+Tab</code></span>
+              <span>Previous Tab</span>
+              <span><code>Ctrl+Alt+1</code> to <code>Ctrl+Alt+9</code></span>
+              <span>Switch to the N'th Tab</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="ide_docmtn.js"></script>
+  </body>
+</html>
