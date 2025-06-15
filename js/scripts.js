@@ -1904,6 +1904,18 @@ ${tab.name}
     }
   }
 
+    async function setFormatCustom() {
+      const currentTab = getCurrentTab();
+      const type = await showAlert('Enter the custom format you want to use:', 'QUERY', 'Rename File', 'QUERY');
+      const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
+      if (name) {
+        currentTab.name = `${name}${'.' + type}`;
+        renderTabs();
+        updateStatus(`Reformated to ${type}`);
+        saveTabsToStorage();
+      }
+    }
+
   // Menu actions
   async function handleMenuAction(action, data) {
     try {
@@ -2051,6 +2063,7 @@ ${tab.name}
         case 'file-2-js': setFileType('js'); detectLanguage(); break;
         case 'file-2-txt': setFileType('txt'); detectLanguage(); break;
         case 'file-2-json': setFileType('json'); detectLanguage(); break;
+        case 'file-2-custom': setFormatCustom(); detectLanguage(); break;
         case 'about':
           showAlert(
             `html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${VERSION}<br>Date of Publish:&nbsp;&nbsp;${DATE_MODIFIED}<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BROWSERS}<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.`,
