@@ -172,7 +172,7 @@ require(['vs/editor/editor.main'], function () {
       header.className = 'alert-header';
 
       const iconElement = document.createElement('img');
-      iconElement.src = `icons/nodeifications/${icon.toLowerCase()}_icon.png`;
+      iconElement.src = `icons/d/${icon.toLowerCase()}_icon.png`;
       iconElement.className = 'alert-icon';
       iconElement.alt = `${type} icon`;
 
