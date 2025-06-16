@@ -44,7 +44,6 @@ const FILE_TYPES = {
   cpp: { mime: 'text/x-c++', ext: '.cpp' },
   rs: { mime: 'text/x-rust', ext: '.rs' },
   go: { mime: 'text/x-go', ext: '.go' },
-  ide: { mime: 'application/x-ide-project', ext: '.ide' },
   svg: { mime: 'image/svg+xml', ext: '.svg' }
 };
 
@@ -86,12 +85,22 @@ require.config({
 
 // Initialize Monaco Editor with language support
 require(['vs/editor/editor.main'], function () {
-  // Register languages with Monaco
+  // Register all supported languages
   monaco.languages.register({ id: 'html' });
   monaco.languages.register({ id: 'css' });
   monaco.languages.register({ id: 'javascript' });
   monaco.languages.register({ id: 'json' });
   monaco.languages.register({ id: 'plaintext' });
+  monaco.languages.register({ id: 'markdown' });
+  monaco.languages.register({ id: 'c' });
+  monaco.languages.register({ id: 'cpp' });
+  monaco.languages.register({ id: 'csharp' });
+  monaco.languages.register({ id: 'python' });
+  monaco.languages.register({ id: 'java' });
+  monaco.languages.register({ id: 'rust' });
+  monaco.languages.register({ id: 'go' });
+  monaco.languages.register({ id: 'jsx' });
+  monaco.languages.register({ id: 'typescript' });
 
   // Create editor instance
 
@@ -854,58 +863,137 @@ ${tab.name}
       const value = editor.getValue();
       const fileName = currentTab.name.toLowerCase();
 
-      // --- SVG Preview from markup ---
-      if (fileName.endsWith('.svg')) {
-        // Use the new image previewer overlay for SVG
-        showImagePreviewerOverlay('svg', value, currentTab.name);
-        updateStatus("SVG preview (zoom/pan/drag, Esc to close)");
-        return;
-      }
-      // --- PNG/JPG/JPEG: Use image previewer overlay ---
-      if (
-        fileName.endsWith('.png') ||
-        fileName.endsWith('.jpg') ||
-        fileName.endsWith('.jpeg')
-      ) {
-        // Try to detect if the editor content is a base64 data URL, else show message
-        let dataUrl = '';
+      // Image file handling
+      if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        // Switch to preview-only layout for images
+        setLayout('output-only');
+        
+        // Create image preview container
+        const imgContainer = document.createElement('div');
+        imgContainer.style.width = '100%';
+        imgContainer.style.height = '100%';
+        imgContainer.style.display = 'flex';
+        imgContainer.style.justifyContent = 'center';
+        imgContainer.style.alignItems = 'center';
+        imgContainer.style.background = 'repeating-conic-gradient(#444 0% 25%, #555 0% 50%) 0 0 / 20px 20px';
+        imgContainer.style.overflow = 'auto';
+
         if (/^data:image\/(png|jpe?g);base64,/.test(value.trim())) {
-          dataUrl = value.trim();
+          const img = document.createElement('img');
+          img.src = value.trim();
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '100%';
+          img.style.objectFit = 'contain';
+          imgContainer.appendChild(img);
+
+          // Add zoom controls
+          const controls = document.createElement('div');
+          controls.style.position = 'fixed';
+          controls.style.top = '10px';
+          controls.style.right = '10px';
+          controls.style.background = 'rgba(0,0,0,0.7)';
+          controls.style.padding = '5px';
+          controls.style.borderRadius = '5px';
+          controls.style.zIndex = '1000';
+          controls.innerHTML = `
+            <button onclick="this.getRootNode().host.querySelector('img').style.transform = 'scale(${(s => s * 1.2)(parseFloat(this.getRootNode().host.querySelector('img').style.transform.replace(/[^\d.]/g, '') || 1))})'">+</button>
+            <button onclick="this.getRootNode().host.querySelector('img').style.transform = 'scale(${(s => s / 1.2)(parseFloat(this.getRootNode().host.querySelector('img').style.transform.replace(/[^\d.]/g, '') || 1))})'">-</button>
+            <button onclick="this.getRootNode().host.querySelector('img').style.transform = 'scale(1)'">Reset</button>
+          `;
+          imgContainer.appendChild(controls);
         } else {
-          // Not a data URL, show message
-          document.querySelector('.editor-wrapper').style.display = 'none';
-          const previewPane = document.querySelector('.preview-pane');
-          previewPane.style.display = 'flex';
-          previewPane.style.justifyContent = 'center';
-          previewPane.style.alignItems = 'center';
-          previewPane.style.background = '#111';
-          preview.innerHTML = '';
           const msg = document.createElement('div');
-          msg.textContent = 'Image preview not available for PNG/JPG unless file is opened as binary or pasted as data URL.';
+          msg.textContent = 'Image preview not available. File must be opened as binary or contain a valid data URL.';
           msg.style.color = '#fff';
-          msg.style.fontSize = '1.2rem';
+          msg.style.padding = '20px';
           msg.style.background = 'rgba(0,0,0,0.7)';
-          msg.style.padding = '2rem';
-          msg.style.borderRadius = '12px';
-          msg.style.textAlign = 'center';
-          msg.style.cursor = 'pointer';
-          msg.onclick = hideImagePreviewInPane;
-          preview.appendChild(msg);
-          return;
+          msg.style.borderRadius = '5px';
+          imgContainer.appendChild(msg);
         }
-        showImagePreviewerOverlay('img', dataUrl, currentTab.name);
-        updateStatus("Image preview (zoom/pan/drag, Esc to close)");
+
+        preview.appendChild(imgContainer);
+        updateStatus("Image preview");
         return;
       }
-      // --- End Image Preview ---
+      
+      // SVG file handling
+      if (fileName.endsWith('.svg')) {
+        // Create container for SVG preview
+        const svgContainer = document.createElement('div');
+        svgContainer.style.width = '100%';
+        svgContainer.style.height = '100%';
+        svgContainer.style.display = 'flex';
+        svgContainer.style.flexDirection = 'column';
+        svgContainer.style.background = 'repeating-conic-gradient(#444 0% 25%, #555 0% 50%) 0 0 / 20px 20px';
 
-      // Restore editor if not viewing image
-      document.querySelector('.editor-wrapper').style.display = '';
-      const previewPane = document.querySelector('.preview-pane');
-      previewPane.style.justifyContent = '';
-      previewPane.style.alignItems = '';
-      previewPane.style.background = '';
+        // Add preview controls
+        const controls = document.createElement('div');
+        controls.style.padding = '5px';
+        controls.style.background = 'var(--menu-bg-dark)';
+        controls.innerHTML = `
+          <button id="svgZoomIn">+</button>
+          <button id="svgZoomOut">−</button>
+          <button id="svgZoomReset">Reset</button>
+          <button id="svgEditMode">Edit SVG</button>
+        `;
 
+        // SVG preview area
+        const svgPreview = document.createElement('div');
+        svgPreview.style.flex = '1';
+        svgPreview.style.overflow = 'auto';
+        svgPreview.style.display = 'flex';
+        svgPreview.style.justifyContent = 'center';
+        svgPreview.style.alignItems = 'center';
+        svgPreview.innerHTML = value;
+
+        // Add controls and preview to container
+        svgContainer.appendChild(controls);
+        svgContainer.appendChild(svgPreview);
+        preview.appendChild(svgContainer);
+
+        // Setup zoom functionality
+        let zoom = 1;
+        const svgElement = svgPreview.querySelector('svg');
+        if (svgElement) {
+          const updateZoom = () => {
+            svgElement.style.transform = `scale(${zoom})`;
+            svgElement.style.transformOrigin = 'center center';
+          };
+
+          controls.querySelector('#svgZoomIn').onclick = () => {
+            zoom = Math.min(zoom * 1.2, 10);
+            updateZoom();
+          };
+          controls.querySelector('#svgZoomOut').onclick = () => {
+            zoom = Math.max(zoom / 1.2, 0.1);
+            updateZoom();
+          };
+          controls.querySelector('#svgZoomReset').onclick = () => {
+            zoom = 1;
+            updateZoom();
+          };
+          controls.querySelector('#svgEditMode').onclick = () => {
+            setLayout('horizontal');
+          };
+
+          // Add wheel zoom support
+          svgPreview.onwheel = (e) => {
+            if (e.ctrlKey) {
+              e.preventDefault();
+              const delta = e.deltaY > 0 ? 0.9 : 1.1;
+              zoom = Math.max(0.1, Math.min(10, zoom * delta));
+              updateZoom();
+            }
+          };
+        }
+
+        updateStatus("SVG preview");
+        return;
+      }
+
+      // Restore normal layout if not viewing images
+      const editorWrapper = document.querySelector('.editor-wrapper');
+      editorWrapper.style.display = '';
       const isHtml = currentTab.name.endsWith('.html');
       if (isHtml) {
         const iframe = document.createElement('iframe');
@@ -1551,7 +1639,9 @@ ${tab.name}
       java: 'java',
       rs: 'rust',
       go: 'go',
-      ts: 'typescript'
+      jsx: 'jsx',
+      ts: 'typescript',
+      svg: 'xml'
     };
 
     if (languageMap[fileType]) {
@@ -1906,13 +1996,25 @@ ${tab.name}
 
     async function setFormatCustom() {
       const currentTab = getCurrentTab();
-      const type = await showAlert('Enter the custom format you want to use:', 'QUERY', 'Rename File', 'QUERY');
-      const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
-      if (name) {
-        currentTab.name = `${name}${'.' + type}`;
+      const type = await showAlert('Enter the custom format you want to use:', 'QUERY', 'Custom Format', 'QUERY');
+      if (type) {
+        const fileName = currentTab.name;
+        const dotIndex = fileName.lastIndexOf('.');
+        const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
+        currentTab.name = `${name}.${type}`;
+        currentTab.type = type.toLowerCase();
         renderTabs();
-        updateStatus(`Reformated to ${type}`);
+        updateStatus(`Reformatted to ${type}`);
         saveTabsToStorage();
+        refreshExploreFileList();
+        
+        // Register the custom language if not already registered
+        if (!monaco.languages.getLanguages().find(lang => lang.id === type.toLowerCase())) {
+          monaco.languages.register({ id: type.toLowerCase() });
+        }
+        
+        // Set editor language mode
+        monaco.editor.setModelLanguage(editor.getModel(), type.toLowerCase());
       }
     }
 
@@ -2140,7 +2242,7 @@ ${tab.name}
   }
 
   // Returns the icon path for a given file or folder
-  function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
+  const getIcon = (fileName, isFolder, isOpen = false, theme = 'dark') => {
     if (theme === 'light') {
       if (isFolder) return isOpen ? 'icons/open_folder_icon_light.svg' : 'icons/closed_folder_icon_light.svg';
     } else {
@@ -2165,12 +2267,13 @@ ${tab.name}
         case 'c': return 'icons/Clang_icon.png';
         case 'cpp': return 'icons/Cpp_icon.png';
         case 'cs': return 'icons/Csharp_icon.png';
-        case 'py': return 'icons/python_icon.png';
+        case 'py': return 'icons/python_icon.svg';
         case 'java': return 'icons/java_icon.png';
         case 'rs': return 'icons/rust_icon.png';
         case 'go': return 'icons/golang_icon.png';
         case 'jsx': return 'icons/react_icon.png';
         case 'mp3': return 'icons/mp3_audio_icon.png';
+        case 'bin': return 'icons/binary_icon.svg';
         default: return 'icons/text_icon.png';
       }
     }

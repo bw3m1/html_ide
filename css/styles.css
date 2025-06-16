@@ -49,7 +49,8 @@
 body, html {
   margin: 0;
   padding: 0;
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
   font-family: 'Segoe UI', sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-dark);
@@ -87,7 +88,7 @@ body, html {
   background-color: var(--menu-bg-dark);
   border: 1px solid var(--outline-dark);
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+  z-index: 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
 }
 
 .menu-item:hover > .dropdown {
@@ -139,7 +140,7 @@ body, html {
 /* Layout */
 .split-container {
   display: flex;
-  height: calc(100vh - 40px);
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -151,7 +152,7 @@ body, html {
 
 #editor {
   width: 100%;
-  height: 95.5%;
+  height: calc(100% - 25px);
 }
 
 .preview-pane {
@@ -160,6 +161,7 @@ body, html {
   background: var(--bg-dark);
   padding: 1rem;
   overflow: auto;
+  height: calc(100% - 25px);
 }
 
 .resizer {
@@ -211,7 +213,7 @@ body, html {
   border-right: 1px solid var(--outline-dark);
   display: none;
   flex-direction: column;
-  height: 100%;
+  height: calc(100% - 25px);
   overflow: hidden;
   transition: transform 0.3s ease;
   box-shadow: 2px 0 8px rgba(0,0,0,0.1);
