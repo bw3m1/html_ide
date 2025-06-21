@@ -7,42 +7,63 @@ import pygame
 
 # === SETTINGS ===
 GITHUB_REPO = "https://github.com/bw3m1/html_ide.git"
-TARGET_DIR = "html_ide"
-BACKUP_DIR = "!!BKUP"
+
+# === PATHS ===
+UPDATER_PY_DIR = os.path.dirname(os.path.abspath(__file__))      # html_IDE/updater/updater.py
+BASE_DIR = os.path.abspath(os.path.join(UPDATER_PY_DIR, "..//.."))   # html_IDE
+
+# the "=== PATHS ===" section did something wrong
+
+TARGET_DIR = os.path.join(BASE_DIR, "html_ide")   # repo will be cloned here
+BACKUP_DIR = os.path.join(BASE_DIR, "!!BKUP")     # backup destination
 
 # === INSTALL PYGAME IF NEEDED ===
 try:
     import pygame
+    excepted_pygame = False
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "pygame"])
     import pygame
+    excepted_pygame = True
 
 # === INIT PYGAME ===
 pygame.init()
-screen = pygame.display.set_mode((600, 300))
-pygame.display.set_caption("App Updater")
-font = pygame.font.SysFont("consolas", 22)
+screen = pygame.display.set_mode((700, 400))
+pygame.display.set_caption("HTML IDE Updater")
+font = pygame.font.SysFont("monospace", 24) or pygame.font.SysFont("Arial", 24)
 clock = pygame.time.Clock()
 
-# === DRAW STATUS WITH PROGRESS BAR ===
-def draw_status(message, progress=0.0):
-    screen.fill((25, 25, 25))
+# === COLORS ===
+BG_COLOR = (20, 20, 30)
+TEXT_COLOR = (240, 240, 240)
+BAR_BG = (50, 50, 70)
+BAR_FILL = (0, 180, 90)
+BAR_BORDER = (100, 100, 130)
 
-    # Text
-    text = font.render(message, True, (255, 255, 255))
-    text_rect = text.get_rect(center=(300, 120))
-    screen.blit(text, text_rect)
+# === DRAW UI ===
+def draw_status(message, progress=0.0, animate_dots=False):
+    screen.fill(BG_COLOR)
 
-    # Progress bar
-    bar_x, bar_y, bar_w, bar_h = 100, 170, 400, 25
-    pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_w, bar_h), border_radius=5)
-    pygame.draw.rect(screen, (100, 200, 100), (bar_x, bar_y, int(bar_w * progress), bar_h), border_radius=5)
+    # Title
+    title_text = font.render("Updating HTML IDE...", True, TEXT_COLOR)
+    screen.blit(title_text, title_text.get_rect(center=(350, 80)))
+
+    # Subtitle
+    dots = "." * ((pygame.time.get_ticks() // 500) % 4) if animate_dots else ""
+    status_text = font.render(f"{message}{dots}", True, TEXT_COLOR)
+    screen.blit(status_text, status_text.get_rect(center=(350, 140)))
+
+    # Progress Bar
+    bar_rect = pygame.Rect(150, 200, 400, 30)
+    pygame.draw.rect(screen, BAR_BG, bar_rect, border_radius=10)
+    pygame.draw.rect(screen, BAR_FILL, (150, 200, int(400 * progress), 30), border_radius=10)
+    pygame.draw.rect(screen, BAR_BORDER, bar_rect, 2, border_radius=10)
 
     pygame.display.flip()
 
-# === RUN SHELL COMMANDS ===
+# === SHELL COMMANDS ===
 def run_command(command, message, stage_progress):
-    draw_status(message, stage_progress)
+    draw_status(message, stage_progress, animate_dots=True)
     try:
         subprocess.check_call(command, shell=True)
         return True
@@ -51,40 +72,45 @@ def run_command(command, message, stage_progress):
         time.sleep(2)
         return False
 
-# === SMOOTH STEP HELPER ===
-def wait_with_progress(duration, message, start_p, end_p):
+# === PROGRESS ANIMATION ===
+def wait_progress(duration, message, start_p, end_p):
     start_time = time.time()
     while time.time() - start_time < duration:
         t = (time.time() - start_time) / duration
         progress = start_p + (end_p - start_p) * t
-        draw_status(message, progress)
+        draw_status(message, progress, animate_dots=True)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
         clock.tick(60)
 
 # === MAIN UPDATE LOGIC ===
 def update_app():
-    wait_with_progress(0.5, "Preparing update...", 0.0, 0.1)
+    wait_progress(0.5, "Preparing update", 0.0, 0.1)
 
     if os.path.exists(BACKUP_DIR):
         shutil.rmtree(BACKUP_DIR)
+
     if os.path.exists(TARGET_DIR):
-        wait_with_progress(1.0, "Backing up...", 0.1, 0.3)
+        wait_progress(1.0, "Backing up current version", 0.1, 0.3)
         shutil.move(TARGET_DIR, BACKUP_DIR)
     else:
-        wait_with_progress(1.0, "No existing folder. Skipping backup.", 0.1, 0.3)
+        wait_progress(0.6, "No previous install found", 0.1, 0.3)
 
-    draw_status("Cloning from GitHub...", 0.4)
-    success = run_command(f"git clone {GITHUB_REPO} {TARGET_DIR}", "Cloning repository...", 0.6)
+    draw_status("Cloning repository", 0.4, animate_dots=True)
+    success = run_command(f"git clone {GITHUB_REPO} \"{TARGET_DIR}\"", "Cloning repository", 0.6)
 
     if success:
-        wait_with_progress(1.0, "Finalizing update...", 0.8, 1.0)
+        wait_progress(0.8, "Finalizing update", 0.7, 1.0)
         draw_status("✅ Update complete!", 1.0)
     else:
-        wait_with_progress(0.5, "Failed. Restoring backup...", 0.6, 0.8)
+        wait_progress(0.5, "Clone failed, restoring backup", 0.6, 0.8)
         if os.path.exists(BACKUP_DIR):
             shutil.move(BACKUP_DIR, TARGET_DIR)
-            draw_status("🔁 Backup restored.", 0.9)
+            draw_status("🔁 Backup restored", 0.9)
         else:
-            draw_status("❌ No backup found.", 0.9)
+            draw_status("❌ No backup to restore", 0.9)
     time.sleep(2)
 
 # === MAIN LOOP ===
