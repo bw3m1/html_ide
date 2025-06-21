@@ -39,7 +39,8 @@ A lightweight, in-browser HTML editor and live previewer. This project provides 
 
 notes:
 <ul>
-  once you extract all you can now delete the ZIP or keep it as a back up of some sort
+  once you extract all you can now delete the ZIP or keep it as a back up of some sort<br>
+  use the updater.py for updating, if you don't have python installed please install it.
 </ul>
 
 ## Screenshots
