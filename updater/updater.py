@@ -9,10 +9,8 @@ import pygame
 GITHUB_REPO = "https://github.com/bw3m1/html_ide.git"
 
 # === PATHS ===
-UPDATER_PY_DIR = os.path.dirname(os.path.abspath(__file__))      # html_IDE/updater/updater.py
-BASE_DIR = os.path.abspath(os.path.join(UPDATER_PY_DIR, "..//.."))   # html_IDE
-
-# the "=== PATHS ===" section did something wrong
+UPDATER_DIR = os.path.dirname(os.path.abspath(__file__))      # html_IDE/updater
+BASE_DIR = os.path.abspath(os.path.join(UPDATER_DIR, ".."))   # html_IDE
 
 TARGET_DIR = os.path.join(BASE_DIR, "html_ide")   # repo will be cloned here
 BACKUP_DIR = os.path.join(BASE_DIR, "!!BKUP")     # backup destination
@@ -20,17 +18,15 @@ BACKUP_DIR = os.path.join(BASE_DIR, "!!BKUP")     # backup destination
 # === INSTALL PYGAME IF NEEDED ===
 try:
     import pygame
-    excepted_pygame = False
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "pygame"])
     import pygame
-    excepted_pygame = True
 
 # === INIT PYGAME ===
 pygame.init()
 screen = pygame.display.set_mode((700, 400))
-pygame.display.set_caption("HTML IDE Updater")
-font = pygame.font.SysFont("monospace", 24) or pygame.font.SysFont("Arial", 24)
+pygame.display.set_caption("📦 HTML IDE Updater")
+font = pygame.font.SysFont("consolas", 24) or pygame.font.SysFont("Arial", 24)
 clock = pygame.time.Clock()
 
 # === COLORS ===
