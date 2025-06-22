@@ -4,6 +4,7 @@
     "blit",
     "creationflags",
     "getpid",
+    "Pyodide",
     "startfile",
     "tasklist"
   ]
