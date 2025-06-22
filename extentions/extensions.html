@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extensions</title>
+    <title>Extensions - HTML Editor</title>
     <link rel="icon" type="image/png" href="icons/html_editor_icon.png">
     <link rel="stylesheet" href="./extentions.css">
   </head>
@@ -14,18 +14,36 @@
 
         <h1>
           Extensions
+          <div class="subtitle">Enhance your editor with powerful tools</div>
         </h1>
 
-        <div class="feature-card">
-          <h2>
-            <div style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px; display: inline;">
-              <img src="./icons/python_extension_icon.svg" alt="Python Icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px; display: inline;">
+        <div class="extensions-grid">
+          <div class="feature-card">
+            <div class="feature-header">
+              <div class="feature-icon">
+                <img src="./icons/python_extension_icon.svg" alt="Python Icon">
+              </div>
+              <h2>Python</h2>
+              <span class="status-badge in-dev">In Development</span>
             </div>
-            Python
-          </h2>
-          <p>Still in development, and will use pyodide.</p>
-          <a href="./python_extention_deatils/python.html" class="feature-link">View Details</a>
-        </div>
+            <p class="feature-summary">Run Python code directly in your browser using Pyodide with full library support.</p>
+            
+            <div class="feature-highlights">
+              <h3>Key Features:</h3>
+              <ul>
+                <li>Execute Python 3.11 in the browser</li>
+                <li>Access to libraries (NumPy, Pandas, Matplotlib)</li>
+                <li>Interactive Python console</li>
+                <li>Code completion and linting</li>
+                <li>Virtual filesystem support</li>
+              </ul>
+            </div>
+            
+            <div class="feature-actions">
+              <a href="./python_extention_deatils/python.html" class="feature-link">View Details</a>
+              <span class="version">v0.0.3</span>
+            </div>
+          </div>
 
       </div>
     </div>
