@@ -2133,8 +2133,8 @@ ${tab.name}
           updateStatus("Opening IDE documentation");
           break;
         case 'extensions':
-          window.open('extensions.html', '_blank');
-          updateStatus("Opened Extensions Loader");
+          window.open('./extentions/extensions.html', '_blank');
+          updateStatus("Opened Extensions Manager");
           break;
         case 'shortcuts-win':
           window.open('shortcuts/windows.html', '_blank');
