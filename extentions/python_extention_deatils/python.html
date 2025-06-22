@@ -44,36 +44,13 @@
           </ul>
         </div>
 
-        <h2>Try It Out</h2>
-        <div class="python-demo">
-          <div class="code-sample">
-            <div class="code-header">
-              <h3>Example: Data Visualization</h3>
-              <button class="run-button">Run Code</button>
-            </div>
-          </div>
-        </div>
+        <h2>
+          <a href="../../PyScript/index.html" target="_blank">
+            Try It Out
+          </a>
+        </h2>
+      </div>
 
     <script src="../extentions.js"></script>
-    <script>
-      // Demo functionality
-      document.querySelector('.run-button').addEventListener('click', function() {
-        const output = document.querySelector('.output-container');
-        output.textContent = "Running Python code...";
-        
-        // Simulate execution delay
-        setTimeout(() => {
-          output.innerHTML = `✅ Execution successful\n📊 Plot displayed in new tab`;
-        }, 1500);
-      });
-      
-      // Disabled links
-      document.querySelectorAll('.disabled').forEach(link => {
-        link.addEventListener('click', e => {
-          e.preventDefault();
-          alert('This feature is not available in the current version');
-        });
-      });
-    </script>
   </body>
 </html>
