@@ -3,6 +3,8 @@
     "appkit",
     "blit",
     "creationflags",
-    "startfile"
+    "getpid",
+    "startfile",
+    "tasklist"
   ]
 }

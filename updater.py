@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-"""
-HTML IDE Updater - Professional Edition
-
-Fixed and enhanced version with:
-- Proper macOS terminal hiding
-- Reliable pygame installation
-- Improved error handling
-- Fixed progress bar rendering
-- Enhanced repository cloning
-- Better cross-platform support
-"""
-
 import os
 import sys
 import subprocess
@@ -28,14 +15,12 @@ elif sys.platform == "darwin":
         app = NSApplication.sharedApplication()
         app.setActivationPolicy_(NSApplicationActivationPolicyProhibited)
     except ImportError:
-        
         # Install appkit automatically if missing
         install_flags = []
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", "appkit"],
             creationflags=(install_flags[0] if install_flags else 0)
         )
-        
         # Retry importing after installation
         from AppKit import NSApplication, NSApplicationActivationPolicyProhibited
         app = NSApplication.sharedApplication()
@@ -215,6 +200,54 @@ def robust_copy(source, destination):
             
     return False
 
+# === SELF-UPDATE HANDLER ===
+def update_self_if_needed(temp_clone, base_dir):
+    """Check if updater needs update and schedule replacement"""
+    new_updater_path = os.path.join(temp_clone, CURRENT_SCRIPT)
+    if not os.path.exists(new_updater_path):
+        return  # No update needed
+        
+    render_ui("Updating updater script", PROGRESS_STAGES["CLEANING_UP"])
+    
+    # Create helper script based on OS
+    if sys.platform == "win32":
+        helper = os.path.join(base_dir, "post_update.bat")
+        script = f"""@echo off
+:loop
+tasklist | find "{os.getpid()}" > nul
+if not errorlevel 1 (
+    timeout /t 1 /nobreak > nul
+    goto loop
+)
+move /Y "{base_dir}\\updater_new.py" "{base_dir}\\{CURRENT_SCRIPT}" > nul
+del "{helper}" > nul
+"""
+    else:  # macOS/Linux
+        helper = os.path.join(base_dir, "post_update.sh")
+        script = f"""#!/bin/bash
+while ps -p {os.getpid()} > /dev/null; do
+    sleep 1
+done
+mv -f "{base_dir}/updater_new.py" "{base_dir}/{CURRENT_SCRIPT}"
+rm -f "{helper}"
+"""
+    
+    # Write helper script
+    with open(helper, "w") as f:
+        f.write(script)
+    
+    # Make Unix script executable
+    if sys.platform != "win32":
+        os.chmod(helper, 0o755)
+    
+    # Copy new updater to temp name
+    temp_new = os.path.join(base_dir, "updater_new.py")
+    shutil.copy2(new_updater_path, temp_new)
+    
+    # Launch helper script
+    creation_flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+    subprocess.Popen(helper, shell=True, creationflags=creation_flags)
+
 # === UPDATE PROCEDURE ===
 def create_backup(base_dir, backup_dir):
     """Create backup of current installation"""
@@ -259,9 +292,6 @@ def sync_files(source_dir, target_dir):
                 
         # Remove obsolete files
         for item in os.listdir(target_dir):
-            if item == CURRENT_SCRIPT:  # Preserve updater
-                continue
-                
             source_path = os.path.join(source_dir, item)
             dest_path = os.path.join(target_dir, item)
             
@@ -324,6 +354,9 @@ def perform_update():
             
         if not sync_files(temp_clone, base_dir):
             return
+        
+        # Check and update self after sync
+        update_self_if_needed(temp_clone, base_dir)
             
         success = True
         
