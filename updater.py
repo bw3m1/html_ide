@@ -87,8 +87,8 @@ def init_ui():
 
 # Create UI components
 SCREEN = init_ui()
-TITLE_FONT = pygame.font.SysFont("segoeui", 36, bold=True)
-STATUS_FONT = pygame.font.SysFont("segoeui", 24)
+TITLE_FONT = pygame.font.SysFont("-apple-system", 45)
+STATUS_FONT = pygame.font.SysFont("-apple-system", 25)
 CLOCK = pygame.time.Clock()
 
 # === COLOR SCHEME ===
