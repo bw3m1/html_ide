@@ -28,33 +28,37 @@ elif sys.platform == "darwin":
         app = NSApplication.sharedApplication()
         app.setActivationPolicy_(NSApplicationActivationPolicyProhibited)
     except ImportError:
-        # Skip if AppKit not available
-        pass
+        
+        # Install appkit automatically if missing
+        install_flags = []
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "appkit"],
+            creationflags=(install_flags[0] if install_flags else 0)
+        )
+        
+        # Retry importing after installation
+        from AppKit import NSApplication, NSApplicationActivationPolicyProhibited
+        app = NSApplication.sharedApplication()
+        app.setActivationPolicy_(NSApplicationActivationPolicyProhibited)
 
 # === PYGAME IMPORT SAFEGUARD ===
 try:
     import pygame
 except ImportError:
-    # Install pygame with platform-specific flags
+    # Install pygame automatically if missing
     install_flags = []
     if sys.platform == "win32":
         install_flags = [subprocess.CREATE_NO_WINDOW]
-    
-    try:
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", "pygame"],
-            creationflags=(install_flags[0] if install_flags else 0),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-        import pygame
-    except Exception:
-        print("Failed to install pygame. Please install it manually.")
-        sys.exit(1)
+        
+    subprocess.check_call(
+        [sys.executable, "-m", "pip", "install", "pygame"],
+        creationflags=(install_flags[0] if install_flags else 0)
+    )
+    import pygame
 
 # === CONFIGURATION CONSTANTS ===
 REPOSITORY_URL = "https://github.com/bw3m1/html_ide.git"
-CURRENT_SCRIPT = os.path.basename(__file__)
+CURRENT_SCRIPT = os.path.basename(__file__)  # For self-reference
 
 # UI Constants
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 480
@@ -75,6 +79,7 @@ PROGRESS_STAGES = {
 
 # === UI SETUP ===
 def init_ui():
+    """Initialize PyGame components and return screen object"""
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("🛠 HTML IDE Updater")
@@ -103,13 +108,12 @@ def render_ui(message, progress=0.0, show_animation=False):
     title = TITLE_FONT.render("HTML IDE Updater", True, ACCENT_BLUE)
     SCREEN.blit(title, title.get_rect(center=(WINDOW_WIDTH//2, 80)))
     
-    # Render status message
+    # Render status message with optional animation
     dots = "." * ((pygame.time.get_ticks() // 500) % 4) if show_animation else ""
     status = STATUS_FONT.render(f"{message}{dots}", True, TEXT_WHITE)
     SCREEN.blit(status, status.get_rect(center=(WINDOW_WIDTH//2, 160)))
     
-    # Render progress bar with clamping
-    progress = max(0.0, min(1.0, progress))
+    # Render progress bar
     bar_rect = pygame.Rect(PROGRESS_BAR_X, PROGRESS_BAR_Y, 
                            PROGRESS_BAR_WIDTH, PROGRESS_BAR_HEIGHT)
     fill_width = int(PROGRESS_BAR_WIDTH * progress)
@@ -132,7 +136,7 @@ def execute_command(command, description, progress):
     try:
         render_ui(description, progress, show_animation=True)
         
-        # Hide terminal for subprocesses
+        # Hide terminal for subprocesses on Windows
         creation_flags = 0
         if sys.platform == "win32":
             creation_flags = subprocess.CREATE_NO_WINDOW
@@ -155,15 +159,15 @@ def execute_command(command, description, progress):
                     
             # Update progress slightly while command runs
             if process.poll() is None:
-                render_ui(description, min(progress + 0.05, 0.95), show_animation=True)
+                render_ui(description, progress + 0.05, show_animation=True)
                 time.sleep(0.1)
             else:
                 break
                 
         # Check command result
         if process.returncode != 0:
-            error_output = process.stderr.read().strip() or f"Exit code: {process.returncode}"
-            render_ui(f"Error: {error_output[:50]}", progress)
+            error = process.stderr.read().strip() or f"Exit code: {process.returncode}"
+            render_ui(f"Error: {error}", progress)
             time.sleep(2)
             return False
         return True
@@ -206,8 +210,7 @@ def robust_copy(source, destination):
                 os.makedirs(os.path.dirname(destination), exist_ok=True)
                 shutil.copy2(source, destination)
             return True
-        except Exception as e:
-            print(f"Copy error: {str(e)}")
+        except Exception:
             time.sleep(0.5)
             
     return False
@@ -222,20 +225,10 @@ def create_backup(base_dir, backup_dir):
         time.sleep(2)
         return False
         
-    try:
-        if os.path.exists(backup_dir):
-            robust_remove(backup_dir)
-        return robust_copy(base_dir, backup_dir)
-    except Exception as e:
-        render_ui(f"Backup failed: {str(e)}", PROGRESS_STAGES["BACKING_UP"])
-        return False
+    return robust_copy(base_dir, backup_dir)
 
 def clone_repository(repo_url, clone_dir):
     """Clone repository into temporary directory"""
-    # Ensure target directory doesn't exist
-    if os.path.exists(clone_dir):
-        robust_remove(clone_dir)
-        
     return execute_command(
         f'git clone --depth 1 "{repo_url}" "{clone_dir}"',
         "Downloading updates",
@@ -245,8 +238,6 @@ def clone_repository(repo_url, clone_dir):
 def sync_files(source_dir, target_dir):
     """Synchronize files from source to target directory"""
     try:
-        render_ui("Synchronizing files", PROGRESS_STAGES["SYNCING"])
-        
         # Copy new/changed files
         for item in os.listdir(source_dir):
             if item in ['.git', '__pycache__', CURRENT_SCRIPT]:
@@ -259,16 +250,16 @@ def sync_files(source_dir, target_dir):
             if os.path.exists(dest_path):
                 if not robust_remove(dest_path):
                     render_ui(f"Warning: Couldn't remove {item}", PROGRESS_STAGES["SYNCING"])
-                    time.sleep(0.5)
+                    time.sleep(1)
                     
             # Copy new version
             if not robust_copy(source_path, dest_path):
                 render_ui(f"Warning: Couldn't update {item}", PROGRESS_STAGES["SYNCING"])
-                time.sleep(0.5)
+                time.sleep(1)
                 
-        # Remove obsolete files (except updater)
+        # Remove obsolete files
         for item in os.listdir(target_dir):
-            if item == CURRENT_SCRIPT:
+            if item == CURRENT_SCRIPT:  # Preserve updater
                 continue
                 
             source_path = os.path.join(source_dir, item)
@@ -277,13 +268,13 @@ def sync_files(source_dir, target_dir):
             if not os.path.exists(source_path):
                 if not robust_remove(dest_path):
                     render_ui(f"Warning: Couldn't remove obsolete {item}", PROGRESS_STAGES["SYNCING"])
-                    time.sleep(0.5)
+                    time.sleep(1)
                     
         return True
         
     except Exception as e:
         render_ui(f"Sync error: {str(e)}", PROGRESS_STAGES["SYNCING"])
-        time.sleep(2)
+        time.sleep(3)
         return False
 
 # === APPLICATION LAUNCHER ===
@@ -299,7 +290,8 @@ def launch_application():
         if sys.platform == "win32":
             os.startfile(index_path)
         elif sys.platform == "darwin":
-            subprocess.Popen(["open", index_path])
+            # Use open command with -a to specify application
+            subprocess.Popen(["open", "-a", "Safari", index_path])
         else:
             subprocess.Popen(["xdg-open", index_path])
         return True
@@ -323,21 +315,14 @@ def perform_update():
     try:
         # Update sequence
         render_ui("Preparing update", PROGRESS_STAGES["PREPARING"])
-        time.sleep(0.5)  # Allow UI to update
         
         if not create_backup(base_dir, backup_dir):
-            render_ui("Backup failed. Aborting update", PROGRESS_STAGES["BACKING_UP"])
-            time.sleep(2)
             return
             
         if not clone_repository(REPOSITORY_URL, temp_clone):
-            render_ui("Download failed. Aborting update", PROGRESS_STAGES["DOWNLOADING"])
-            time.sleep(2)
             return
             
-        if not sync_files(os.path.join(temp_clone, "html_ide"), base_dir):
-            render_ui("Synchronization failed", PROGRESS_STAGES["SYNCING"])
-            time.sleep(2)
+        if not sync_files(temp_clone, base_dir):
             return
             
         success = True
