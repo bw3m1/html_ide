@@ -1014,7 +1014,8 @@ ${tab.name}
       }
 
       const isJsFile = currentTab.name.endsWith('.js');
-      const isOtherFormat = !isJsFile && !currentTab.name.endsWith('.html');
+      const isPythonFile = currentTab.name.endsWith('.py');
+      const isOtherFormat = !isJsFile && !isPythonFile && !currentTab.name.endsWith('.html');
 
       if (isJsFile) {
         // Create a container for JS output
@@ -1068,6 +1069,8 @@ ${tab.name}
         console.log = originalConsoleLog;
 
         updateStatus("JavaScript executed");
+      } else if (isPythonFile) {
+        // Handle Python file preview // !!
       } else if (isOtherFormat) {
         // Handle other file formats
         const otherOutputContainer = document.createElement('div');
@@ -2131,10 +2134,6 @@ ${tab.name}
           const docUrl = new URL('documentation/IDE_documentation.html', window.location.href).href;
           window.open(docUrl, '_blank');
           updateStatus("Opening IDE documentation");
-          break;
-        case 'extensions':
-          window.open('./extentions/extensions.html', '_blank');
-          updateStatus("Opened Extensions Manager");
           break;
         case 'shortcuts-win':
           window.open('shortcuts/windows.html', '_blank');

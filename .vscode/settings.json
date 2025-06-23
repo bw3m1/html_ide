@@ -4,8 +4,6 @@
     "blit",
     "creationflags",
     "getpid",
-    "Matplotlib",
-    "Pygame",
     "Pyodide",
     "startfile",
     "tasklist"
