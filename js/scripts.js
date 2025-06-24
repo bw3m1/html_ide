@@ -867,7 +867,7 @@ ${tab.name}
       if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
         // Switch to preview-only layout for images
         setLayout('output-only');
-        
+
         // Create image preview container
         const imgContainer = document.createElement('div');
         imgContainer.style.width = '100%';
@@ -915,7 +915,7 @@ ${tab.name}
         updateStatus("Image preview");
         return;
       }
-      
+
       // SVG file handling
       if (fileName.endsWith('.svg')) {
         // Create container for SVG preview
@@ -1768,60 +1768,90 @@ ${tab.name}
   }
 
   // Theme switching
-  function setTheme(theme) {
-    // Remove all theme classes first
-    document.body.classList.remove('light-theme', 'contrast-dark-theme', 'contrast-light-theme');
+function setTheme(theme) {
+  // Remove all theme classes first
+  document.body.classList.remove(
+    'light-theme',
+    'contrast-dark-theme',
+    'contrast-light-theme',
+    'main-dark-theme',
+    'main-light-theme',
+    'main-high-contrast-dark-theme',
+    'main-high-contrast-light-theme',
+    'github-theme',
+    'one-dark-pro-theme',
+    'dracula-theme',
+    'winter-is-coming-theme',
+    'fe-github-theme',
+    'fe-one-dark-pro-theme',
+    'fe-dracula-theme',
+    'fe-winter-is-coming-theme'
+  );
 
-    // Apply selected theme
-    if (theme === 'light') {
-        document.body.classList.add('light-theme');
-        monaco.editor.setTheme('vs');
-    }
-    else if (theme === 'contrast-dark') {
-        document.body.classList.add('contrast-dark-theme');
-        monaco.editor.setTheme('hc-black');
-    }
-    else if (theme === 'contrast-light') {
-        document.body.classList.add('contrast-light-theme');
-        monaco.editor.setTheme('hc-light');
-    }
-    else if (theme === 'automatic') {
-        // Detect system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
-            monaco.editor.setTheme('vs-dark');
-            document.body.classList.remove('light-theme');
-            document.body.classList.remove('contrast-light-theme');
-            document.body.classList.remove('contrast-dark-theme');
-        } else {
-            monaco.editor.setTheme('vs');
-            document.body.classList.add('light-theme');
-            document.body.classList.remove('contrast-light-theme');
-            document.body.classList.remove('contrast-dark-theme');
-        }
-        // Listen for changes in system theme
-        if (!setTheme._autoListener) {
-            setTheme._autoListener = () => setTheme('automatic');
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
-        }
-    }
-    else {
-        // Default dark theme
+  // Apply selected theme
+  switch (theme) {
+    case 'light':
+      document.body.classList.add('light-theme', 'main-light-theme');
+      monaco.editor.setTheme('vs');
+      break;
+    case 'contrast-dark':
+      document.body.classList.add('contrast-dark-theme', 'main-high-contrast-dark-theme');
+      monaco.editor.setTheme('hc-black');
+      break;
+    case 'contrast-light':
+      document.body.classList.add('contrast-light-theme', 'main-high-contrast-light-theme');
+      monaco.editor.setTheme('hc-light');
+      break;
+    case 'github':
+      document.body.classList.add('github-theme', 'fe-github-theme');
+      monaco.editor.setTheme('github'); // GitHub
+      break;
+    case 'one-dark-pro':
+      document.body.classList.add('one-dark-pro-theme', 'fe-one-dark-pro-theme');
+      monaco.editor.setTheme('one-dark-pro'); // One Dark Pro
+      break;
+    case 'dracula':
+      document.body.classList.add('dracula-theme', 'fe-dracula-theme');
+      monaco.editor.setTheme('dracula'); // Dracula
+      break;
+    case 'winter-is-coming':
+      document.body.classList.add('winter-is-coming-theme', 'fe-winter-is-coming-theme');
+      monaco.editor.setTheme('winter-is-coming'); // Winter is Coming
+      break;
+    case 'automatic':
+      // Detect system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.body.classList.add('main-dark-theme');
         monaco.editor.setTheme('vs-dark');
-    }
-
-    // Notify File Explorer iframe about theme change
-    const fileExplorer = document.querySelector('#file-explorer iframe');
-    if (fileExplorer && fileExplorer.contentWindow) {
-        fileExplorer.contentWindow.postMessage({
-            type: 'themeChange',
-            theme: theme
-        }, '*');
-    }
-
-    localStorage.setItem('editorTheme', theme);
-    updateStatus(`Theme set to ${theme}`);
+      } else {
+        document.body.classList.add('main-light-theme');
+        monaco.editor.setTheme('vs');
+      }
+      // Listen for changes in system theme
+      if (!setTheme._autoListener) {
+        setTheme._autoListener = () => setTheme('automatic');
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
+      }
+      break;
+    default:
+      // Default dark theme
+      document.body.classList.add('main-dark-theme');
+      monaco.editor.setTheme('vs-dark');
   }
+
+  // Notify File Explorer iframe about theme change
+  const fileExplorer = document.querySelector('#file-explorer iframe');
+  if (fileExplorer && fileExplorer.contentWindow) {
+    fileExplorer.contentWindow.postMessage({
+      type: 'themeChange',
+      theme: theme
+    }, '*');
+  }
+
+  localStorage.setItem('editorTheme', theme);
+  updateStatus(`Theme set to ${theme}`);
+}
 
   // Run code
   function runCode(newTab) {
@@ -1997,29 +2027,29 @@ ${tab.name}
     }
   }
 
-    async function setFormatCustom() {
-      const currentTab = getCurrentTab();
-      const type = await showAlert('Enter the custom format you want to use:', 'QUERY', 'Custom Format', 'QUERY');
-      if (type) {
-        const fileName = currentTab.name;
-        const dotIndex = fileName.lastIndexOf('.');
-        const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
-        currentTab.name = `${name}.${type}`;
-        currentTab.type = type.toLowerCase();
-        renderTabs();
-        updateStatus(`Reformatted to ${type}`);
-        saveTabsToStorage();
-        refreshExploreFileList();
-        
-        // Register the custom language if not already registered
-        if (!monaco.languages.getLanguages().find(lang => lang.id === type.toLowerCase())) {
-          monaco.languages.register({ id: type.toLowerCase() });
-        }
-        
-        // Set editor language mode
-        monaco.editor.setModelLanguage(editor.getModel(), type.toLowerCase());
+  async function setFormatCustom() {
+    const currentTab = getCurrentTab();
+    const type = await showAlert('Enter the custom format you want to use:', 'QUERY', 'Custom Format', 'QUERY');
+    if (type) {
+      const fileName = currentTab.name;
+      const dotIndex = fileName.lastIndexOf('.');
+      const name = dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
+      currentTab.name = `${name}.${type}`;
+      currentTab.type = type.toLowerCase();
+      renderTabs();
+      updateStatus(`Reformatted to ${type}`);
+      saveTabsToStorage();
+      refreshExploreFileList();
+
+      // Register the custom language if not already registered
+      if (!monaco.languages.getLanguages().find(lang => lang.id === type.toLowerCase())) {
+        monaco.languages.register({ id: type.toLowerCase() });
       }
+
+      // Set editor language mode
+      monaco.editor.setModelLanguage(editor.getModel(), type.toLowerCase());
     }
+  }
 
   // Menu actions
   async function handleMenuAction(action, data) {
@@ -2077,6 +2107,10 @@ ${tab.name}
         case 'layout-output-only': setLayout('output-only'); break;
         case 'theme-dark': setTheme('dark'); break;
         case 'theme-light': setTheme('light'); break;
+        case 'theme-github': setTheme('github'); break;
+        case 'theme-one-dark-pro': setTheme('one-dark-pro'); break;
+        case 'theme-dracula': setTheme('dracula'); break;
+        case 'theme-winter-is-coming': setTheme('winter-is-coming'); break;
         case 'theme-auto': setTheme('automatic'); break;
         case 'theme-contrast-dark': setTheme('contrast-dark'); break;
         case 'theme-contrast-light': setTheme('contrast-light'); break;
@@ -2448,8 +2482,8 @@ ${tab.name}
     });
 
     updatePreview();
-    refreshExploreFileList();
     setTheme(localStorage.getItem('editorTheme') || 'automatic');
+    refreshExploreFileList();
     setLayout("editor-only");
     toggleFileExplorer(); toggleFileExplorer();
     updateStatus("IDE Setup Ready");

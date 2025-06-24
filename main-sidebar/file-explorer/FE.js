@@ -622,50 +622,57 @@ function deleteFileOrFolder(item, items) {
 window.addEventListener('message', (event) => {
   if (event.data.type === 'themeChange') {
     // Remove existing theme classes
-    document.body.classList.remove('light-theme', 'contrast-dark-theme', 'contrast-light-theme');
+    document.body.classList.remove(
+      'light-theme',
+      'contrast-dark-theme',
+      'contrast-light-theme',
+      'fe-dark-theme',
+      'fe-light-theme',
+      'fe-contrast-dark-theme',
+      'fe-contrast-light-theme',
+      'fe-github-theme',
+      'fe-one-dark-pro-theme',
+      'fe-dracula-theme',
+      'fe-winter-is-coming-theme'
+    );
 
     // Apply new theme
     switch (event.data.theme) {
       case 'light':
-        document.body.classList.add('light-theme');
+        document.body.classList.add('light-theme', 'fe-light-theme');
         break;
       case 'contrast-dark':
-        document.body.classList.add('contrast-dark-theme');
+        document.body.classList.add('contrast-dark-theme', 'fe-contrast-dark-theme');
         break;
       case 'contrast-light':
-        document.body.classList.add('contrast-light-theme');
+        document.body.classList.add('contrast-light-theme', 'fe-contrast-light-theme');
+        break;
+      case 'github':
+        document.body.classList.add('fe-github-theme');
+        break;
+      case 'one-dark-pro':
+        document.body.classList.add('fe-one-dark-pro-theme');
+        break;
+      case 'dracula':
+        document.body.classList.add('fe-dracula-theme');
+        break;
+      case 'winter-is-coming':
+        document.body.classList.add('fe-winter-is-coming-theme');
         break;
       case 'automatic':
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (prefersDark) {
-          // Default dark theme
+          document.body.classList.add('fe-dark-theme');
         } else {
-          document.body.classList.add('light-theme');
+          document.body.classList.add('fe-light-theme');
         }
         break;
+      default:
+        document.body.classList.add('fe-dark-theme');
     }
 
     // Re-render to update icons with new theme
     renderFileExplorer();
-  }
-  else if (event.data.type === 'updateFileExplorer') {
-    if (event.data.files) {
-      fileSystem = event.data.files;
-      localStorage.setItem('projectFiles', JSON.stringify(fileSystem));
-    }
-    if (event.data.tabs) {
-      tabs = event.data.tabs;
-      localStorage.setItem('editorTabs', JSON.stringify(tabs));
-    }
-    renderFileExplorer();
-  }
-  else if (event.data.type === 'fileExplorerTabSwitch') {
-    const { tabId } = event.data;
-    switchToTab(tabId);
-  }
-  else if (event.data.type === 'fileExplorerFileOpen') {
-    const { fileName, filePath } = event.data;
-    openFileFromExplorer(filePath);
   }
 });
 

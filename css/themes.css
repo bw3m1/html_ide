@@ -54,11 +54,11 @@
   /* file explorer themes */
 
     .fe-dark-theme {
-      --background: #1e1e1e;
+      --background: #181818;
       --foreground: #d4d4d4;
       --icon-foreground: #c5c5c5;
       --menu-border: #3c3c3c;
-      --explorer-header-background: #252526;
+      --explorer-header-background: #181818;
       --list-open-active: #094771;
       --list-open-active-bullet: #0078d4;
       --list-hoverBackground: #2a2d2e;
@@ -101,13 +101,97 @@
 /* custom themes */
 
   /* GitHub Theme */
-    /* not implemented yet */
+  .github-theme-dark {
+    --bg-dark: #0d1117;
+    --text-dark: #c9d1d9;
+    --menu-bg-dark: #161b22;
+    --hover-dark: #21262d;
+    --outline-dark: #30363d;
+    --accent-color: #58a6ff;
+    --error-red: #f85149;
+    --success-green: #56d364;
+    --menu-text-hover: #8b949e;
+  }
+
+  .fe-github-theme-dark {
+    --background: #0d1117;
+    --foreground: #c9d1d9;
+    --icon-foreground: #586069;
+    --menu-border: #30363d;
+    --explorer-header-background: #161b22;
+    --list-open-active: #21262d;
+    --list-open-active-bullet: #58a6ff;
+    --list-hoverBackground: #21262d;
+  }
 
   /* One Dark Pro */
-    /* not implemented yet */
+  .one-dark-pro-theme {
+    --bg-dark: #282c34;
+    --text-dark: #abb2bf;
+    --menu-bg-dark: #21252b;
+    --hover-dark: #2c313a;
+    --outline-dark: #181a1f;
+    --accent-color: #61afef;
+    --error-red: #e06c75;
+    --success-green: #98c379;
+    --menu-text-hover: #d7dae0;
+  }
+
+  .fe-one-dark-pro-theme {
+    --background: #21252b;
+    --foreground: #abb2bf;
+    --icon-foreground: #5c6370;
+    --menu-border: #181a1f;
+    --explorer-header-background: #21252b;
+    --list-open-active: #2c313a;
+    --list-open-active-bullet: #61afef;
+    --list-hoverBackground: #2c313a;
+  }
 
   /* Dracula Theme */
-    /* not implemented yet */
+  .dracula-theme {
+    --bg-dark: #282a36;
+    --text-dark: #f8f8f2;
+    --menu-bg-dark: #191a21;
+    --hover-dark: #343746;
+    --outline-dark: #21222c;
+    --accent-color: #bd93f9;
+    --error-red: #ff5555;
+    --success-green: #50fa7b;
+    --menu-text-hover: #6272a4;
+  }
 
-  /* Winter is coming */
-    /* not implemented yet */
+  .fe-dracula-theme {
+    --background: #191a21;
+    --foreground: #f8f8f2;
+    --icon-foreground: #6272a4;
+    --menu-border: #21222c;
+    --explorer-header-background: #191a21;
+    --list-open-active: #343746;
+    --list-open-active-bullet: #bd93f9;
+    --list-hoverBackground: #343746;
+  }
+
+  /* Winter is Coming */
+  .winter-is-coming-theme {
+    --bg-dark: #011627;
+    --text-dark: #d6deeb;
+    --menu-bg-dark: #01111d;
+    --hover-dark: #1d3b53;
+    --outline-dark: #0b2942;
+    --accent-color: #7fdbca;
+    --error-red: #ff5874;
+    --success-green: #addb67;
+    --menu-text-hover: #5f7e97;
+  }
+
+  .fe-winter-is-coming-theme {
+    --background: #01111d;
+    --foreground: #d6deeb;
+    --icon-foreground: #5f7e97;
+    --menu-border: #0b2942;
+    --explorer-header-background: #01111d;
+    --list-open-active: #1d3b53;
+    --list-open-active-bullet: #7fdbca;
+    --list-hoverBackground: #1d3b53;
+  }
