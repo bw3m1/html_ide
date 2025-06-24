@@ -1,0 +1,98 @@
+/*
+    you can add your custom theme here
+    ( if you've been licensed by Bryson J. G. ( bw3m1 on github ) and are legally allowed to )
+*/
+
+  /* main section themes */
+
+    .main-dark-theme {
+      --bg-dark: #1e1e1e;
+      --text-dark: #d4d4d4;
+      --menu-bg-dark: #181818;
+      --hover-dark: #1e1e1e;
+      --outline-dark: #2b2b2b;
+      --accent-color: #007acc;
+      --error-red: #f44;
+      --success-green: #4f4;
+      --file-explorer-width: 280px;
+      --menu-text-hover: #4d4d4d;
+    }
+
+    .main-high-contrast-dark-theme {
+      --bg-dark: #000;
+      --text-dark: #fff;
+      --menu-bg-dark: #0c0c0c;
+      --hover-dark: #c15900;
+      --outline-dark: #333;
+      --accent-color: #007acc;
+      --error-red: #f22;
+      --success-green: #0f0;
+      --menu-text-hover: #007acc;
+    }
+
+    .main-light-theme {
+      --bg-dark: #fff;
+      --text-dark: #333;
+      --menu-bg-dark: #f0f0f0;
+      --hover-dark: #e0e0e0;
+      --outline-dark: #e0e0e0;
+      --menu-text-hover: #333;
+    }
+
+    .main-high-contrast-light-theme {
+      --bg-dark: #fff;
+      --text-dark: #000;
+      --menu-bg-dark: #f0f0f0;
+      --hover-dark: #007acc;
+      --outline-dark: #1e1e1e;
+      --accent-color: #007acc;
+      --error-red: #f22;
+      --success-green: #0f0;
+      --menu-text-hover: #000;
+    }
+  
+  /* file explorer themes */
+
+    .fe-dark-theme {
+      --background: #1e1e1e;
+      --foreground: #d4d4d4;
+      --icon-foreground: #c5c5c5;
+      --menu-border: #3c3c3c;
+      --explorer-header-background: #252526;
+      --list-open-active: #094771;
+      --list-open-active-bullet: #0078d4;
+      --list-hoverBackground: #2a2d2e;
+    }
+
+    .fe-light-theme {
+      --background: #f3f3f3;
+      --foreground: #333333;
+      --icon-foreground: #424242;
+      --menu-border: #e0e0e0;
+      --explorer-header-background: #f0f0f0;
+      --list-open-active: #0078d4;
+      --list-open-active-bullet: #80c8ff;
+      --list-hoverBackground: #e8e8e8;
+    }
+
+    .fe-contrast-dark-theme {
+      --background: #000000;
+      --foreground: #ffffff;
+      --icon-foreground: #ffffff;
+      --menu-border: #6b6b6b;
+      --explorer-header-background: #0c0c0c;
+      --list-open-active: #c15900;
+      --list-open-active-bullet: #ff8c00;
+      --list-hoverBackground: #333333;
+    }
+
+    .fe-contrast-light-theme {
+      --background: #ffffff;
+      --foreground: #000000;
+      --icon-foreground: #000000;
+      --menu-border: #000000;
+      --explorer-header-background: #f0f0f0;
+      --list-open-active: #007acc;
+      --list-open-active-bullet: #ffffff;
+      --list-hoverBackground: #d4d4d4;
+    }

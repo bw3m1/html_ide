@@ -1070,7 +1070,7 @@ ${tab.name}
 
         updateStatus("JavaScript executed");
       } else if (isPythonFile) {
-        // Handle Python file preview // !!
+        // Handle Python using Pyodide
       } else if (isOtherFormat) {
         // Handle other file formats
         const otherOutputContainer = document.createElement('div');
@@ -2159,12 +2159,7 @@ ${tab.name}
           window.open('https://devdocs.io/javascript/', '_blank');
           updateStatus("Opening documentation for JavaScript");
           break;
-        case 'file-2-html': setFileType('html'); detectLanguage(); break;
-        case 'file-2-css': setFileType('css'); detectLanguage(); break;
-        case 'file-2-js': setFileType('js'); detectLanguage(); break;
-        case 'file-2-txt': setFileType('txt'); detectLanguage(); break;
-        case 'file-2-json': setFileType('json'); detectLanguage(); break;
-        case 'file-2-custom': setFormatCustom(); detectLanguage(); break;
+        case 'reformat': setFormatCustom(); detectLanguage(); break;
         case 'about':
           showAlert(
             `html IDE<br><br>Version:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${VERSION}<br>Date of Publish:&nbsp;&nbsp;${DATE_MODIFIED}<br>Browsers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BROWSERS}<br><br>A feature-rich IDE for web development<br><br>Developed by Bryson J G.`,
