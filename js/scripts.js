@@ -1896,12 +1896,13 @@ function setTheme(theme) {
 
       if (isJS) {
         const theme = localStorage.getItem('editorTheme') || 'dark';
-        const colors = {
+        const colorThemes = {
           dark: { bg: '#111', text: '#eee', log: '#0f0', error: '#f55', accent: '#ffa500' },
           light: { bg: '#fff', text: '#111', log: '#080', error: '#c00', accent: '#d2691e' },
           'contrast-dark': { bg: '#000', text: '#fff', log: '#0ff', error: '#f00', accent: '#ff0' },
           'contrast-light': { bg: '#fff', text: '#000', log: '#00f', error: '#900', accent: '#a52a2a' }
-        }[theme] || colors.dark;
+        };
+        const colors = colorThemes[theme] || colorThemes.dark;
 
         const html = `
         <!DOCTYPE html>
