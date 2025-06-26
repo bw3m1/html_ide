@@ -1,33 +1,11 @@
 // File system data structure
 let fileSystem = JSON.parse(localStorage.getItem('projectFiles')) || [
-  {
-    name: "main",
-    type: "folder",
-    expanded: true,
-    children: [
-      { name: "index.html", type: "file" },
-      { name: "styles.css", type: "file" },
-      { name: "scripts.js", type: "file" },
-      {
-        name: "assets",
-        type: "folder",
-        expanded: false,
-        children: [
-          { name: "Button.jsx", type: "file" },
-          { name: "Card.jsx", type: "file" }
-        ]
-      }
-    ]
-  },
-  { name: "package.json", type: "file" },
-  { name: "README.md", type: "file" }
+  { name: "untitled.html", type: "file" }
 ];
 
 // Tabs state
 let tabs = JSON.parse(localStorage.getItem('editorTabs')) || [
-  { id: 'tab1', name: 'index.html', active: true },
-  { id: 'tab2', name: 'styles.css', active: false },
-  { id: 'tab3', name: 'scripts.js', active: false }
+  { id: 'tab1', name: 'untitled.html', active: true },
 ];
 
 // Current context menu state
@@ -301,18 +279,13 @@ function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  // Get initial theme from parent window if available
+  // Apply initial theme
   try {
     const parentTheme = window.parent.localStorage.getItem('editorTheme') || 'dark';
-    if (parentTheme === 'light') {
-      document.body.classList.add('light-theme');
-    } else if (parentTheme === 'contrast-dark') {
-      document.body.classList.add('contrast-dark-theme');
-    } else if (parentTheme === 'contrast-light') {
-      document.body.classList.add('contrast-light-theme');
-    }
+    applyTheme(parentTheme);
   } catch (e) {
     console.warn('Could not get initial theme from parent window');
+    applyTheme('dark'); // Fallback to dark theme
   }
 
   initContextMenu();
@@ -621,60 +594,65 @@ function deleteFileOrFolder(item, items) {
 // Listen for messages from parent window
 window.addEventListener('message', (event) => {
   if (event.data.type === 'themeChange') {
-    // Remove existing theme classes
-    document.body.classList.remove(
-      'light-theme',
-      'contrast-dark-theme',
-      'contrast-light-theme',
-      'fe-dark-theme',
-      'fe-light-theme',
-      'fe-contrast-dark-theme',
-      'fe-contrast-light-theme',
-      'fe-github-theme',
-      'fe-one-dark-pro-theme',
-      'fe-dracula-theme',
-      'fe-winter-is-coming-theme'
-    );
-
-    // Apply new theme
-    switch (event.data.theme) {
-      case 'light':
-        document.body.classList.add('light-theme', 'fe-light-theme');
-        break;
-      case 'contrast-dark':
-        document.body.classList.add('contrast-dark-theme', 'fe-contrast-dark-theme');
-        break;
-      case 'contrast-light':
-        document.body.classList.add('contrast-light-theme', 'fe-contrast-light-theme');
-        break;
-      case 'github':
-        document.body.classList.add('fe-github-theme');
-        break;
-      case 'one-dark-pro':
-        document.body.classList.add('fe-one-dark-pro-theme');
-        break;
-      case 'dracula':
-        document.body.classList.add('fe-dracula-theme');
-        break;
-      case 'winter-is-coming':
-        document.body.classList.add('fe-winter-is-coming-theme');
-        break;
-      case 'automatic':
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
-          document.body.classList.add('fe-dark-theme');
-        } else {
-          document.body.classList.add('fe-light-theme');
-        }
-        break;
-      default:
-        document.body.classList.add('fe-dark-theme');
-    }
-
-    // Re-render to update icons with new theme
-    renderFileExplorer();
+    applyTheme(event.data.theme);
   }
 });
+
+// Dedicated theme application function
+function applyTheme(theme) {
+  // Remove existing theme classes
+  document.body.classList.remove(
+    'light-theme',
+    'contrast-dark-theme',
+    'contrast-light-theme',
+    'fe-dark-theme',
+    'fe-light-theme',
+    'fe-contrast-dark-theme',
+    'fe-contrast-light-theme',
+    'fe-github-theme',
+    'fe-one-dark-pro-theme',
+    'fe-dracula-theme',
+    'fe-winter-is-coming-theme'
+  );
+
+  // Apply new theme
+  switch (theme) {
+    case 'light':
+      document.body.classList.add('light-theme', 'fe-light-theme');
+      break;
+    case 'contrast-dark':
+      document.body.classList.add('contrast-dark-theme', 'fe-contrast-dark-theme');
+      break;
+    case 'contrast-light':
+      document.body.classList.add('contrast-light-theme', 'fe-contrast-light-theme');
+      break;
+    case 'github':
+      document.body.classList.add('fe-github-theme');
+      break;
+    case 'one-dark-pro':
+      document.body.classList.add('fe-one-dark-pro-theme');
+      break;
+    case 'dracula':
+      document.body.classList.add('fe-dracula-theme');
+      break;
+    case 'winter-is-coming':
+      document.body.classList.add('fe-winter-is-coming-theme');
+      break;
+    case 'automatic':
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.body.classList.add('fe-dark-theme');
+      } else {
+        document.body.classList.add('fe-light-theme');
+      }
+      break;
+    default:
+      document.body.classList.add('fe-dark-theme');
+  }
+
+  // Re-render to update icons with new theme
+  renderFileExplorer();
+}
 
 let draggedItem = null;
 let draggedPath = null;

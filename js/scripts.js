@@ -27,9 +27,10 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODIFIED = "6 / 25 / 2025 at 6:46 PM MDT";
-VERSION = "0 . 4 . 5 Patch 1";
-BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More.";
+DATE_MODIFIED = "6 / 26 / 2025 at 10:22 AM MDT";
+VERSION = "0 . 4 . 5 Patch 2";
+// Supported browsers include Chromium-based browsers, Firefox, and Safari.
+BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Brave, And More.";
 
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
@@ -78,13 +79,14 @@ require.config({
     'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs',
     'vs/language/html': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/html',
     'vs/language/css': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/css',
-    'vs/language/typescript': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/typescript',
+    'vs/language/typescript': 'https://cdnjs.cloudflasupportre.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/typescript',
     'vs/language/json': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/json'
   }
 });
 
-// Initialize Monaco Editor with language support
+// Initialize Monaco Editor with language 
 require(['vs/editor/editor.main'], function () {
+
   // Register all supported languages
   monaco.languages.register({ id: 'html' });
   monaco.languages.register({ id: 'css' });
@@ -101,6 +103,8 @@ require(['vs/editor/editor.main'], function () {
   monaco.languages.register({ id: 'go' });
   monaco.languages.register({ id: 'jsx' });
   monaco.languages.register({ id: 'typescript' });
+
+  // should add monaco.theme.register( ... ); to register custom themes for CL and more user options
 
   // Create editor instance
 
@@ -172,7 +176,7 @@ require(['vs/editor/editor.main'], function () {
       header.className = 'alert-header';
 
       const iconElement = document.createElement('img');
-      iconElement.src = `icons/d/${icon.toLowerCase()}_icon.png`;
+      iconElement.src = `icons\\notification\\${icon.toLowerCase()}_icon.png`;
       iconElement.className = 'alert-icon';
       iconElement.alt = `${type} icon`;
 
@@ -2505,10 +2509,24 @@ function setTheme(theme) {
     });
 
     updatePreview();
-    setTheme(localStorage.getItem('editorTheme') || 'automatic');
+    toggleFileExplorer(); 
+    const theme = localStorage.getItem('editorTheme') || 'automatic';
+    setTheme(theme);
+    
+    // Force theme sync with file explorer after a short delay
+    setTimeout(() => {
+      const fileExplorer = document.querySelector('#file-explorer iframe');
+      if (fileExplorer && fileExplorer.contentWindow) {
+        fileExplorer.contentWindow.postMessage({
+          type: 'themeChange',
+          theme: theme
+        }, '*');
+      }
+    }, 500);
+    
     refreshExploreFileList();
     setLayout("editor-only");
-    toggleFileExplorer(); toggleFileExplorer();
+    toggleFileExplorer();
     updateStatus("IDE Setup Ready");
   }
 

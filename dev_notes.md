@@ -7,8 +7,6 @@
   <br>
   - should not be able to edit read only files
   - tab bar buttons
-  <br>
-  - function showAlert icon
 
 <!-- 
 
