@@ -1,10 +1,14 @@
 # by update 0.4.6 ...
 
 ## fix
-  - js run new tab error displays line misinformation
-  - tab close override issue
-  - should not be able to edit read only files
+  - js run in new tab
+  - js run in preview infinite loop issue
   - loading problem in run in new tab
+  <br>
+  - should not be able to edit read only files
+  - tab bar buttons
+  <br>
+  - function showAlert icon
 
 <!-- 
 
@@ -19,5 +23,6 @@
 -->
 
 ## remove
- - unused functions from scripts.js
- - unused async from scripts.js
+ - unused functions from <code>scripts.js</code>
+ - unused asyncs from <code>scripts.js</code>
+

@@ -27,9 +27,9 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODIFIED = "6 / 12 / 2025 at 9:12 PM MDT";
-VERSION = "0 . 4 . 5"
-BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More."
+DATE_MODIFIED = "6 / 25 / 2025 at 6:46 PM MDT";
+VERSION = "0 . 4 . 5 Patch 1";
+BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Samsung, Brave, And More.";
 
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
@@ -426,82 +426,105 @@ ${tab.name}
   }
 
   function closeTab(tabId = null) {
-    // If no tabId provided, try to close current tab
-    if (!tabId) {
-      const currentTab = getCurrentTab();
-      if (!currentTab) {
-        updateStatus("Error: No active tab to close", true);
-        return;
+      // If no tabId provided, try to close current tab
+      if (!tabId) {
+          const currentTab = getCurrentTab();
+          if (!currentTab) {
+              updateStatus("Error: No active tab to close", true);
+              return;
+          }
+          tabId = currentTab.id;
       }
-      tabId = currentTab.id;
-    }
 
-    // Validate tab exists
-    const tabIndex = state.tabs.findIndex(tab => tab.id === tabId);
-    if (tabIndex === -1) {
-      updateStatus(`Error: Tab ${tabId} not found`, true);
+      // Validate tab exists
+      const tabIndex = state.tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex === -1) {
+          updateStatus(`Error: Tab ${tabId} not found`, true);
 
-      // Auto-recovery: switch to first available tab or create new one
-      if (state.tabs.length > 0) {
-        switchToTab(state.tabs[0].id);
+          // Auto-recovery: switch to first available tab or create new one
+          if (state.tabs.length > 0) {
+              switchToTab(state.tabs[0].id);
+          } else {
+              addNewTab();
+          }
+          return;
+      }
+
+      const tabToClose = state.tabs[tabIndex];
+      const isActiveTab = tabToClose.active;
+
+      // Save content BEFORE removal if it's the active tab
+      if (isActiveTab) {
+          tabToClose.content = editor.getValue();
+      }
+
+      // Check for unsaved changes
+      const hasUnsavedChanges = isActiveTab && 
+          editor.getValue() !== tabToClose.content;
+
+      if (hasUnsavedChanges && !confirm('You have unsaved changes. Close tab anyway?')) {
+          return;
+      }
+
+      // Close the tab
+      state.tabs.splice(tabIndex, 1);
+
+      // Handle tab switching after closure
+      if (isActiveTab) {
+          if (state.tabs.length > 0) {
+              // Switch to nearest tab (next or previous)
+              const newIndex = Math.min(tabIndex, state.tabs.length - 1);
+              const newTab = state.tabs[newIndex];
+              
+              // Update state before switching
+              state.currentTabId = newTab.id;
+              newTab.active = true;
+              
+              // Set editor content directly without saving
+              editor.setValue(newTab.content);
+              
+              // Update language mode
+              const fileType = newTab.name.split('.').pop().toLowerCase();
+              const languageMap = {
+                  html: 'html',
+                  css: 'css',
+                  js: 'javascript',
+                  json: 'json',
+                  txt: 'plaintext'
+              };
+              monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType] || 'plaintext');
+          } else {
+              // Always add a new default tab if none remain
+              const newTab = getCurrentTab();
+              editor.setValue(newTab.content);
+          }
+      }
+
+      // Notify file explorer of tab changes
+      const fileExplorer = document.querySelector('#file-explorer iframe');
+      if (fileExplorer && fileExplorer.contentWindow) {
+          fileExplorer.contentWindow.postMessage({
+              type: 'updateFileExplorer',
+              tabs: state.tabs
+          }, '*');
+      }
+
+      // Update UI and state
+      renderTabs();
+      saveTabsToStorage();
+      state.unsavedChanges = false;
+      updateStatus(`Closed tab: ${tabToClose.name}`);
+      refreshExploreFileList();
+
+      // Ensure empty state if no tabs
+      const editorWrapper = document.querySelector('.editor-wrapper');
+      if (state.tabs.length === 0) {
+          editorWrapper.classList.add('empty');
+          // Always ensure at least one tab exists
+          getCurrentTab();
       } else {
-        addNewTab();
+          editorWrapper.classList.remove('empty');
       }
-      return;
-    }
-
-    // Check for unsaved changes
-    const tabToClose = state.tabs[tabIndex];
-    const isActiveTab = tabToClose.active;
-    const hasUnsavedChanges = isActiveTab &&
-      editor.getValue() !== tabToClose.content;
-
-    if (hasUnsavedChanges && !confirm('You have unsaved changes. Close tab anyway?')) {
-      return;
-    }
-
-    // Close the tab
-    state.tabs.splice(tabIndex, 1);
-
-    // Handle tab switching after closure
-    if (isActiveTab) {
-      if (state.tabs.length > 0) {
-        // Switch to nearest tab (next or previous)
-        const newIndex = Math.min(tabIndex, state.tabs.length - 1);
-        switchToTab(state.tabs[newIndex].id);
-      } else {
-        // Always add a new default tab if none remain
-        const newTab = getCurrentTab();
-        editor.setValue(newTab.content);
-        renderTabs();
-      }
-    }
-
-    // Notify file explorer of tab changes
-    const fileExplorer = document.querySelector('#file-explorer iframe');
-    if (fileExplorer && fileExplorer.contentWindow) {
-      fileExplorer.contentWindow.postMessage({
-        type: 'updateFileExplorer',
-        tabs: state.tabs
-      }, '*');
-    }
-
-    // Update UI and state
-    renderTabs();
-    saveTabsToStorage();
-    state.unsavedChanges = false;
-    updateStatus(`Closed tab: ${tabToClose.name}`);
-    refreshExploreFileList();
-
-    // Ensure empty state if no tabs
-    const editorWrapper = document.querySelector('.editor-wrapper');
-    if (state.tabs.length === 0) {
-      editorWrapper.classList.add('empty');
-      // Always ensure at least one tab exists
-      getCurrentTab();
-    } else {
-      editorWrapper.classList.remove('empty');
-    }
   }
 
   // Helper for finding file entries
