@@ -77,9 +77,9 @@ const state = {
 require.config({
   paths: {
     'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs',
-    'vs/language/html': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/html',
-    'vs/language/css': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/css',
-    'vs/language/typescript': 'https://cdnjs.cloudflasupportre.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/typescript',
+    'vs/language/html': './monaco-editor/basic-languages/html.js',
+    'vs/language/css': './monaco-editor/basic-languages/css.js',
+    'vs/language/typescript': './monaco-editor/basic-languages/typescript.js',
     'vs/language/json': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/json'
   }
 });
@@ -1652,7 +1652,7 @@ ${tab.name}
     updateStatus("Editor cleared");
   }
 
-  async function detectLanguage() {
+  async function detectLanguage() { // !!
     const currentTab = getCurrentTab();
     const fileType = currentTab.name.split('.').pop().toLowerCase();
     const languageMap = {
@@ -2330,6 +2330,8 @@ function setTheme(theme) {
         case 'jsx': return 'icons/react_icon.png';
         case 'mp3': return 'icons/mp3_audio_icon.png';
         case 'bin': return 'icons/binary_icon.svg';
+        case 'sql': return 'icons/sql_icon.svg';
+        case 'php': return 'icons/php_icon.svg';
         default: return 'icons/text_icon.png';
       }
     }

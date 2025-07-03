@@ -271,6 +271,8 @@ function getIcon(fileName, isFolder, isOpen = false, theme = 'dark') {
       case 'jsx': return '../../icons/react_icon.png';
       case 'mp3': return '../../icons/mp3_audio_icon.png';
       case 'bin': return '../../icons/binary_icon.svg';
+      case 'sql': return '../../icons/sql_icon.svg';
+      case 'php': return '../../icons/php_icon.svg';
       default: return '../../icons/text_icon.png';
     }
   }
