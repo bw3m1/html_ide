@@ -30,7 +30,7 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 DATE_MODIFIED = "6 / 26 / 2025 at 10:22 AM MDT";
 VERSION = "0 . 4 . 5 Patch 2";
 // Supported browsers include Chromium-based browsers, Firefox, and Safari.
-BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, Brave, And More.";
+BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, And More.";
 
 const FILE_TYPES = {
   html: { mime: 'text/html', ext: '.html' },
@@ -77,10 +77,19 @@ const state = {
 require.config({
   paths: {
     'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs',
-    'vs/language/html': './monaco-editor/basic-languages/html.js',
-    'vs/language/css': './monaco-editor/basic-languages/css.js',
-    'vs/language/typescript': './monaco-editor/basic-languages/typescript.js',
-    'vs/language/json': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/json'
+    // Language-specific paths
+    'vs/language/html/html': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/html/html',
+    'vs/language/css/css': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/css/css',
+    'vs/language/typescript/tsMode': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/typescript/tsMode',
+    'vs/language/json/jsonMode': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/json/jsonMode',
+    'vs/language/plaintext/plaintextMode': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/plaintext/plaintextMode',
+    'vs/language/markdown/markdownMode': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/markdown/markdownMode',
+    'vs/language/cpp/cpp': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/cpp/cpp',
+    'vs/language/csharp/csharp': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/csharp/csharp',
+    'vs/language/python/python': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/python/python',
+    'vs/language/java/java': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/java/java',
+    'vs/language/rust/rust': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/rust/rust',
+    'vs/language/go/go': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/language/go/go'
   }
 });
 
@@ -103,8 +112,6 @@ require(['vs/editor/editor.main'], function () {
   monaco.languages.register({ id: 'go' });
   monaco.languages.register({ id: 'jsx' });
   monaco.languages.register({ id: 'typescript' });
-
-  // should add monaco.theme.register( ... ); to register custom themes for CL and more user options
 
   // Create editor instance
 
@@ -377,7 +384,18 @@ ${tab.name}
         css: 'css',
         js: 'javascript',
         json: 'json',
-        txt: 'plaintext'
+        txt: 'plaintext',
+        md: 'markdown',
+        c: 'c',
+        cpp: 'cpp',
+        cs: 'csharp',  // Changed from 'cs' to 'csharp'
+        py: 'python',
+        java: 'java',
+        rs: 'rust',
+        go: 'go',
+        jsx: 'jsx',
+        ts: 'typescript',
+        svg: 'xml'      // SVG files should use XML language mode
       };
 
       monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType] || 'plaintext');
@@ -430,105 +448,105 @@ ${tab.name}
   }
 
   function closeTab(tabId = null) {
-      // If no tabId provided, try to close current tab
-      if (!tabId) {
-          const currentTab = getCurrentTab();
-          if (!currentTab) {
-              updateStatus("Error: No active tab to close", true);
-              return;
-          }
-          tabId = currentTab.id;
+    // If no tabId provided, try to close current tab
+    if (!tabId) {
+      const currentTab = getCurrentTab();
+      if (!currentTab) {
+        updateStatus("Error: No active tab to close", true);
+        return;
       }
+      tabId = currentTab.id;
+    }
 
-      // Validate tab exists
-      const tabIndex = state.tabs.findIndex(tab => tab.id === tabId);
-      if (tabIndex === -1) {
-          updateStatus(`Error: Tab ${tabId} not found`, true);
+    // Validate tab exists
+    const tabIndex = state.tabs.findIndex(tab => tab.id === tabId);
+    if (tabIndex === -1) {
+      updateStatus(`Error: Tab ${tabId} not found`, true);
 
-          // Auto-recovery: switch to first available tab or create new one
-          if (state.tabs.length > 0) {
-              switchToTab(state.tabs[0].id);
-          } else {
-              addNewTab();
-          }
-          return;
-      }
-
-      const tabToClose = state.tabs[tabIndex];
-      const isActiveTab = tabToClose.active;
-
-      // Save content BEFORE removal if it's the active tab
-      if (isActiveTab) {
-          tabToClose.content = editor.getValue();
-      }
-
-      // Check for unsaved changes
-      const hasUnsavedChanges = isActiveTab && 
-          editor.getValue() !== tabToClose.content;
-
-      if (hasUnsavedChanges && !confirm('You have unsaved changes. Close tab anyway?')) {
-          return;
-      }
-
-      // Close the tab
-      state.tabs.splice(tabIndex, 1);
-
-      // Handle tab switching after closure
-      if (isActiveTab) {
-          if (state.tabs.length > 0) {
-              // Switch to nearest tab (next or previous)
-              const newIndex = Math.min(tabIndex, state.tabs.length - 1);
-              const newTab = state.tabs[newIndex];
-              
-              // Update state before switching
-              state.currentTabId = newTab.id;
-              newTab.active = true;
-              
-              // Set editor content directly without saving
-              editor.setValue(newTab.content);
-              
-              // Update language mode
-              const fileType = newTab.name.split('.').pop().toLowerCase();
-              const languageMap = {
-                  html: 'html',
-                  css: 'css',
-                  js: 'javascript',
-                  json: 'json',
-                  txt: 'plaintext'
-              };
-              monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType] || 'plaintext');
-          } else {
-              // Always add a new default tab if none remain
-              const newTab = getCurrentTab();
-              editor.setValue(newTab.content);
-          }
-      }
-
-      // Notify file explorer of tab changes
-      const fileExplorer = document.querySelector('#file-explorer iframe');
-      if (fileExplorer && fileExplorer.contentWindow) {
-          fileExplorer.contentWindow.postMessage({
-              type: 'updateFileExplorer',
-              tabs: state.tabs
-          }, '*');
-      }
-
-      // Update UI and state
-      renderTabs();
-      saveTabsToStorage();
-      state.unsavedChanges = false;
-      updateStatus(`Closed tab: ${tabToClose.name}`);
-      refreshExploreFileList();
-
-      // Ensure empty state if no tabs
-      const editorWrapper = document.querySelector('.editor-wrapper');
-      if (state.tabs.length === 0) {
-          editorWrapper.classList.add('empty');
-          // Always ensure at least one tab exists
-          getCurrentTab();
+      // Auto-recovery: switch to first available tab or create new one
+      if (state.tabs.length > 0) {
+        switchToTab(state.tabs[0].id);
       } else {
-          editorWrapper.classList.remove('empty');
+        addNewTab();
       }
+      return;
+    }
+
+    const tabToClose = state.tabs[tabIndex];
+    const isActiveTab = tabToClose.active;
+
+    // Save content BEFORE removal if it's the active tab
+    if (isActiveTab) {
+      tabToClose.content = editor.getValue();
+    }
+
+    // Check for unsaved changes
+    const hasUnsavedChanges = isActiveTab &&
+      editor.getValue() !== tabToClose.content;
+
+    if (hasUnsavedChanges && !confirm('You have unsaved changes. Close tab anyway?')) {
+      return;
+    }
+
+    // Close the tab
+    state.tabs.splice(tabIndex, 1);
+
+    // Handle tab switching after closure
+    if (isActiveTab) {
+      if (state.tabs.length > 0) {
+        // Switch to nearest tab (next or previous)
+        const newIndex = Math.min(tabIndex, state.tabs.length - 1);
+        const newTab = state.tabs[newIndex];
+
+        // Update state before switching
+        state.currentTabId = newTab.id;
+        newTab.active = true;
+
+        // Set editor content directly without saving
+        editor.setValue(newTab.content);
+
+        // Update language mode
+        const fileType = newTab.name.split('.').pop().toLowerCase();
+        const languageMap = {
+          html: 'html',
+          css: 'css',
+          js: 'javascript',
+          json: 'json',
+          txt: 'plaintext'
+        };
+        monaco.editor.setModelLanguage(editor.getModel(), languageMap[fileType] || 'plaintext');
+      } else {
+        // Always add a new default tab if none remain
+        const newTab = getCurrentTab();
+        editor.setValue(newTab.content);
+      }
+    }
+
+    // Notify file explorer of tab changes
+    const fileExplorer = document.querySelector('#file-explorer iframe');
+    if (fileExplorer && fileExplorer.contentWindow) {
+      fileExplorer.contentWindow.postMessage({
+        type: 'updateFileExplorer',
+        tabs: state.tabs
+      }, '*');
+    }
+
+    // Update UI and state
+    renderTabs();
+    saveTabsToStorage();
+    state.unsavedChanges = false;
+    updateStatus(`Closed tab: ${tabToClose.name}`);
+    refreshExploreFileList();
+
+    // Ensure empty state if no tabs
+    const editorWrapper = document.querySelector('.editor-wrapper');
+    if (state.tabs.length === 0) {
+      editorWrapper.classList.add('empty');
+      // Always ensure at least one tab exists
+      getCurrentTab();
+    } else {
+      editorWrapper.classList.remove('empty');
+    }
   }
 
   // Helper for finding file entries
@@ -1652,7 +1670,7 @@ ${tab.name}
     updateStatus("Editor cleared");
   }
 
-  async function detectLanguage() { // !!
+  async function detectLanguage() {
     const currentTab = getCurrentTab();
     const fileType = currentTab.name.split('.').pop().toLowerCase();
     const languageMap = {
@@ -1689,6 +1707,8 @@ ${tab.name}
             });
             break;
           case 'js':
+          case 'jsx':
+          case 'ts':
             await new Promise((resolve) => {
               require(['vs/language/typescript/tsMode'], resolve);
             });
@@ -1698,14 +1718,45 @@ ${tab.name}
               require(['vs/language/json/jsonMode'], resolve);
             });
             break;
-          case 'plaintext':
+          case 'txt':
             await new Promise((resolve) => {
               require(['vs/language/plaintext/plaintextMode'], resolve);
             });
             break;
-          case 'markdown':
+          case 'md':
             await new Promise((resolve) => {
               require(['vs/language/markdown/markdownMode'], resolve);
+            });
+            break;
+          case 'c':
+          case 'cpp':
+            await new Promise((resolve) => {
+              require(['vs/language/cpp/cpp'], resolve);
+            });
+            break;
+          case 'cs':
+            await new Promise((resolve) => {
+              require(['vs/language/csharp/csharp'], resolve);
+            });
+            break;
+          case 'py':
+            await new Promise((resolve) => {
+              require(['vs/language/python/python'], resolve);
+            });
+            break;
+          case 'java':
+            await new Promise((resolve) => {
+              require(['vs/language/java/java'], resolve);
+            });
+            break;
+          case 'rs':
+            await new Promise((resolve) => {
+              require(['vs/language/rust/rust'], resolve);
+            });
+            break;
+          case 'go':
+            await new Promise((resolve) => {
+              require(['vs/language/go/go'], resolve);
             });
             break;
         }
@@ -1795,90 +1846,90 @@ ${tab.name}
   }
 
   // Theme switching
-function setTheme(theme) {
-  // Remove all theme classes first
-  document.body.classList.remove(
-    'light-theme',
-    'contrast-dark-theme',
-    'contrast-light-theme',
-    'main-dark-theme',
-    'main-light-theme',
-    'main-high-contrast-dark-theme',
-    'main-high-contrast-light-theme',
-    'github-theme',
-    'one-dark-pro-theme',
-    'dracula-theme',
-    'winter-is-coming-theme',
-    'fe-github-theme',
-    'fe-one-dark-pro-theme',
-    'fe-dracula-theme',
-    'fe-winter-is-coming-theme'
-  );
+  function setTheme(theme) {
+    // Remove all theme classes first
+    document.body.classList.remove(
+      'light-theme',
+      'contrast-dark-theme',
+      'contrast-light-theme',
+      'main-dark-theme',
+      'main-light-theme',
+      'main-high-contrast-dark-theme',
+      'main-high-contrast-light-theme',
+      'github-theme',
+      'one-dark-pro-theme',
+      'dracula-theme',
+      'winter-is-coming-theme',
+      'fe-github-theme',
+      'fe-one-dark-pro-theme',
+      'fe-dracula-theme',
+      'fe-winter-is-coming-theme'
+    );
 
-  // Apply selected theme
-  switch (theme) {
-    case 'light':
-      document.body.classList.add('light-theme', 'main-light-theme');
-      monaco.editor.setTheme('vs');
-      break;
-    case 'contrast-dark':
-      document.body.classList.add('contrast-dark-theme', 'main-high-contrast-dark-theme');
-      monaco.editor.setTheme('hc-black');
-      break;
-    case 'contrast-light':
-      document.body.classList.add('contrast-light-theme', 'main-high-contrast-light-theme');
-      monaco.editor.setTheme('hc-light');
-      break;
-    case 'github':
-      document.body.classList.add('github-theme', 'fe-github-theme');
-      monaco.editor.setTheme('github'); // GitHub
-      break;
-    case 'one-dark-pro':
-      document.body.classList.add('one-dark-pro-theme', 'fe-one-dark-pro-theme');
-      monaco.editor.setTheme('one-dark-pro'); // One Dark Pro
-      break;
-    case 'dracula':
-      document.body.classList.add('dracula-theme', 'fe-dracula-theme');
-      monaco.editor.setTheme('dracula'); // Dracula
-      break;
-    case 'winter-is-coming':
-      document.body.classList.add('winter-is-coming-theme', 'fe-winter-is-coming-theme');
-      monaco.editor.setTheme('winter-is-coming'); // Winter is Coming
-      break;
-    case 'automatic':
-      // Detect system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
+    // Apply selected theme
+    switch (theme) {
+      case 'light':
+        document.body.classList.add('light-theme', 'main-light-theme');
+        monaco.editor.setTheme('vs');
+        break;
+      case 'contrast-dark':
+        document.body.classList.add('contrast-dark-theme', 'main-high-contrast-dark-theme');
+        monaco.editor.setTheme('hc-black');
+        break;
+      case 'contrast-light':
+        document.body.classList.add('contrast-light-theme', 'main-high-contrast-light-theme');
+        monaco.editor.setTheme('hc-light');
+        break;
+      case 'github':
+        document.body.classList.add('github-theme', 'fe-github-theme');
+        monaco.editor.setTheme('github'); // GitHub
+        break;
+      case 'one-dark-pro':
+        document.body.classList.add('one-dark-pro-theme', 'fe-one-dark-pro-theme');
+        monaco.editor.setTheme('one-dark-pro'); // One Dark Pro
+        break;
+      case 'dracula':
+        document.body.classList.add('dracula-theme', 'fe-dracula-theme');
+        monaco.editor.setTheme('dracula'); // Dracula
+        break;
+      case 'winter-is-coming':
+        document.body.classList.add('winter-is-coming-theme', 'fe-winter-is-coming-theme');
+        monaco.editor.setTheme('winter-is-coming'); // Winter is Coming
+        break;
+      case 'automatic':
+        // Detect system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          document.body.classList.add('main-dark-theme');
+          monaco.editor.setTheme('vs-dark');
+        } else {
+          document.body.classList.add('main-light-theme');
+          monaco.editor.setTheme('vs');
+        }
+        // Listen for changes in system theme
+        if (!setTheme._autoListener) {
+          setTheme._autoListener = () => setTheme('automatic');
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
+        }
+        break;
+      default:
+        // Default dark theme
         document.body.classList.add('main-dark-theme');
         monaco.editor.setTheme('vs-dark');
-      } else {
-        document.body.classList.add('main-light-theme');
-        monaco.editor.setTheme('vs');
-      }
-      // Listen for changes in system theme
-      if (!setTheme._autoListener) {
-        setTheme._autoListener = () => setTheme('automatic');
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme._autoListener);
-      }
-      break;
-    default:
-      // Default dark theme
-      document.body.classList.add('main-dark-theme');
-      monaco.editor.setTheme('vs-dark');
-  }
+    }
 
-  // Notify File Explorer iframe about theme change
-  const fileExplorer = document.querySelector('#file-explorer iframe');
-  if (fileExplorer && fileExplorer.contentWindow) {
-    fileExplorer.contentWindow.postMessage({
-      type: 'themeChange',
-      theme: theme
-    }, '*');
-  }
+    // Notify File Explorer iframe about theme change
+    const fileExplorer = document.querySelector('#file-explorer iframe');
+    if (fileExplorer && fileExplorer.contentWindow) {
+      fileExplorer.contentWindow.postMessage({
+        type: 'themeChange',
+        theme: theme
+      }, '*');
+    }
 
-  localStorage.setItem('editorTheme', theme);
-  updateStatus(`Theme set to ${theme}`);
-}
+    localStorage.setItem('editorTheme', theme);
+    updateStatus(`Theme set to ${theme}`);
+  }
 
   // Run code
   function runCode(newTab) {
@@ -2512,10 +2563,10 @@ function setTheme(theme) {
     });
 
     updatePreview();
-    toggleFileExplorer(); 
+    toggleFileExplorer();
     const theme = localStorage.getItem('editorTheme') || 'automatic';
     setTheme(theme);
-    
+
     // Force theme sync with file explorer after a short delay
     setTimeout(() => {
       const fileExplorer = document.querySelector('#file-explorer iframe');
@@ -2526,10 +2577,11 @@ function setTheme(theme) {
         }, '*');
       }
     }, 500);
-    
+
     refreshExploreFileList();
     setLayout("editor-only");
     toggleFileExplorer();
+    detectLanguage();
     updateStatus("IDE Setup Ready");
   }
 
