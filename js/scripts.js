@@ -27,8 +27,8 @@ const INIT_CONTENTS = `<!DOCTYPE html>
 </html>`;
 
 // things in the about
-DATE_MODIFIED = "6 / 26 / 2025 at 10:22 AM MDT";
-VERSION = "0 . 4 . 5 Patch 2";
+DATE_MODIFIED = "07 / 05 / 2025 at 11:41 AM MDT";
+VERSION = "0 . 4 . 5 Patch 3";
 // Supported browsers include Chromium-based browsers, Firefox, and Safari.
 BROWSERS = "Chrome,  Safari,  Edge,  FireFox, Opera, And More.";
 
@@ -1063,7 +1063,7 @@ ${tab.name}
       const isOtherFormat = !isJsFile && !isPythonFile && !currentTab.name.endsWith('.html');
 
       if (isJsFile) {
-        // Create a container for JS output
+        // Create container for JS output
         const jsOutputContainer = document.createElement('div');
         jsOutputContainer.id = 'js-output';
         jsOutputContainer.style.padding = '1rem';
@@ -1072,7 +1072,11 @@ ${tab.name}
         jsOutputContainer.style.overflow = 'auto';
         jsOutputContainer.style.height = '100%';
 
-        // Create a console div
+        // Create result display area
+        const resultDiv = document.createElement('div');
+        resultDiv.style.marginBottom = '1rem';
+
+        // Create console output area
         const consoleDiv = document.createElement('div');
         consoleDiv.id = 'js-console';
         consoleDiv.style.backgroundColor = 'var(--menu-bg-dark)';
@@ -1082,40 +1086,140 @@ ${tab.name}
         consoleDiv.style.fontFamily = 'monospace';
         consoleDiv.style.whiteSpace = 'pre-wrap';
 
+        // Build output structure
+        jsOutputContainer.appendChild(resultDiv);
+        jsOutputContainer.appendChild(consoleDiv);
         preview.appendChild(jsOutputContainer);
 
-
-        // Override console.log to capture output
-        const originalConsoleLog = console.log;
+        // Store logs
         const logs = [];
 
-        console.log = function (...args) {
-          logs.push(args.join(' '));
-          consoleDiv.textContent = logs.join('\n');
-          consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        // Create secure sandboxed iframe
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-scripts'; // Only allow script execution
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        // Get user code
+        const userCode = editor.getValue();
+
+        // Create HTML content for iframe
+        const blobContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <script>
+        // Capture console.log
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+          // Send logs to parent window
+          window.parent.postMessage({
+            type: 'log',
+            args: args.map(arg => {
+              try {
+                return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
+              } catch {
+                return String(arg);
+              }
+            })
+          }, '*');
           originalConsoleLog.apply(console, args);
         };
-
+        
+        let terminated = false;
+        const timeout = setTimeout(() => {
+          terminated = true;
+          window.parent.postMessage({ type: 'timeout' }, '*');
+        }, 5000); // 5-second timeout
+        
         try {
-          // Execute the JS code
-          const result = new Function(editor.getValue())();
-
-          if (result !== undefined) {
-            jsOutputContainer.textContent = String(result);
-          } else {
-            jsOutputContainer.textContent = 'Code executed (no return value)';
-          }
+          // Create safe execution wrapper
+          const runUserCode = () => {
+            if (terminated) throw new Error('Execution terminated');
+            return new Function(${JSON.stringify(userCode)})();
+          };
+          
+          // Execute user code
+          const result = runUserCode();
+          clearTimeout(timeout);
+          
+          // Send result to parent
+          window.parent.postMessage({
+            type: 'done',
+            result: result !== undefined ? String(result) : undefined
+          }, '*');
         } catch (error) {
-          jsOutputContainer.textContent = `Error: ${error.message}`;
-          jsOutputContainer.style.color = 'var(--error-red)';
+          clearTimeout(timeout);
+          window.parent.postMessage({
+            type: 'error',
+            error: error.message
+          }, '*');
         }
+      </script>
+    </head>
+    <body></body>
+    </html>
+  `;
 
-        // Restore original console.log
-        console.log = originalConsoleLog;
+        // Create blob URL for iframe
+        const blob = new Blob([blobContent], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        iframe.src = blobUrl;
 
-        updateStatus("JavaScript executed");
+        // Set up timeout fallback (in case iframe fails)
+        const parentTimeout = setTimeout(() => {
+          cleanup();
+          resultDiv.textContent = 'Error: Execution timed out or failed to start';
+          resultDiv.style.color = 'var(--error-red)';
+        }, 6000); // 6-second fallback timeout
+
+        // Handle cleanup
+        const cleanup = () => {
+          window.removeEventListener('message', messageHandler);
+          clearTimeout(parentTimeout);
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+          URL.revokeObjectURL(blobUrl);
+          updateStatus("JavaScript executed");
+        };
+
+        // Handle messages from iframe
+        const messageHandler = (event) => {
+          if (event.source !== iframe.contentWindow) return;
+
+          const data = event.data;
+          switch (data.type) {
+            case 'log':
+              logs.push(data.args.join(' '));
+              consoleDiv.textContent = logs.join('\n');
+              consoleDiv.scrollTop = consoleDiv.scrollHeight;
+              break;
+
+            case 'done':
+              resultDiv.textContent = data.result || 'Code executed (no return value)';
+              cleanup();
+              break;
+
+            case 'error':
+              resultDiv.textContent = `Error: ${data.error}`;
+              resultDiv.style.color = 'var(--error-red)';
+              cleanup();
+              break;
+
+            case 'timeout':
+              resultDiv.textContent = 'Error: Execution timed out (possible infinite loop)';
+              resultDiv.style.color = 'var(--error-red)';
+              cleanup();
+              break;
+          }
+        };
+
+        // Listen for messages from iframe
+        window.addEventListener('message', messageHandler);
       } else if (isPythonFile) {
-        // Handle Python using Pyodide
+        // Handle Python using Pyodide // !! ( 0.5.8 )
       } else if (isOtherFormat) {
         // Handle other file formats
         const otherOutputContainer = document.createElement('div');
@@ -2186,10 +2290,6 @@ ${tab.name}
         case 'layout-output-only': setLayout('output-only'); break;
         case 'theme-dark': setTheme('dark'); break;
         case 'theme-light': setTheme('light'); break;
-        case 'theme-github': setTheme('github'); break;
-        case 'theme-one-dark-pro': setTheme('one-dark-pro'); break;
-        case 'theme-dracula': setTheme('dracula'); break;
-        case 'theme-winter-is-coming': setTheme('winter-is-coming'); break;
         case 'theme-auto': setTheme('automatic'); break;
         case 'theme-contrast-dark': setTheme('contrast-dark'); break;
         case 'theme-contrast-light': setTheme('contrast-light'); break;
@@ -2287,11 +2387,6 @@ ${tab.name}
           localStorage.setItem('autosaveEnabled', state.autosaveEnabled);
           setupAutosave(state.autosaveEnabled);
           updateStatus(`Autosave ${state.autosaveEnabled ? 'enabled' : 'disabled'}`);
-          break;
-        case 'file-change-notifications':
-          state.fileChangeNotificationsEnabled = !state.fileChangeNotificationsEnabled;
-          localStorage.setItem('fileChangeNotificationsEnabled', state.fileChangeNotificationsEnabled);
-          updateStatus(`File change notifications ${state.fileChangeNotificationsEnabled ? 'enabled' : 'disabled'}`);
           break;
       }
     } catch (error) {
