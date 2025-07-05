@@ -1,33 +1,25 @@
-# Issue Log from Update 0.4.5
+# Issue Log from Update 0.4.6
 
 ## Critical Fixes Needed
 
-### JavaScript Execution Issues
-- **Preview infinite loop freeze**  
-JavaScript infinite loops (e.g., `while (true) {}`) completely freeze the preview panel. Current workaround requires deleting browser cookies (which also clears user progress).
+## preview looks funny when executing js
+- make the boxed the same color as the bg
 
-### System Functionality
-- **Read-only file editing**  
-Users can currently edit read-only files - need to implement protection
-
-- **Tab bar button failures**  
-Tab management buttons intermittently fail or behave unexpectedly
-
+- **Tab bar Actions failures**  
+Tab management buttons ( i.e. the close and new tab buttons ) don't perform the actions there supposed to
 
 ### Loading Issues (Requires Verification)
 - **HTML run in new tab loading**  
 Testers report inconsistent loading behavior when executing "run in new tab" on HTML documents...
 
 
+
 ## Code Maintenance Tasks
-- Remove unused functions from `scripts.js`
-- Remove unused actions from `scripts.js`
+- Gnarly Optimism the code in size
 
-<!-- the next block is for the next update ( 0.4.7 ) -->
+<br><br>
 
-<!--
-
-## Proposed Features
+# Proposed Features
 
 ### Preview Enhancements
 - **Markdown rendering**  
@@ -50,5 +42,3 @@ Better Monaco Editor theme support
 ### Language Support Exploration
 - **Python execution**  
 Via pyodide (currently considered infeasible)
-
--->
