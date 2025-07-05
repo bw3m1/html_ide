@@ -8,11 +8,16 @@
 - **Tab bar Actions failures**  
 Tab management buttons ( i.e. the close and new tab buttons ) don't perform the actions there supposed to
 
+### System Functionality
+- **Read-only file editing**  
+Users can currently edit read-only files - need to implement protection
+
+- **Tab bar Actions failures**  
+Tab management buttons ( i.e. the close and new tab buttons ) don't perform the actions there supposed to
+
 ### Loading Issues (Requires Verification)
 - **HTML run in new tab loading**  
 Testers report inconsistent loading behavior when executing "run in new tab" on HTML documents...
-
-
 
 ## Code Maintenance Tasks
 - Gnarly Optimism the code in size
